@@ -1,0 +1,5 @@
+These audio files are part of the TCDAudio14 dataset (formally known as ACM14). The TCDAudio14 dataset was created to assess the quality of several popular formats at a variety of bitrates commonly used by streaming services.
+
+More information regarding this dataset can be found here:
+
+C. Sloan, N. Harte, D. Kelly, A. C. Kokaram and A. Hines, "Objective Assessment of Perceptual Audio Quality Using ViSQOLAudio," in IEEE Transactions on Broadcasting, vol. 63, no. 4, pp. 693-705, Dec. 2017

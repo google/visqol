@@ -1,0 +1,59 @@
+// Copyright 2019 Google LLC, Andrew Hines
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package Visqol;
+
+message VisqolConfig {
+
+  // Contains info related to the input signals.
+  message VisqolAudioInfo {
+    // The sample rate of the input signals. Both signals must
+    // have the same sample rate. This value must be supplied.
+    int32 sample_rate = 1;
+  }
+
+  // Contains config info for ViSQOL
+  message VisqolOptions {
+    // Not yet supported.
+    bool output_mos_score = 1;
+
+    // The path to a svr model file. If not supplied,
+    // the default model is used.
+    string svr_model_path = 2;
+
+    // If true, the input audio files will be compared using the ViSQOL speech
+    // mode. See use_unscaled_speech_mos_mapping below for details regarding
+    // the mapping of NSIM to MOS-LQO.
+    bool use_speech_scoring = 3;
+
+    // Not yet supported.
+    bool detect_voice_activity = 4;
+
+    // Currently, only 48k samples rates are supported by ViSQOL Audio -
+    // (Speech mode does not have this restriction). To override this and run
+    // with non-48k input, set this bool to true.
+    bool allow_unsupported_sample_rates = 5;
+
+    // When using the speech comparison mode, a value of false for this bool
+    // will cause a perfect NSIM score of 1.0 to be mapped to a perfect MOS-LQO
+    // of 5.0. If this bool is instead set to true, a perfect NSIM score will
+    // instead be mapped to a MOS-LQO of ~4.x.
+    bool use_unscaled_speech_mos_mapping = 6;
+  }
+
+  VisqolAudioInfo audio = 1;
+  VisqolOptions options = 2;
+}

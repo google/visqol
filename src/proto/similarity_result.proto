@@ -1,0 +1,68 @@
+// Copyright 2019 Google LLC, Andrew Hines
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package Visqol;
+
+message SimilarityResultMsg {
+
+  // Contains info related to the similarity result for each patch.
+  message PatchSimilarityMsg {
+    // Similarity score for this patch.
+    double similarity = 1;
+
+    // Stored lowest to highest.
+    repeated double freq_band_means = 2;
+
+    // The time (in sec) where this patch starts in the reference signal.
+    double ref_patch_start_time = 3;
+
+    // The time (in sec) where this patch end in the reference signal.
+    double ref_patch_end_time = 4;
+
+    // The time (in sec) where this patch starts in the degraded signal.
+    double deg_patch_start_time = 5;
+
+    // The time (in sec) where this patch ends in the degraded signal.
+    double deg_patch_end_time = 6;
+  }
+
+  // The "Mean Opinion Score - Listening Quality Objective" for the degraded
+  // signal, following the comparison to the reference signal. Produced using
+  // an SVR model.
+  double moslqo = 1;
+
+  // Mean of FVNSIM
+  double vnsim = 2;
+
+  // Mean of per patch mean frequency band similarity across all patches.
+  // Lowest to highest frequency bands:
+  repeated double fvnsim = 3;
+
+  // Lowest to highest center frequency bands:
+  repeated double center_freq_bands = 4;
+
+  // The patch comparison results for each patch compared between the reference
+  // and degraded signals.
+  repeated PatchSimilarityMsg patch_sims = 5;
+
+  // If ViSQOl was used at the command line to process a reference and degraded
+  // filepath pair for comparison, this will hold the reference filepath.
+  string reference_filepath = 6;
+
+  // If ViSQOl was used at the command line to process a reference and degraded
+  // filepath pair for comparison, this will hold the degraded filepath.
+  string degraded_filepath = 7;
+}
