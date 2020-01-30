@@ -75,7 +75,8 @@ ABSL_CONST_INIT const char kDefaultSpeechModelFile[] =
 
 google::protobuf::util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
     (int argc, char **argv) {
-  absl::SetProgramUsageMessage("perceptual quality estimator for speech and audio");
+  absl::SetProgramUsageMessage(
+      "Perceptual quality estimator for speech and audio");
   absl::ParseCommandLine(argc, argv);
 
   bool errorFound = false;

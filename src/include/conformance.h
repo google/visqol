@@ -24,8 +24,8 @@
 // modification, we must bump the conformance version number.
 // Previous matlab versions were known as 238.
 // The C++ version introduces fixes and starts at 250.
-// As of 300, the first digits are the major version and last two digits are
-// the minor version.
+// As of 300, the first digit is the major version and last two digits are the
+// minor version.
 #define kVisqolConformanceNumber (300)
 
 // If the scores for these known files changes, tests/conformance_test will fail
