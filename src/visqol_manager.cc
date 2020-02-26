@@ -121,7 +121,7 @@ std::vector<SimilarityResultMsg> VisqolManager::Run(
           "Error executing ViSQOL: %s.", status_or.status().ToString().c_str());
       // A status of aborted gets thrown when visqol hasn't been init'd.
       // So if that happens we want to quit processing.
-      if (status_or.status().error_code() == error::Code::ABORTED) {
+      if (status_or.status().error_code() == google::protobuf::util::error::Code::ABORTED) {
         break;
       }
     }
@@ -205,7 +205,7 @@ SimilarityResultMsg VisqolManager::PopulateSimResultMsg(
 
 Status VisqolManager::ErrorIfNotInitialized() {
   if (is_initialized_ == false) {
-    return Status(error::Code::ABORTED,
+    return Status(google::protobuf::util::error::Code::ABORTED,
         "VisqolManager must be initialized before use.");
   } else {
     return Status();
