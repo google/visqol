@@ -30,14 +30,16 @@ class FilePath {
   FilePath(const FilePath &other) { path_ = other.path_; }
 
   FilePath(const std::string &path) {
-      path_ = ::boost::filesystem::path(path).string(); }
+    path_ = ::boost::filesystem::path(path).string();
+  }
 
   const std::string Path() const { return path_; }
 
   bool Exists() const { return ::boost::filesystem::exists(path_); }
 
   static std::string currentWorkingDir() {
-      return ::boost::filesystem::current_path().string(); }
+    return ::boost::filesystem::current_path().string();
+  }
 
  private:
   std::string path_;

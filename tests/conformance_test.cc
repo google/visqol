@@ -33,9 +33,10 @@ struct ConformanceTestData{
   const Visqol::CommandLineArgs test_inputs;
 
   ConformanceTestData(const std::string &ref_file, const std::string &deg_file,
-                      const bool speech_mode, const double exp_result) :
-      expected_result{exp_result},
-      test_inputs{CommandLineArgsHelper(ref_file, deg_file, "", speech_mode)} {}
+                      const bool speech_mode, const double exp_result)
+      : expected_result{exp_result},
+        test_inputs{
+            CommandLineArgsHelper(ref_file, deg_file, "", speech_mode)} {}
 };
 
 // Class definition necessary for Value-Parameterized Tests.
