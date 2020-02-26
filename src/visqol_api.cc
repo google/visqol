@@ -40,7 +40,7 @@ const size_t VisqolApi::k48kSampleRate = 48000;
 Status VisqolApi::Create(const VisqolConfig config) {
   // If audio info was not supplied, return error.
   if (!config.has_audio()) {
-    return Status(error::Code::INVALID_ARGUMENT,
+    return Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "Audio info must be supplied for config.");
   }
 
@@ -51,7 +51,7 @@ Status VisqolApi::Create(const VisqolConfig config) {
 
   // Ensure a sample rate value was provided.
   if (sample_rate_ == 0) {
-    return Status(error::Code::INVALID_ARGUMENT,
+    return Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "The sample rate for the signals must be set.");
   }
 
@@ -59,7 +59,8 @@ Status VisqolApi::Create(const VisqolConfig config) {
   bool speech_mode = false;
   bool unscaled_speech_map = false;
   bool allow_sr_override = false;
-  std::string model_file = FilePath::currentWorkingDir() + kDefaultAudioModelFile;
+  std::string model_file =
+      FilePath::currentWorkingDir() + kDefaultAudioModelFile;
   if (config.has_options()) {
     auto config_options = config.options();
     speech_mode = config_options.use_speech_scoring();
@@ -81,7 +82,7 @@ Status VisqolApi::Create(const VisqolConfig config) {
   if (sample_rate_ != k48kSampleRate &&
       speech_mode == false  &&
       allow_sr_override == false) {
-    return Status(error::Code::INVALID_ARGUMENT,
+    return Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "Currently, 48k is the only sample rate supported by ViSQOL Audio. "
         "See README for details of overriding.");
   }

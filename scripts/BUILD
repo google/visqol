@@ -5,9 +5,7 @@ exports_files(["LICENSE"])
 py_binary(
     name = "fit_nsim_to_mos_poly",
     srcs = ["fit_nsim_to_mos_poly.py"],
-    deps = [
-        "@numpy",
-    ],
+    deps = ["@numpy"],
 )
 
 py_binary(
