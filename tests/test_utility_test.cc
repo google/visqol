@@ -29,7 +29,8 @@ TEST(TestUtility, MatrixComparison) {
   // Test for different col count
   const AMatrix<double> different_cols_a(2, 2, std::vector<double>{0, 0, 0, 0});
   const AMatrix<double> different_cols_b(4, 1, std::vector<double>{0, 0, 0, 0});
-  const std::string expected_fail_cols = "Matrices do not match!"
+  const std::string expected_fail_cols =
+      "Matrices do not match!"
       " matrix_a num cols: 2 matrix_b num cols: 1";
   CompareDoubleMatrix(different_cols_a, different_cols_b, kTolerance,
       &fail_msg);
@@ -38,7 +39,8 @@ TEST(TestUtility, MatrixComparison) {
   // Test for different row count
   const AMatrix<double> different_rows_a{std::valarray<double>{0, 0, 0, 0, 0}};
   const AMatrix<double> different_rows_b{std::valarray<double>{0, 0, 0, 0}};
-  const std::string expected_fail_rows = "Matrices do not match!"
+  const std::string expected_fail_rows =
+      "Matrices do not match!"
       " matrix_a num rows: 5 matrix_b num rows: 4";
   CompareDoubleMatrix(different_rows_a, different_rows_b, kTolerance,
       &fail_msg);
@@ -47,7 +49,8 @@ TEST(TestUtility, MatrixComparison) {
   // Test for different contents
   const AMatrix<double> different_contents_a{std::valarray<double>{0, 0, 0, 0}};
   const AMatrix<double> different_contents_b{std::valarray<double>{0, 0, 1, 0}};
-  const std::string expected_fail_contents = "Matrices do not match!"
+  const std::string expected_fail_contents =
+      "Matrices do not match!"
       " At index 2 matrix_a abs val: 0.000000 matrix_b abs val: 1.000000";
   CompareDoubleMatrix(different_contents_a, different_contents_b,
       kTolerance, &fail_msg);

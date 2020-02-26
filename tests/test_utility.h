@@ -17,19 +17,16 @@
 #ifndef VISQOL_TESTS_TEST_UTILITY_H
 #define VISQOL_TESTS_TEST_UTILITY_H
 
+#include "gtest/gtest.h"
 #include "amatrix.h"
 #include "commandline_parser.h"
 
 namespace Visqol {
-Visqol::CommandLineArgs CommandLineArgsHelper(const std::string &ref_file,
-                                              const std::string &deg_file,
-                                              const std::string &batch_file
-                                                  = "",
-                                              const bool speech_mode = false,
-                                              const bool unscaled_speech
-                                                  = false) {
-  const std::string simToQualModel = FilePath::currentWorkingDir() +
-      kDefaultAudioModelFile;
+Visqol::CommandLineArgs CommandLineArgsHelper(
+    const std::string &ref_file, const std::string &deg_file,
+    const std::string &batch_file = "", const bool speech_mode = false,
+    const bool unscaled_speech = false) {
+  const std::string simToQualModel = FilePath::currentWorkingDir() + kDefaultAudioModelFile;
   const std::string emptyStr;
   return  CommandLineArgs{
         ref_file,
@@ -45,9 +42,9 @@ Visqol::CommandLineArgs CommandLineArgsHelper(const std::string &ref_file,
 }
 
 // Perform basic matrix dimension comparison.
-template<typename T>
+template <typename T>
 bool CompareMatrix(const AMatrix<T> matrix_a, const AMatrix<T> matrix_b,
-    std::string *fail_msg) {
+                   std::string *fail_msg) {
   if (matrix_a.NumCols() != matrix_b.NumCols()) {
     *fail_msg = "Matrices do not match!"
         " matrix_a num cols: " + std::to_string(matrix_a.NumCols()) +
@@ -65,8 +62,8 @@ bool CompareMatrix(const AMatrix<T> matrix_a, const AMatrix<T> matrix_b,
 
 // Perform comparison of matrix containing doubles
 bool CompareDoubleMatrix(const AMatrix<double> matrix_a,
-    const AMatrix<double> matrix_b, const double tolerance,
-    std::string *fail_msg) {
+                         const AMatrix<double> matrix_b, const double tolerance,
+                         std::string *fail_msg) {
   bool basic_comp = CompareMatrix(matrix_a, matrix_b, fail_msg);
   if (basic_comp) {
     int i = 0;
@@ -88,8 +85,8 @@ bool CompareDoubleMatrix(const AMatrix<double> matrix_a,
 
 // Perform comparison of matrix containing complex numbers.
 bool CompareComplexMatrix(const AMatrix<std::complex<double>> matrix_a,
-    const AMatrix<std::complex<double>> matrix_b, const double tolerance,
-    std::string *fail_msg) {
+                          const AMatrix<std::complex<double>> matrix_b,
+                          const double tolerance, std::string *fail_msg) {
   bool basic_comp = CompareMatrix(matrix_a, matrix_b, fail_msg);
   if (basic_comp) {
     int i = 0;

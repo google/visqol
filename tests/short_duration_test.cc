@@ -30,9 +30,10 @@ struct ShortDurationTestData{
   const double expected_result;
   const Visqol::CommandLineArgs test_inputs;
 
-  ShortDurationTestData(const std::string &ref_file, const std::string &deg_file,
-                      const double exp_result) : expected_result{exp_result},
-      test_inputs{CommandLineArgsHelper(ref_file, deg_file)} {}
+  ShortDurationTestData(const std::string &ref_file,
+                        const std::string &deg_file, const double exp_result)
+      : expected_result{exp_result},
+        test_inputs{CommandLineArgsHelper(ref_file, deg_file)} {}
 };
 
 // Class definition necessary for Value-Parameterized Tests.
@@ -82,7 +83,7 @@ TEST_P(ShortDurationTest, InvalidArgsTest) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_FALSE(status_or.ok());
-  ASSERT_EQ(google::protobuf::util::error::INVALID_ARGUMENT,
+  ASSERT_EQ(google::protobuf::util::error::Code::INVALID_ARGUMENT,
             status_or.status().error_code());
 }
 
