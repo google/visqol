@@ -21,6 +21,7 @@
 #include <valarray>
 #include <complex>
 #include <vector>
+#include <cstdio>
 
 namespace Visqol {
 class ComplexValArray {
