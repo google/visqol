@@ -59,10 +59,10 @@ TEST(BuildSpectrogramTest, basic_positive_flow) {
 
   // Create the spectrograms
   GammatoneSpectrogramBuilder spectroBuilder(filter_bank, false);
-  Spectrogram spectrogram_ref = spectroBuilder.Build(signal_ref, window)
-      .ValueOrDie();
-  Spectrogram spectrogram_deg = spectroBuilder.Build(signal_deg, window)
-      .ValueOrDie();
+  Spectrogram spectrogram_ref =
+      spectroBuilder.Build(signal_ref, window).ValueOrDie();
+  Spectrogram spectrogram_deg =
+      spectroBuilder.Build(signal_deg, window).ValueOrDie();
 
   ASSERT_EQ(kRefSpectroNumCols, spectrogram_ref.Data().NumCols());
   ASSERT_EQ(kNumBands, spectrogram_ref.Data().NumRows());

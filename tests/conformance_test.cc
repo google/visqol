@@ -57,7 +57,7 @@ TEST_P(ConformanceTest, ConformanceWithKnownScores) {
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
   EXPECT_NEAR(GetParam().expected_result, status_or.ValueOrDie().moslqo(),
-      kTolerance);
+              kTolerance);
 }
 
 // Initialise the input paramaters.
