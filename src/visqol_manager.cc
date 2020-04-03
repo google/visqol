@@ -188,7 +188,7 @@ SimilarityResultMsg VisqolManager::PopulateSimResultMsg(
     sim_result_msg.add_center_freq_bands(*itr);
   }
 
-  for (auto patch : sim_result.debug_info.patch_sims) {
+  for (const auto& patch : sim_result.debug_info.patch_sims) {
     auto patch_msg = sim_result_msg.add_patch_sims();
     patch_msg->set_similarity(patch.similarity);
     patch_msg->set_ref_patch_start_time(patch.ref_patch_start_time);
