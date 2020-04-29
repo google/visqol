@@ -19,11 +19,11 @@
 
 #include <vector>
 
-#include "google/protobuf/stubs/status.h"
-
 #include "file_path.h"
 #include "similarity_to_quality_mapper.h"
 #include "support_vector_regression_model.h"
+
+#include "google/protobuf/stubs/status.h"
 
 namespace Visqol {
 /**
