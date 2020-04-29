@@ -19,12 +19,12 @@
 
 #include <vector>
 
-#include "absl/synchronization/mutex.h"
-#include "google/protobuf/stubs/status.h"
-#include "svm.h"
-
 #include "file_path.h"
 #include "machine_learning.h"
+
+#include "absl/synchronization/mutex.h"
+#include "svm.h"
+#include "google/protobuf/stubs/status.h"
 
 namespace Visqol {
 /**
