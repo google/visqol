@@ -61,17 +61,8 @@ cc_library(
         "src/svr_training",
     ],
     linkopts = select({
-        "@bazel_tools//src/conditions:windows": [
-            # Windows Link Opts
-            "-LIBPATH:C:\\\\boost\\\\stage\\\\lib",
-        ],
-        "@bazel_tools//src/conditions:darwin_x86_64": [
-            # Mac Link Opts
-        ],
         "//conditions:default": [
             # Linux Link Opts
-            "-lboost_system",
-            "-lboost_filesystem",
         ],
     }),
     visibility = ["//visibility:public"],
@@ -79,13 +70,11 @@ cc_library(
         "@bazel_tools//src/conditions:windows": [
             # Windows Dependencies
             "@pffft_lib_win//:pffft_win",
-            "@boost_headers_windows//:boost_header",
-        ],
-        "@bazel_tools//src/conditions:darwin_x86_64": [
-            # Mac Dependencies
         ],
         "//conditions:default": [
             # Linux Dependencies
+            "@boost//:system",
+            "@boost//:filesystem",
             "@pffft_lib_linux//:pffft_linux",
         ],
     }) + [
