@@ -54,9 +54,9 @@ cc_library(
 # Armadillo Headers
 http_archive(
     name = "armadillo_headers",
-    strip_prefix = "armadillo-9.860.1",
-    urls = ["http://sourceforge.net/projects/arma/files/armadillo-9.860.1.tar.xz"],
-    sha256 = "1603888ab73b7f0588df1a37a464436eb0ff6b1372a9962ee1424b4329f165a9",
+    strip_prefix = "armadillo-9.860.2",
+    urls = ["http://sourceforge.net/projects/arma/files/armadillo-9.860.2.tar.xz"],
+    sha256 = "d856ea58c18998997bcae6689784d2d3eeb5daf1379d569fddc277fe046a996b",
     build_file_content = """
 cc_library(
     name = "armadillo_header",
