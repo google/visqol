@@ -291,9 +291,11 @@ Use of this source code is governed by a Apache v2.0 license that can be found i
 There have been several papers that describe the design of the ViSQOL algorithm and compare it to other metrics.
 These three should serve as an overview:
 
-[ViSQOL: The virtual speech quality objective listener](https://arrow.dit.ie/cgi/viewcontent.cgi?article=1168&context=scschcomcon) (IWAENC 2012)
-[Robustness of speech quality metrics to background noise and network degradations: Comparing ViSQOL, PESQ and POLQA](https://arrow.dit.ie/cgi/viewcontent.cgi?article=1160&context=scschcomcon) (ICASSP 2013)
-[ViSQOLAudio: An objective audio quality metric for low bitrate codecs](https://asa.scitation.org/doi/full/10.1121/1.4921674) (Journal of the Acoustic Society of America, 2015)
+[ViSQOL v3: An Open Source Production Ready Objective Speech and Audio Metric](https://arxiv.org/abs/2004.09584) (2020 Twelfth International Conference on Quality of Multimedia Experience (QoMEX))
+
+[ViSQOL: an objective speech quality model](https://asmp-eurasipjournals.springeropen.com/track/pdf/10.1186/s13636-015-0054-9) (2015 EURASIP Journal on Audio, Speech, and Music Processing)
+
+[Objective Assessment of Perceptual Audio Quality Using ViSQOLAudio](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7940042) (The 2017 IEEE Transactions on Broadcasting)
 
 ## FAQ
 
