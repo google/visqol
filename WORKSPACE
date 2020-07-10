@@ -3,6 +3,7 @@
 ########################
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 
 # GoogleTest/GoogleMock framework.
 http_archive(
@@ -67,6 +68,98 @@ cc_library(
 """,
 )
 
+http_archive(
+    name = "bazel_skylib",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+    ],
+    sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
+)
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+bazel_skylib_workspace()
+
+# Python bindings
+git_repository(
+    name = "pybind11_bazel",
+    remote = "https://github.com/pybind/pybind11_bazel.git",
+    branch = "master",
+)
+
+http_archive(
+  name = "pybind11",
+  build_file = "@pybind11_bazel//:pybind11.BUILD",
+  strip_prefix = "pybind11-2.5.0",
+  urls = ["https://github.com/pybind/pybind11/archive/v2.5.0.tar.gz"],
+)
+load("@pybind11_bazel//:python_configure.bzl", "python_configure")
+python_configure(name = "local_config_python")
+
+# pybind11_abseil does not have an abseil.
+new_git_repository(
+    name = "pybind11_abseil",
+    remote = "https://github.com/pybind/pybind11_abseil.git",
+    branch = "experimental",
+    build_file_content = """
+pybind_library(
+    name = "absl_casters",
+    hdrs = ["absl_casters.h"],
+    data = ["//third_party/py/dateutil"],
+    deps = [
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:span",
+    ],
+)
+
+
+pybind_library(
+    name = "absl_numpy_span_caster",
+    hdrs = ["absl_numpy_span_caster.h"],
+    deps = [
+        "@com_google_absl//absl/types:span",
+#        "//third_party/py/numpy:headers",  # buildcleaner: keep
+#        "//third_party/py/numpy:multiarray",  # buildcleaner: keep
+    ],
+)
+
+pybind_library(
+    name = "status_utils",
+    srcs = ["status_utils.cc"],
+    hdrs = ["status_utils.h"],
+    deps = [
+        ":absl_casters",
+        ":status_not_ok_exception",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+    ],
+)
+
+pybind_library(
+    name = "status_casters",
+    hdrs = ["status_casters.h"],
+    deps = [
+        ":status_utils",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+    ],
+)
+"""
+)
+
+new_git_repository(
+    name = "pybind11_protobuf",
+    remote = "https://github.com/pybind/pybind11_protobuf.git",
+    branch = "master",
+    build_file_content = """
+pybind_library(
+    name = "proto_casters",
+)
+"""
+)
 
 ##################
 # Platform Linux #
@@ -122,17 +215,6 @@ cc_library(
 )
 """,
 )
-
-http_archive(
-    name = "bazel_skylib",
-    urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
-    ],
-    sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
-)
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-bazel_skylib_workspace()
 
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
