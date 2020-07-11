@@ -43,41 +43,20 @@ cc_library(
         exclude = ["**/main.cc"],
     ),
     hdrs = glob(["src/include/*.h"]),
-    copts = select({
-        "@bazel_tools//src/conditions:windows": [
-            # Windows Compile Opts
-            "/D_USE_MATH_DEFINES",
-        ],
-        "@bazel_tools//src/conditions:darwin_x86_64": [
-            # Mac Compile Opts
-        ],
-        "//conditions:default": [
-            # Linux Compile Opts
-        ],
-    }),
     includes = [
         "src/include",
         "src/proto",
         "src/svr_training",
     ],
-    linkopts = select({
-        "//conditions:default": [
-            # Linux Link Opts
-        ],
-    }),
     visibility = ["//visibility:public"],
-    deps = select({
-        "@bazel_tools//src/conditions:windows": [
-            # Windows Dependencies
-            "@pffft_lib_win//:pffft_win",
-        ],
-        "//conditions:default": [
-            # Linux Dependencies
-            "@boost//:system",
-            "@boost//:filesystem",
-            "@pffft_lib_linux//:pffft_linux",
-        ],
-    }) + [
+    deps = [
+        "@avcodec_headers//:headeravcodec",
+        "@avformat_headers//:headeravformat",
+        "@com_google_protobuf//:protobuf_lite",
+        "@svm_lib//:libsvm",
+        "@com_google_googletest//:gtest_main",
+        # Linux Dependencies
+        "@pffft_lib_linux//:pffft_linux",
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
         "@com_google_absl//absl/base",
@@ -87,23 +66,30 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/types:span",
-        "@com_google_protobuf//:protobuf_lite",
         "@svm_lib//:libsvm",
         "@armadillo_headers//:armadillo_header",
+        "//util/task:status",
+        "//util/task:statusor",
     ],
 )
 
 # Application
 # =========================================================
 cc_binary(
-    name = "visqol",
+    name = "main",
     srcs = ["src/main.cc"],
     data = [
         "//model:libsvm_nu_svr_model.txt",
         "//model:tcdvoip_nu.568_c5.31474325639_g3.17773760038_model.txt",
     ],
     visibility = ["//visibility:public"],
-    deps = [":visqol_lib"],
+    deps = [
+        ":visqol_lib",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:raw_logging_internal",
+        "//util/task:status",
+        "//util/task:statusor",
+    ],
 )
 
 # Tests
@@ -176,8 +162,8 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -197,6 +183,7 @@ cc_test(
         ":visqol_config_cc_proto",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "//util/task:status",
     ],
 )
 
@@ -301,8 +288,8 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -419,8 +406,8 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -503,5 +490,6 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "//util/task:status",
     ],
 )

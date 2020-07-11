@@ -15,7 +15,7 @@
 #include "visqol_manager.h"
 
 #include "gtest/gtest.h"
-#include "google/protobuf/stubs/status.h"
+#include "util/task/status.h"
 
 #include "similarity_result.h"
 #include "test_utility.h"

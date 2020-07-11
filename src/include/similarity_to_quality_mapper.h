@@ -20,7 +20,7 @@
 #include <vector>
 
 
-#include "google/protobuf/stubs/status.h"
+#include "util/task/status.h"
 
 namespace Visqol {
 

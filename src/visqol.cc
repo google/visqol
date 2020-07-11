@@ -31,7 +31,7 @@
 #include "spectrogram_builder.h"
 
 namespace Visqol {
-google::protobuf::util::StatusOr<SimilarityResult>
+util::StatusOr<SimilarityResult>
 Visqol::CalculateSimilarity(
     const AudioSignal &ref_signal, AudioSignal &deg_signal,
     SpectrogramBuilder *spect_builder, const AnalysisWindow &window,

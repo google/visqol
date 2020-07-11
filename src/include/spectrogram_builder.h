@@ -17,7 +17,7 @@
 #ifndef VISQOL_INCLUDE_SPECTROGRAMBUILDER_H
 #define VISQOL_INCLUDE_SPECTROGRAMBUILDER_H
 
-#include "google/protobuf/stubs/statusor.h"
+#include "util/task/statusor.h"
 
 #include "analysis_window.h"
 #include "audio_signal.h"
@@ -50,7 +50,7 @@ class SpectrogramBuilder {
    *
    * @return The spectrogram representation of the input signal.
    */
-  virtual google::protobuf::util::StatusOr<Spectrogram> Build(
+  virtual util::StatusOr<Spectrogram> Build(
       const AudioSignal &signal,
       const AnalysisWindow &window) = 0;
 };

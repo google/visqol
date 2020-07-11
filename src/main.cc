@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "absl/base/internal/raw_logging.h"
-#include "google/protobuf/stubs/status.h"
-#include "google/protobuf/stubs/statusor.h"
+#include "util/task/status.h"
+#include "util/task/statusor.h"
 
 #include "commandline_parser.h"
 #include "sim_results_writer.h"

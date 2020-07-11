@@ -21,7 +21,7 @@
 #include "absl/base/internal/raw_logging.h"
 #include "absl/memory/memory.h"
 
-#include "google/protobuf/stubs/status.h"
+#include "util/task/status.h"
 #include "google/protobuf/stubs/status_macros.h"
 
 #include "alignment.h"
@@ -38,7 +38,7 @@
 
 #include "google/protobuf/port_def.inc"
 // This 'using' declaration is necessary for the ASSIGN_OR_RETURN macro.
-using namespace google::protobuf::util;
+using namespace util;
 
 namespace Visqol {
 
@@ -212,7 +212,7 @@ Status VisqolManager::ErrorIfNotInitialized() {
   }
 }
 
-google::protobuf::util::Status VisqolManager::ValidateInputAudio(
+util::Status VisqolManager::ValidateInputAudio(
       const AudioSignal& ref_signal, const AudioSignal& deg_signal) {
   // Warn if there is an excessive difference in durations.
   double ref_duration = ref_signal.GetDuration();
@@ -225,7 +225,7 @@ google::protobuf::util::Status VisqolManager::ValidateInputAudio(
 
   // Error if the signals have different sample rates.
   if (ref_signal.sample_rate != deg_signal.sample_rate) {
-    return google::protobuf::util::Status(
+    return util::Status(
         google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "Input audio signals have different sample rates! Reference audio "
         "sample rate: "+std::to_string(ref_signal.sample_rate)+". Degraded "
@@ -248,6 +248,6 @@ google::protobuf::util::Status VisqolManager::ValidateInputAudio(
     }
   }
 
-  return google::protobuf::util::Status();
+  return util::Status();
 }
 }  // namespace Visqol

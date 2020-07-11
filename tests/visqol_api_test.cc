@@ -15,7 +15,7 @@
 #include "visqol_api.h"
 
 #include "gtest/gtest.h"
-#include "google/protobuf/stubs/status.h"
+#include "util/task/status.h"
 
 #include "audio_signal.h"
 #include "commandline_parser.h"

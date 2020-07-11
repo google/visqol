@@ -47,7 +47,7 @@ class GammatoneSpectrogramBuilder : public SpectrogramBuilder {
       const bool use_speech_mode);
 
   // Docs inherited from parent.
-  google::protobuf::util::StatusOr<Spectrogram> Build(
+  util::StatusOr<Spectrogram> Build(
       const AudioSignal &signal,
       const AnalysisWindow &window) override;
 

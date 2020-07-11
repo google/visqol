@@ -23,7 +23,7 @@
 #include "similarity_to_quality_mapper.h"
 #include "support_vector_regression_model.h"
 
-#include "google/protobuf/stubs/status.h"
+#include "util/task/status.h"
 
 namespace Visqol {
 /**

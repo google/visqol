@@ -24,7 +24,7 @@
 
 #include "absl/synchronization/mutex.h"
 #include "svm.h"
-#include "google/protobuf/stubs/status.h"
+#include "util/task/status.h"
 
 namespace Visqol {
 /**

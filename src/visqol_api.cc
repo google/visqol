@@ -19,7 +19,8 @@
 
 #include "absl/types/span.h"
 
-#include "google/protobuf/stubs/statusor.h"
+#include "devtools/build/runtime/get_runfiles_dir.h"
+#include "util/task/statusor.h"
 #include "google/protobuf/stubs/status_macros.h"
 
 #include "commandline_parser.h"
@@ -31,7 +32,7 @@
 #include "google/protobuf/port_def.inc"
 
 // This 'using' declaration is necessary for the ASSIGN_OR_RETURN macro.
-using namespace google::protobuf::util;
+using namespace util;
 
 namespace Visqol {
 

@@ -22,8 +22,8 @@
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"
-#include "google/protobuf/stubs/status.h"
-#include "google/protobuf/stubs/statusor.h"
+#include "util/task/status.h"
+#include "util/task/statusor.h"
 
 #include "alignment.h"
 #include "amatrix.h"
@@ -81,7 +81,7 @@ PatchSimilarityResult ComparisonPatchesSelector::FindMostSimilarDegPatch(
   return res;
 }
 
-google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
+util::StatusOr<std::vector<PatchSimilarityResult>>
 ComparisonPatchesSelector::FindMostSimilarDegPatches(
     const std::vector<ImagePatch>& ref_patches,
     const std::vector<size_t>& ref_patch_indices,
@@ -95,7 +95,7 @@ ComparisonPatchesSelector::FindMostSimilarDegPatches(
       num_frames_in_deg_spectro, num_frames_per_patch);
 
   if (!num_patches) {
-    return google::protobuf::util::Status(
+    return util::Status(
         google::protobuf::util::error::Code::CANCELLED ,
         "Degraded file was too short, different, or misaligned to score any "
         "of the reference patches.");
@@ -194,7 +194,7 @@ AudioSignal ComparisonPatchesSelector::Slice(
   return sliced_signal;
 }
 
-google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
+util::StatusOr<std::vector<PatchSimilarityResult>>
 ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
     const std::vector<PatchSimilarityResult>& sim_results,
     const AudioSignal &ref_signal,

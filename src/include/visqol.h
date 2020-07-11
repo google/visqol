@@ -19,7 +19,7 @@
 
 #include <vector>
 
-#include "google/protobuf/stubs/statusor.h"
+#include "util/task/statusor.h"
 
 #include "analysis_window.h"
 #include "audio_signal.h"
@@ -59,7 +59,7 @@ class Visqol {
    * @return If the comparison was successful, return the similarity result and
    *    associated debug info. Else, return an error status.
    */
-  google::protobuf::util::StatusOr<SimilarityResult> CalculateSimilarity(
+  util::StatusOr<SimilarityResult> CalculateSimilarity(
       const AudioSignal &ref_signal, AudioSignal &deg_signal,
       SpectrogramBuilder *spect_builder, const AnalysisWindow &window,
       const ImagePatchCreator *patch_creator,

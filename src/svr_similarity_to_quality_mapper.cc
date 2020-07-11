@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include "google/protobuf/stubs/status.h"
+#include "util/task/status.h"
 
 #include "file_path.h"
 
@@ -25,7 +25,7 @@ SvrSimilarityToQualityMapper::SvrSimilarityToQualityMapper(
     const FilePath &support_vector_model)
     : model_path_{support_vector_model} {}
 
-google::protobuf::util::Status SvrSimilarityToQualityMapper::Init() {
+util::Status SvrSimilarityToQualityMapper::Init() {
   return model_.Init(model_path_);
 }
 

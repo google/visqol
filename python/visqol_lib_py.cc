@@ -7,7 +7,7 @@
 #include "conformance.h"
 #include "visqol_api.h"
 #include "visqol_manager.h"
-#include "src/proto/visqol_config.pb.h"
+#include "third_party/visqol/src/proto/visqol_config.pb.h"
 
 namespace Visqol {
 
