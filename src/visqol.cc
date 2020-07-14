@@ -77,7 +77,7 @@ Visqol::CalculateSimilarity(
   auto ref_patches = patch_creator->CreatePatchesFromIndices(
       ref_spectrogram.Data(), ref_patch_indices);
   auto most_sim_patch_result =
-      comparison_patches_selector->FindMostSimilarDegPatches(
+      comparison_patches_selector->FindMostOptimalDegPatches(
           ref_patches, ref_patch_indices, deg_spectrogram.Data(),
           frame_duration);
   if (!most_sim_patch_result.ok()) {

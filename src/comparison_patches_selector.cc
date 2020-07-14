@@ -21,68 +21,117 @@
 #include <utility>
 #include <vector>
 
-#include "absl/base/internal/raw_logging.h"
-#include "util/task/status.h"
-#include "util/task/statusor.h"
-
 #include "alignment.h"
 #include "amatrix.h"
 #include "audio_signal.h"
 #include "image_patch_creator.h"
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
+#include "absl/base/internal/raw_logging.h"
+#include "util/task/status.h"
+#include "util/task/statusor.h"
 
 namespace Visqol {
 ComparisonPatchesSelector::ComparisonPatchesSelector(
     std::unique_ptr<PatchSimilarityComparator> sim_comparator)
     : sim_comparator_{std::move(sim_comparator)} {}
 
-PatchSimilarityResult ComparisonPatchesSelector::FindMostSimilarDegPatch(
+void ComparisonPatchesSelector::FindMostOptimalDegPatch(
     const AMatrix<double>& spectrogram_data, const ImagePatch& ref_patch,
-    int ref_frame_index, const double frame_duration) const {
+    std::vector<ImagePatch>& deg_patches,
+    std::vector<std::vector<double>>& cumulative_similarity_dp,
+    std::vector<std::vector<int>>& backtrace,
+    const std::vector<size_t>& ref_patch_indices, int patch_index,
+    const int search_window) const {
+  // The similarity threshold below which the two patch matches are not a good
+  // match.
+  int ref_frame_index = ref_patch_indices[patch_index];
   ImagePatch deg_patch;
   PatchSimilarityResult sim_result;
-  PatchSimilarityResult best_sim_result;
-  int best_slide_offset = 0;
-  const int num_frames_per_patch = ref_patch.NumCols();
-  const double patch_duration = frame_duration * num_frames_per_patch;
-  double highest_sim = std::numeric_limits<double>::lowest();
 
-  // For each possible index in the given range, build a degraded patch and
-  // check it for similarity to the given reference patch.
+  // For a given reference frame index, this function compares the given
+  // reference patch with all possible degraded patches in the search window and
+  // populates the cumulative_similarity_dp vector accordingly. For more details
+  // : https://en.wikipedia.org/wiki/Dynamic_time_warping
+  // Try Viterbi, if optimization is needed.
 
-  // The ref_frame_index means ref patch minus half a patch, and the end index
-  // if ref patch + half.  This means we may need to add silence.
-  for (int slide_offset = ref_frame_index - (num_frames_per_patch / 2);
-       slide_offset <= ref_frame_index + (num_frames_per_patch / 2);
-       slide_offset++) {
-    if (slide_offset > (int)spectrogram_data.NumCols() - 1) {
+  for (int slide_offset = ref_frame_index - search_window;
+       slide_offset <= ref_frame_index + search_window; slide_offset++) {
+    if (slide_offset < 0) {
+      // The degraded patch index cannot be less than 0.
+      slide_offset = -1;
+      continue;
+    }
+    if (slide_offset >= spectrogram_data.NumCols()) {
       // The start of the degraded is past the end of the spectrogram, so
       // nothing left to compare.
       break;
     }
-    deg_patch = BuildDegradedPatch(spectrogram_data, slide_offset,
-        slide_offset + ref_patch.NumCols() - 1, ref_patch.NumRows(),
-        ref_patch.NumCols());
+    deg_patch = deg_patches[slide_offset];
     sim_result = sim_comparator_->MeasurePatchSimilarity(ref_patch, deg_patch);
 
-    if (sim_result.similarity > highest_sim) {
-      highest_sim = sim_result.similarity;
-      best_sim_result = sim_result;
-      best_slide_offset = slide_offset;
+    int past_slide_offset = -1;
+    double highest_sim = std::numeric_limits<double>::lowest();
+    // There's no need to backtrace for the first patch index.
+    if (patch_index > 0) {
+      // The lower_limit parameter tells us how far we should go
+      // back to look for a possible match for the previous patch index
+      // (patch_index - 1). The current value of lower_limit is used because the
+      // search space for the previous patch index  is
+      // (ref_patch_indices[patch_index - 1] - search_window,
+      // ref_patch_indices[patch_index - 1] + search_window).
+      int lower_limit = ref_patch_indices[patch_index - 1] - search_window;
+      lower_limit = std::max(lower_limit, 0);
+      // The back_offset parameter determines all the offsets that should be
+      // considered while calculating the highest cumulative similarity score
+      // achieved till patch_index - 1. Since two reference patches should
+      // not map to the exact same degraded patch, the initial value of
+      // back_offset is set to slide_offset - 1.
+      int back_offset = slide_offset - 1;
+      for (; back_offset >= lower_limit; back_offset--) {
+        // The current for loop is used to find out the highest cumulative score
+        // achieved till the previous ref_patch_index.
+        if (cumulative_similarity_dp[patch_index - 1][back_offset] >
+            highest_sim) {
+          highest_sim = cumulative_similarity_dp[patch_index - 1][back_offset];
+          past_slide_offset = back_offset;
+        }
+      }
+      sim_result.similarity += highest_sim;
+      // If the current reference patch experienced a packet loss, then the
+      // cumulative similarity score till the previous patch might be more and
+      // in that case no matching patch for the current reference patch is found
+      // in the degraded window.
+      if (cumulative_similarity_dp[patch_index - 1][slide_offset] >
+          sim_result.similarity) {
+        sim_result.similarity =
+            cumulative_similarity_dp[patch_index - 1][slide_offset];
+        past_slide_offset = slide_offset;
+      }
+    }
+    cumulative_similarity_dp[patch_index][slide_offset] = sim_result.similarity;
+    backtrace[patch_index][slide_offset] = past_slide_offset;
+  }
+}
+
+size_t ComparisonPatchesSelector::CalcMaxNumPatches(
+    const std::vector<size_t>& ref_patch_indices,
+    size_t num_frames_in_deg_spectro, size_t num_frames_per_patch) const {
+  size_t num_patches = ref_patch_indices.size();
+
+  if (num_patches) {
+    // The last patch can start up to half a patch away.
+    while (ref_patch_indices[num_patches - 1] - floor(num_frames_per_patch / 2)
+                > num_frames_in_deg_spectro) {
+      num_patches--;
     }
   }
 
-  PatchSimilarityResult res;
-  res = std::move(best_sim_result);
-  // Set the degraded patch start and end time.
-  res.deg_patch_start_time = best_slide_offset * frame_duration;
-  res.deg_patch_end_time = res.deg_patch_start_time + patch_duration;
-  return res;
+  return num_patches;
 }
 
 util::StatusOr<std::vector<PatchSimilarityResult>>
-ComparisonPatchesSelector::FindMostSimilarDegPatches(
+ComparisonPatchesSelector::FindMostOptimalDegPatches(
     const std::vector<ImagePatch>& ref_patches,
     const std::vector<size_t>& ref_patch_indices,
     const AMatrix<double>& spectrogram_data,
@@ -90,56 +139,101 @@ ComparisonPatchesSelector::FindMostSimilarDegPatches(
   const size_t num_frames_per_patch = ref_patches[0].NumCols();
   const size_t num_frames_in_deg_spectro = spectrogram_data.NumCols();
   const double patch_duration = frame_duration * num_frames_per_patch;
-  // Allow going up to the end.
-  const size_t num_patches = CalcMaxNumPatches(ref_patch_indices,
-      num_frames_in_deg_spectro, num_frames_per_patch);
+  constexpr int kNumberOfSearchPatches = 60;
+  const int search_window = kNumberOfSearchPatches * num_frames_per_patch;
+  const size_t num_patches = CalcMaxNumPatches(
+      ref_patch_indices, num_frames_in_deg_spectro, num_frames_per_patch);
 
   if (!num_patches) {
     return util::Status(
-        google::protobuf::util::error::Code::CANCELLED ,
+        google::protobuf::util::error::Code::CANCELLED,
         "Degraded file was too short, different, or misaligned to score any "
         "of the reference patches.");
   } else if (num_patches < ref_patch_indices.size()) {
-    ABSL_RAW_LOG(WARNING, "Warning: Dropping %zu (of %zu) reference patches "
+    ABSL_RAW_LOG(
+        WARNING,
+        "Warning: Dropping %zu (of %zu) reference patches "
         "due to the degraded file being misaligned or too short. If too many "
         "patches are dropped, the score will be less meaningful.",
         ref_patch_indices.size() - num_patches, ref_patch_indices.size());
   }
-
+  // The vector to store the similarity results
   std::vector<PatchSimilarityResult> bestDegPatches(num_patches);
-
-  // Attempt to get a good alignment without backtracking.
-  for (size_t patch_index = 0; patch_index < num_patches; patch_index++) {
-    // Find the best alignment to the ref patch within 1 patch length of the
-    // hard-aligned deg signal.
-    bestDegPatches[patch_index] =
-        FindMostSimilarDegPatch(spectrogram_data, ref_patches[patch_index],
-                                ref_patch_indices[patch_index], frame_duration);
-
-    // Set the reference patch start and end time.
-    bestDegPatches[patch_index].ref_patch_start_time =
-        ref_patch_indices[patch_index] * frame_duration;
-
-    bestDegPatches[patch_index].ref_patch_end_time =
-        bestDegPatches[patch_index].ref_patch_start_time + patch_duration;
+  std::vector<std::vector<double>> cumulative_similarity_dp(
+      ref_patch_indices.size(),
+      std::vector<double>(spectrogram_data.NumCols()));
+  std::vector<std::vector<int>> backtrace(
+      ref_patch_indices.size(), std::vector<int>(spectrogram_data.NumCols()));
+  std::vector<ImagePatch> deg_patches(spectrogram_data.NumCols());
+  for (size_t slide_offset = 0; slide_offset < spectrogram_data.NumCols();
+       slide_offset++) {
+    deg_patches[slide_offset] =
+        BuildDegradedPatch(spectrogram_data, slide_offset,
+                           slide_offset + ref_patches[0].NumCols() - 1,
+                           ref_patches[0].NumRows(), ref_patches[0].NumCols());
   }
-  return bestDegPatches;
-}
-
-size_t ComparisonPatchesSelector::CalcMaxNumPatches(
-    const std::vector<size_t>& ref_patch_indices, size_t num_deg_frames,
-    size_t num_frames) const {
-  size_t num_patches = ref_patch_indices.size();
-
-  if (num_patches) {
-    // The last patch can start up to half a patch away.
-    while (ref_patch_indices[num_patches - 1] - floor(num_frames / 2) >
-           num_deg_frames) {
-      num_patches--;
+  // Attempt to get a good alignment with backtracking.
+  for (size_t patch_index = 0; patch_index < num_patches; patch_index++) {
+    // Find the best alignment to the ref patch within a distance of
+    // search_window on each side of the hard-aligned deg signal.
+    FindMostOptimalDegPatch(spectrogram_data, ref_patches[patch_index],
+                            deg_patches, cumulative_similarity_dp, backtrace,
+                            ref_patch_indices, patch_index, search_window);
+  }
+  double max_similarity_score = std::numeric_limits<double>::lowest();
+  // The patch index for the last reference patch.
+  int last_index = num_patches - 1;
+  // The last_offset stores the offset at which the last reference patch got the
+  // maximal similarity score over all the reference patches.
+  int last_offset;
+  int lower_limit =
+      std::max(0, int(ref_patch_indices[last_index] - search_window));
+  // The for loop is used to find the offset which maximizes the similarity
+  // score across all the patches.
+  for (int slide_offset = lower_limit;
+       slide_offset <= ref_patch_indices[last_index] + search_window;
+       slide_offset++) {
+    if (slide_offset > num_frames_in_deg_spectro) {
+      // The frame offset for degraded start patch cannot be more than the
+      // number of frames in the degraded spectrogram.
+      break;
+    }
+    if (cumulative_similarity_dp[last_index][slide_offset] >
+        max_similarity_score) {
+      max_similarity_score = cumulative_similarity_dp[last_index][slide_offset];
+      last_offset = slide_offset;
     }
   }
 
-  return num_patches;
+  for (int patch_index = num_patches - 1; patch_index >= 0; patch_index--) {
+    // This sets the reference and degraded patch start and end times.
+    ImagePatch ref_patch = ref_patches[patch_index];
+    ImagePatch deg_patch = BuildDegradedPatch(
+        spectrogram_data, last_offset, last_offset + ref_patch.NumCols() - 1,
+        ref_patch.NumRows(), ref_patch.NumCols());
+    bestDegPatches[patch_index] =
+        sim_comparator_->MeasurePatchSimilarity(ref_patch, deg_patch);
+    // This condition is true only if no matching patch was found for the given
+    // reference patch.
+    if (last_offset == backtrace[patch_index][last_offset]) {
+      ImagePatch new_deg_patch{ref_patch.NumRows(), ref_patch.NumCols()};
+      bestDegPatches[patch_index] =
+          sim_comparator_->MeasurePatchSimilarity(ref_patch, new_deg_patch);
+      bestDegPatches[patch_index].deg_patch_start_time = 0.0;
+      bestDegPatches[patch_index].deg_patch_end_time = 0.0;
+    } else {
+      bestDegPatches[patch_index].deg_patch_start_time =
+          last_offset * frame_duration;
+      bestDegPatches[patch_index].deg_patch_end_time =
+          bestDegPatches[patch_index].deg_patch_start_time + patch_duration;
+    }
+    bestDegPatches[patch_index].ref_patch_start_time =
+        ref_patch_indices[patch_index] * frame_duration;
+    bestDegPatches[patch_index].ref_patch_end_time =
+        bestDegPatches[patch_index].ref_patch_start_time + patch_duration;
+    last_offset = backtrace[patch_index][last_offset];
+  }
+  return bestDegPatches;
 }
 
 ImagePatch ComparisonPatchesSelector::BuildDegradedPatch(
@@ -153,7 +247,7 @@ ImagePatch ComparisonPatchesSelector::BuildDegradedPatch(
 
   int first_real_frame = std::max(0, window_beginning);
   // This is an inclusive end, so subtract 1.
-  int last_real_frame =  std::min(window_end, spectrogram_data.NumCols() - 1);
+  int last_real_frame = std::min(window_end, spectrogram_data.NumCols() - 1);
   for (size_t rowIndex = 0; rowIndex < spectrogram_data.NumRows(); rowIndex++) {
     row = spectrogram_data.RowSubset(rowIndex, first_real_frame,
                                      last_real_frame);

@@ -47,6 +47,12 @@
 
 #define kConformanceGuitar64aac (4.5123244380958774)
 
+#define kConformanceGuitarShortDegradedPatch (4.0120925346530543)
+
+#define kConformanceGuitarShortReferencePatch (4.9771152297354284)
+
+#define kConformanceDifferentAudios (1)
+
 #define kConformanceGlock48aac (4.333169489109431)
 
 #define kConformanceContrabassoon24aac (4.0500790740957617)

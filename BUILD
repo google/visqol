@@ -250,6 +250,7 @@ cc_test(
         "//model:libsvm_nu_svr_model.txt",
         "//testdata:clean_speech/CA01_01.wav",
         "//testdata:clean_speech/transcoded_CA01_01.wav",
+        "//testdata:short_duration/5_second/guitar48_stereo_5_sec.wav",
         "//testdata/conformance_testdata_subset:castanets48_stereo.wav",
         "//testdata/conformance_testdata_subset:contrabassoon48_stereo.wav",
         "//testdata/conformance_testdata_subset:contrabassoon48_stereo_24kbps_aac.wav",
@@ -366,6 +367,7 @@ cc_test(
     data = [
         "//model:libsvm_nu_svr_model.txt",
         "//testdata:mismatched_duration/guitar48_stereo_middle_2sec_cut.wav",
+        "//testdata:mismatched_duration/guitar48_stereo_middle_50ms_cut.wav",
         "//testdata:mismatched_duration/guitar48_stereo_x2.wav",
         "//testdata/conformance_testdata_subset:guitar48_stereo.wav",
     ],

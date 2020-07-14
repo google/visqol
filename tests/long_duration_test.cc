@@ -23,14 +23,19 @@ namespace Visqol {
 namespace {
 
 const double kMinMoslqo = 1.0;
+const double kTolerance = 0.0001;
+const double kConformanceGuitarLongDuration = 4.8179655940874921;
 
 // Confirm that a run can succesfully complete with a long file. In this test,
 // file duration is 1 min.
 TEST(LongFiles, 1_min) {
   // Build command line args.
-  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper
-      ("testdata/long_duration/1_min/guitar48_stereo_ref_1min.wav",
-       "testdata/long_duration/1_min/guitar48_stereo_deg_1min.wav");
+  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper(
+      "testdata/long_duration/1_min/"
+      "guitar48_stereo_ref_1min.wav",
+      "testdata/long_duration/1_min/"
+      "guitar48_stereo_deg_1min.wav",
+      "", true);
   auto files_to_compare = VisqolCommandLineParser::BuildFilePairPaths(cmd_args);
 
   // Init ViSQOL.
@@ -45,7 +50,9 @@ TEST(LongFiles, 1_min) {
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
   ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kMinMoslqo);
+  EXPECT_NEAR(kConformanceGuitarLongDuration, status_or.ValueOrDie().moslqo(),
+              kTolerance);
 }
 
 } // namespace
-} // namespace Visqol
+}  // namespace Visqol
