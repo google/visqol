@@ -193,7 +193,7 @@ ComparisonPatchesSelector::FindMostOptimalDegPatches(
   for (int slide_offset = lower_limit;
        slide_offset <= ref_patch_indices[last_index] + search_window;
        slide_offset++) {
-    if (slide_offset > num_frames_in_deg_spectro) {
+    if (slide_offset >= num_frames_in_deg_spectro) {
       // The frame offset for degraded start patch cannot be more than the
       // number of frames in the degraded spectrogram.
       break;
