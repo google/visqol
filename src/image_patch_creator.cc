@@ -57,7 +57,7 @@ google::protobuf::util::StatusOr<std::vector<size_t>>
   // Ensure that the spectrum is at least as big as a single patch
   if (spectrum_length < patch_size_ + init_patch_index) {
     return google::protobuf::util::Status(
-      google::protobuf::util::error::INVALID_ARGUMENT, "Reference spectrum "
+      google::protobuf::util::error::Code::INVALID_ARGUMENT, "Reference spectrum "
       "size (" + std::to_string(spectrum_length) + ") smaller than minimum "
       "patch size (" + std::to_string(patch_size_ + init_patch_index) + ").");
   }

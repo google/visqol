@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
   auto sim_result_msgs = visqol.Run(files_to_compare);
 
   // Write the results.
-  for (auto sim_result_msg : sim_result_msgs) {
+  for (const auto& sim_result_msg : sim_result_msgs) {
     Visqol::SimilarityResultsWriter::Write(
         cmd_args.verbose, cmd_args.results_output_csv, cmd_args.debug_output_path,
         sim_result_msg, cmd_args.use_speech_mode);

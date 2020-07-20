@@ -40,23 +40,30 @@ ABSL_FLAG(std::string, batch_input_csv, "",
           "If the `batch_input_csv` flag is used, the `reference_file` \n"
           "and `degraded_file` flags will be ignored.");
 ABSL_FLAG(std::string, results_csv, "",
-"Used to specify a path that the similarity score results will be output to \n"
-". This will be a CSV file with the format:\n"
-"------------------\n"
-"reference,degraded,moslqo\n"
-"ref1.wav,deg1.wav,3.4\n"
-"ref2.wav,deg2.wav,4.1\n");
+          "Used to specify a path that the similarity score results will be "
+          "output to \n"
+          ". This will be a CSV file with the format:\n"
+          "------------------\n"
+          "reference,degraded,moslqo\n"
+          "ref1.wav,deg1.wav,3.4\n"
+          "ref2.wav,deg2.wav,4.1\n");
 ABSL_FLAG(bool, verbose, false, "Enables verbose output in the terminal.");
 ABSL_FLAG(std::string, output_debug, "",
-"Used to specify a file path where output debug information will be written\n"
-"to. This debug info contains the full details of the comparison between the\n"
-"reference and degraded audio signals and is in JSON format. The file does\n"
-"not need to previously exist. Contents will be appended to the file if it\n"
-"does already exist or if ViSQOL is run in batch mode.");
-ABSL_FLAG(std::string, similarity_to_quality_model, "",
-"The libsvm model to use during comparison. Use this only if you want to\n"
-"explicitly specify the model file location, otherwise the default model will\n"
-"be used.");
+          "Used to specify a file path where output debug information will be "
+          "written\n"
+          "to. This debug info contains the full details of the comparison "
+          "between the\n"
+          "reference and degraded audio signals and is in JSON format. The "
+          "file does\n"
+          "not need to previously exist. Contents will be appended to the file "
+          "if it\n"
+          "does already exist or if ViSQOL is run in batch mode.");
+ABSL_FLAG(
+    std::string, similarity_to_quality_model, "",
+    "The libsvm model to use during comparison. Use this only if you want to\n"
+    "explicitly specify the model file location, otherwise the default model "
+    "will\n"
+    "be used.");
 ABSL_FLAG(bool, use_speech_mode, false,
 "Use a wideband model (sensitive up to 8kHz) with voice activity detection\n"
 "that normalizes the polynomial NSIM->MOS mapping so that a perfect NSIM\n"

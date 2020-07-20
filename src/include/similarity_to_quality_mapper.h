@@ -19,6 +19,7 @@
 
 #include <vector>
 
+
 #include "google/protobuf/stubs/status.h"
 
 namespace Visqol {

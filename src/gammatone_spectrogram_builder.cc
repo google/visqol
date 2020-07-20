@@ -57,7 +57,7 @@ google::protobuf::util::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build
   // ensure that the signal is large enough.
   if (sig.NumRows() <= window.size) {
     return google::protobuf::util::Status(
-        google::protobuf::util::error::INVALID_ARGUMENT,
+        google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "Too few samples ("+std::to_string(sig.NumRows())+") in signal to build"
         " spectrogram ("+std::to_string(hop_size)+" required minimum).");
   }

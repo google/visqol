@@ -358,8 +358,7 @@ TEST(VisqolCommandLineTest, SpeechModeDisabled) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  EXPECT_NEAR(kMonoKnownMos, status_or.ValueOrDie().moslqo(),
-      kTolerance);
+  EXPECT_NEAR(kMonoKnownMos, status_or.ValueOrDie().moslqo(), kTolerance);
 }
 
 /**
@@ -405,7 +404,7 @@ TEST(VisqolCommandLineTest, UnscaledSpeechMode) {
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
   EXPECT_NEAR(kCA01_01UnscaledPerfectScore, status_or.ValueOrDie().moslqo(),
-      kTolerance);
+              kTolerance);
 }
 
 }  // namespace
