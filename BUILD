@@ -12,20 +12,24 @@ exports_files(["LICENSE"])
 proto_library(
     name = "similarity_result",
     srcs = ["src/proto/similarity_result.proto"],
+    visibility = ["//visibility:public"],
 )
 
 proto_library(
     name = "visqol_config",
     srcs = ["src/proto/visqol_config.proto"],
+    visibility = ["//visibility:public"],
 )
 
 cc_proto_library(
     name = "similarity_result_cc_proto",
+    visibility = ["//visibility:public"],
     deps = [":similarity_result"],
 )
 
 cc_proto_library(
     name = "visqol_config_cc_proto",
+    visibility = ["//visibility:public"],
     deps = [":visqol_config"],
 )
 
@@ -55,6 +59,7 @@ cc_library(
         "@com_google_protobuf//:protobuf_lite",
         "@svm_lib//:libsvm",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/types:optional",
         # Linux Dependencies
         "@pffft_lib_linux//:pffft_linux",
         ":similarity_result_cc_proto",

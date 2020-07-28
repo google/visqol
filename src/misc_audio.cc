@@ -87,52 +87,63 @@ AudioSignal MiscAudio::ToMono(const AudioSignal &signal) {
 }
 
 AudioSignal MiscAudio::LoadAsMono(const FilePath &path) {
-  AudioSignal sig;
   std::ifstream wav_file(path.Path().c_str(), std::ios::binary);
   if (wav_file) {
     std::stringstream wav_string_stream;
     wav_string_stream << wav_file.rdbuf();
     wav_file.close();
-
-    WavReader wav_reader(&wav_string_stream);
-    const size_t num_total_samples = wav_reader.GetNumTotalSamples();
-
-    if (wav_reader.IsHeaderValid() && num_total_samples != 0) {
-      std::vector<int16_t> interleaved_samples(num_total_samples);
-      const auto num_samp_read = wav_reader.ReadSamples(num_total_samples,
-                                                      &interleaved_samples[0]);
-
-      // Certain wav files are 'mostly valid' and have a slight difference with
-      // the reported file length.  Warn for these.
-      if (num_samp_read != num_total_samples) {
-        ABSL_RAW_LOG(WARNING,
-                     "Number of samples read (%lu) was less than the expected"
-                     " number (%lu).",
-                     num_samp_read, num_total_samples);
-      }
-      if (num_samp_read > 0) {
-        const auto interleaved_norm_vec = MiscMath::NormalizeInt16ToDouble(
-            interleaved_samples);
-        const auto multi_chan_norm_vec = ExtractMultiChannel(
-            wav_reader.GetNumChannels(),
-            interleaved_norm_vec);
-
-        const AMatrix<double> outMat(multi_chan_norm_vec);
-        sig.data_matrix = outMat;
-        sig.sample_rate = wav_reader.GetSampleRateHz();
-        sig = MiscAudio::ToMono(sig);
-      } else {
-        ABSL_RAW_LOG(ERROR,
-                 "Error reading data for file %s.", path.Path().c_str());
-      }
-    } else {
-      ABSL_RAW_LOG(ERROR,
-                 "Error reading header for file %s.", path.Path().c_str());
-    }
-
+    return LoadAsMono(&wav_string_stream, path.Path());
   } else {
     ABSL_RAW_LOG(ERROR,
                  "Could not find file %s.", path.Path().c_str());
+    return AudioSignal();
+  }
+}
+
+AudioSignal MiscAudio::LoadAsMono(std::stringstream *string_stream,
+                                  absl::optional<std::string> filepath) {
+  AudioSignal sig;
+  WavReader wav_reader(string_stream);
+  const size_t num_total_samples = wav_reader.GetNumTotalSamples();
+
+  if (wav_reader.IsHeaderValid() && num_total_samples != 0) {
+    std::vector<int16_t> interleaved_samples(num_total_samples);
+    const auto num_samp_read =
+        wav_reader.ReadSamples(num_total_samples, &interleaved_samples[0]);
+
+    // Certain wav files are 'mostly valid' and have a slight difference with
+    // the reported file length.  Warn for these.
+    if (num_samp_read != num_total_samples) {
+      ABSL_RAW_LOG(WARNING,
+                   "Number of samples read (%lu) was less than the expected"
+                   " number (%lu).",
+                   num_samp_read, num_total_samples);
+    }
+    if (num_samp_read > 0) {
+      const auto interleaved_norm_vec =
+          MiscMath::NormalizeInt16ToDouble(interleaved_samples);
+      const auto multi_chan_norm_vec = ExtractMultiChannel(
+          wav_reader.GetNumChannels(), interleaved_norm_vec);
+
+      const AMatrix<double> outMat(multi_chan_norm_vec);
+      sig.data_matrix = outMat;
+      sig.sample_rate = wav_reader.GetSampleRateHz();
+      sig = MiscAudio::ToMono(sig);
+    } else {
+      if (filepath.has_value()) {
+        ABSL_RAW_LOG(ERROR, "Error reading data for file %s.",
+                     filepath->c_str());
+      } else {
+        ABSL_RAW_LOG(ERROR, "Error reading data from audio stream.");
+      }
+    }
+  } else {
+    if (filepath.has_value()) {
+      ABSL_RAW_LOG(ERROR, "Error reading header for file %s.",
+                   filepath->c_str());
+    } else {
+      ABSL_RAW_LOG(ERROR, "Error reading header from audio stream.");
+    }
   }
 
   return sig;

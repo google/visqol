@@ -214,13 +214,20 @@ ComparisonPatchesSelector::FindMostOptimalDegPatches(
     bestDegPatches[patch_index] =
         sim_comparator_->MeasurePatchSimilarity(ref_patch, deg_patch);
     // This condition is true only if no matching patch was found for the given
-    // reference patch.
+    // reference patch. In this case, the matched patch is essentially set to
+    // NULL (which is different from a silent patch).
     if (last_offset == backtrace[patch_index][last_offset]) {
       ImagePatch new_deg_patch{ref_patch.NumRows(), ref_patch.NumCols()};
       bestDegPatches[patch_index] =
           sim_comparator_->MeasurePatchSimilarity(ref_patch, new_deg_patch);
       bestDegPatches[patch_index].deg_patch_start_time = 0.0;
       bestDegPatches[patch_index].deg_patch_end_time = 0.0;
+      bestDegPatches[patch_index].similarity = 0.0;
+      int num_rows = bestDegPatches[patch_index].freq_band_means.NumRows();
+      int num_cols = bestDegPatches[patch_index].freq_band_means.NumCols();
+      bestDegPatches[patch_index].freq_band_means =
+          bestDegPatches[patch_index].freq_band_means.Filled(num_rows, num_cols,
+                                                             0.0);
     } else {
       bestDegPatches[patch_index].deg_patch_start_time =
           last_offset * frame_duration;
@@ -300,6 +307,12 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
   // The patches are already matched.  Iterate over each pair.
   for (size_t i = 0; i < sim_results.size(); ++i) {
     auto sim_result = sim_results[i];
+    if (sim_result.deg_patch_start_time == sim_result.deg_patch_end_time &&
+        sim_result.deg_patch_start_time == 0.0) {
+      realigned_results[i] = sim_result;
+      continue;
+    }
+
     // 1. The sim results keep track of the start and end points of each matched
     // pair.  Extract the audio for this segment.
     auto ref_patch_audio = Slice(ref_signal, sim_result.ref_patch_start_time,
