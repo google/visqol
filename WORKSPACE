@@ -90,19 +90,6 @@ cc_library(
 ####################
 # Platform Windows #
 ####################
-# Boost Headers
-new_local_repository(
-    name = "boost_headers_windows",
-    path = "C:\\boost",
-    build_file_content = """
-cc_library(
-    name = "boost_header",
-    hdrs = glob(["boost/**/*.hpp","boost/**/*.h"]),
-    visibility = ["//visibility:public"],
-)
-""",
-)
-
 # PFFFT - Windows
 http_archive(
     name = "pffft_lib_win",
