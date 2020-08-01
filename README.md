@@ -35,7 +35,7 @@ ViSQOL can be run from the command line, or integrated into a project and used t
 3. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
-#### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2019 March)
+#### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2020 August)
 
 1. ##### Install Visual Studio
 - Bazel requires Visual Studio 2015 or later. See further details [here](https://docs.bazel.build/versions/master/windows.html#build-c).
@@ -43,17 +43,11 @@ ViSQOL can be run from the command line, or integrated into a project and used t
 
 2. ##### Install Bazel
 - Bazel can be install for Windows from [here](https://docs.bazel.build/versions/master/windows.html).
-- Tested with Bazel version 0.22.0.
+- Tested with Bazel version `3.4.1`.
 
 3. ##### Install git
 - `git` for Windows can be obtained from the [official git website](https://git-scm.com/downloads).
 - When installing, select the option that allows `git` to be accessed from the system shells.
-
-4. ##### Install Boost
-- Tested with version 1.60.0.
-- Download the Windows version from [here](https://www.boost.org/users/history/version_1_60_0.html).
-- Extract the contents of the download to the `C:` directory, and rename the extracted folder to remove any version info. You should now have the following directory structure: `C:\boost`
-- Navigate to this directory and build the Boost binaries for x64. For version 1.60.0, these instructions can be found [here](https://www.boost.org/doc/libs/1_60_0/more/getting_started/windows.html#prepare-to-use-a-boost-library-binary).
 
 5. ##### Build ViSQOL:
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
