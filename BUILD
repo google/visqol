@@ -69,6 +69,8 @@ cc_library(
     deps = select({
         "@bazel_tools//src/conditions:windows": [
             # Windows Dependencies
+            "@boost//:system",
+            "@boost//:filesystem",
             "@pffft_lib_win//:pffft_win",
         ],
         "//conditions:default": [
