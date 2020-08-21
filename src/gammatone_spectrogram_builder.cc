@@ -33,9 +33,8 @@ GammatoneSpectrogramBuilder::GammatoneSpectrogramBuilder(
     const GammatoneFilterBank &filter_bank, const bool use_speech_mode) :
     filter_bank_(filter_bank), speech_mode_(use_speech_mode) {}
 
-util::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build
-    (const AudioSignal &signal,
-     const AnalysisWindow &window) {
+google::protobuf::util::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
+    const AudioSignal &signal, const AnalysisWindow &window) {
   const auto &sig = signal.data_matrix;
   size_t sample_rate = signal.sample_rate;
   double max_freq = speech_mode_ ? kSpeechModeMaxFreq : sample_rate / 2.0;

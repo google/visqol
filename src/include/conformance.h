@@ -59,4 +59,6 @@
 
 #define kConformanceCastanetsIdentity (4.7321012530423481)
 
+#define kConformanceBadDegraded (1.0021)
+
 #endif // VISQOL_INCLUDE_CONFORMANCE_H

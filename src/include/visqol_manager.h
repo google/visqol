@@ -30,7 +30,7 @@
 #include "svr_similarity_to_quality_mapper.h"
 
 #include "util/task/status.h"
-#include "util/task/statusor.h"
+#include "google/protobuf/stubs/statusor.h"
 
 namespace Visqol {
 
@@ -88,11 +88,15 @@ class VisqolManager {
    *    speech audio. Else, false.
    * @param use_unscaled_speech True if perfect NSIM scores of 1.0 should not
    *    be scaled to a MOS-LQO of 5.0, but instead scaled to ~4.x.
+   * @param search_window The search_window parameter determines how far the
+   *    comparison algorithm will search to discover the most optimal match for
+   *    a given reference patch.
    *
    * @return An 'OK' status if initialised successfully, else an error status.
    */
   google::protobuf::util::Status Init(const FilePath sim_to_quality_mapper_model,
-                    const bool use_speech_mode, const bool use_unscaled_speech);
+                    const bool use_speech_mode, const bool use_unscaled_speech,
+                    const int search_window );
 
   /**
    * Perform comparisons on a number of reference/degraded audio file pairs.
@@ -119,7 +123,7 @@ class VisqolManager {
    * @return A StatusOr object that will contain a SimilarityResultMsg if the
    *    comparison was successful, else it will contain the error Status.
    */
-  util::StatusOr<SimilarityResultMsg> Run(
+  google::protobuf::util::StatusOr<SimilarityResultMsg> Run(
       const FilePath& ref_signal_path, const FilePath& deg_signal_path);
 
   /**
@@ -131,7 +135,7 @@ class VisqolManager {
    * @return A StatusOr object that will contain a SimilarityResultMsg if the
    *    comparison was successful, else it will contain the error Status.
    */
-  util::StatusOr<SimilarityResultMsg> Run(
+  google::protobuf::util::StatusOr<SimilarityResultMsg> Run(
       const AudioSignal& ref_signal, AudioSignal& deg_signal);
 
  private:
@@ -150,6 +154,12 @@ class VisqolManager {
    * True if the object was successfully initialized, else false.
    */
   bool is_initialized_ = false;
+
+  /**
+  * This parameter is used to determine how far the algorithm will search in
+  * order to find the most optimal match.
+  */
+  int search_window_ = 60;
 
   /**
    * Used for creating the patches from both the reference and degraded signals

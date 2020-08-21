@@ -31,13 +31,13 @@
 #include "spectrogram_builder.h"
 
 namespace Visqol {
-util::StatusOr<SimilarityResult>
-Visqol::CalculateSimilarity(
+google::protobuf::util::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
     const AudioSignal &ref_signal, AudioSignal &deg_signal,
     SpectrogramBuilder *spect_builder, const AnalysisWindow &window,
     const ImagePatchCreator *patch_creator,
     const ComparisonPatchesSelector *comparison_patches_selector,
-    const SimilarityToQualityMapper *sim_to_qual_mapper) const {
+    const SimilarityToQualityMapper *sim_to_qual_mapper,
+    const int search_window) const {
   /////////////////// Stage 1: Preprocessing ///////////////////
   deg_signal = MiscAudio::ScaleToMatchSoundPressureLevel(ref_signal,
       deg_signal);
@@ -79,7 +79,7 @@ Visqol::CalculateSimilarity(
   auto most_sim_patch_result =
       comparison_patches_selector->FindMostOptimalDegPatches(
           ref_patches, ref_patch_indices, deg_spectrogram.Data(),
-          frame_duration);
+          frame_duration, search_window);
   if (!most_sim_patch_result.ok()) {
     return most_sim_patch_result.status();
   }

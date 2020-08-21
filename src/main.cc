@@ -14,7 +14,7 @@
 
 #include "absl/base/internal/raw_logging.h"
 #include "util/task/status.h"
-#include "util/task/statusor.h"
+#include "google/protobuf/stubs/statusor.h"
 
 #include "commandline_parser.h"
 #include "sim_results_writer.h"
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
   Visqol::VisqolManager visqol;
   auto init_status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
-      cmd_args.use_unscaled_speech_mos_mapping);
+      cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius);
   if (!init_status.ok()) {
     ABSL_RAW_LOG(ERROR, "%s",
         init_status.error_message().ToString().c_str());

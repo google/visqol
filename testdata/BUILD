@@ -3,6 +3,8 @@ licenses(["notice"])  # BSD
 package(default_visibility = ["//visibility:public"])
 
 exports_files([
+    "alignment/reference.wav",
+    "alignment/degraded.wav",
     "clean_speech/CA01_01.wav",
     "clean_speech/transcoded_CA01_01.wav",
     "mismatched_duration/guitar48_stereo_x2.wav",

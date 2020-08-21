@@ -28,8 +28,8 @@
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
 #include "absl/base/internal/raw_logging.h"
+#include "google/protobuf/stubs/statusor.h"
 #include "util/task/status.h"
-#include "util/task/statusor.h"
 
 namespace Visqol {
 ComparisonPatchesSelector::ComparisonPatchesSelector(
@@ -130,17 +130,16 @@ size_t ComparisonPatchesSelector::CalcMaxNumPatches(
   return num_patches;
 }
 
-util::StatusOr<std::vector<PatchSimilarityResult>>
+google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
 ComparisonPatchesSelector::FindMostOptimalDegPatches(
     const std::vector<ImagePatch>& ref_patches,
     const std::vector<size_t>& ref_patch_indices,
-    const AMatrix<double>& spectrogram_data,
-    const double frame_duration) const {
+    const AMatrix<double>& spectrogram_data, const double frame_duration,
+    const int search_window_radius) const {
   const size_t num_frames_per_patch = ref_patches[0].NumCols();
   const size_t num_frames_in_deg_spectro = spectrogram_data.NumCols();
   const double patch_duration = frame_duration * num_frames_per_patch;
-  constexpr int kNumberOfSearchPatches = 60;
-  const int search_window = kNumberOfSearchPatches * num_frames_per_patch;
+  const int search_window = search_window_radius * num_frames_per_patch;
   const size_t num_patches = CalcMaxNumPatches(
       ref_patch_indices, num_frames_in_deg_spectro, num_frames_per_patch);
 
@@ -214,13 +213,17 @@ ComparisonPatchesSelector::FindMostOptimalDegPatches(
     bestDegPatches[patch_index] =
         sim_comparator_->MeasurePatchSimilarity(ref_patch, deg_patch);
     // This condition is true only if no matching patch was found for the given
-    // reference patch.
+    // reference patch. In this case, the matched patch is essentially set to
+    // NULL (which is different from a silent patch).
     if (last_offset == backtrace[patch_index][last_offset]) {
-      ImagePatch new_deg_patch{ref_patch.NumRows(), ref_patch.NumCols()};
-      bestDegPatches[patch_index] =
-          sim_comparator_->MeasurePatchSimilarity(ref_patch, new_deg_patch);
       bestDegPatches[patch_index].deg_patch_start_time = 0.0;
       bestDegPatches[patch_index].deg_patch_end_time = 0.0;
+      bestDegPatches[patch_index].similarity = 0.0;
+      int num_rows = bestDegPatches[patch_index].freq_band_means.NumRows();
+      int num_cols = bestDegPatches[patch_index].freq_band_means.NumCols();
+      bestDegPatches[patch_index].freq_band_means =
+          bestDegPatches[patch_index].freq_band_means.Filled(num_rows, num_cols,
+                                                             0.0);
     } else {
       bestDegPatches[patch_index].deg_patch_start_time =
           last_offset * frame_duration;
@@ -288,18 +291,22 @@ AudioSignal ComparisonPatchesSelector::Slice(
   return sliced_signal;
 }
 
-util::StatusOr<std::vector<PatchSimilarityResult>>
+google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
 ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
     const std::vector<PatchSimilarityResult>& sim_results,
-    const AudioSignal &ref_signal,
-    const AudioSignal &deg_signal,
-    SpectrogramBuilder *spect_builder,
-    const AnalysisWindow &window) const {
+    const AudioSignal& ref_signal, const AudioSignal& deg_signal,
+    SpectrogramBuilder* spect_builder, const AnalysisWindow& window) const {
   std::vector<PatchSimilarityResult> realigned_results(sim_results.size());
 
   // The patches are already matched.  Iterate over each pair.
   for (size_t i = 0; i < sim_results.size(); ++i) {
     auto sim_result = sim_results[i];
+    if (sim_result.deg_patch_start_time == sim_result.deg_patch_end_time &&
+        sim_result.deg_patch_start_time == 0.0) {
+      realigned_results[i] = sim_result;
+      continue;
+    }
+
     // 1. The sim results keep track of the start and end points of each matched
     // pair.  Extract the audio for this segment.
     auto ref_patch_audio = Slice(ref_signal, sim_result.ref_patch_start_time,

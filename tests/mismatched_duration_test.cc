@@ -41,7 +41,8 @@ TEST(MismatchedLengths, deg_too_short) {
   Visqol::VisqolManager visqol;
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
-      cmd_args.use_unscaled_speech_mos_mapping);
+      cmd_args.use_unscaled_speech_mos_mapping,
+      cmd_args.search_window_radius);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.
@@ -66,7 +67,8 @@ TEST(MismatchedLengths, deg_too_long) {
   Visqol::VisqolManager visqol;
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
-      cmd_args.use_unscaled_speech_mos_mapping);
+      cmd_args.use_unscaled_speech_mos_mapping,
+      cmd_args.search_window_radius);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.
@@ -93,7 +95,8 @@ TEST(MismatchedLengths, deg_long) {
   Visqol::VisqolManager visqol;
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
                             cmd_args.use_speech_mode,
-                            cmd_args.use_unscaled_speech_mos_mapping);
+                            cmd_args.use_unscaled_speech_mos_mapping,
+                            cmd_args.search_window_radius);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.

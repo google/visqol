@@ -19,7 +19,7 @@
 
 #include <vector>
 
-#include "util/task/statusor.h"
+#include "google/protobuf/stubs/statusor.h"
 
 #include "analysis_window.h"
 #include "audio_signal.h"
@@ -55,16 +55,19 @@ class Visqol {
    *    from the degraded signal with those from the reference signal.
    * @param sim_to_qual_mapper Used to convert a similarity score to a quality
    *    score.
+   * @param search_window This parameter is used to determine how far the
+   *    algorithm will search in order to find the most optimal match.
    *
    * @return If the comparison was successful, return the similarity result and
    *    associated debug info. Else, return an error status.
    */
-  util::StatusOr<SimilarityResult> CalculateSimilarity(
+  google::protobuf::util::StatusOr<SimilarityResult> CalculateSimilarity(
       const AudioSignal &ref_signal, AudioSignal &deg_signal,
       SpectrogramBuilder *spect_builder, const AnalysisWindow &window,
       const ImagePatchCreator *patch_creator,
       const ComparisonPatchesSelector *comparison_patches_selector,
-      const SimilarityToQualityMapper *sim_to_qual_mapper) const;
+      const SimilarityToQualityMapper *sim_to_qual_mapper,
+      const int search_window) const;
 
  private:
   /**

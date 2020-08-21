@@ -19,8 +19,7 @@
 
 #include "absl/types/span.h"
 
-#include "devtools/build/runtime/get_runfiles_dir.h"
-#include "util/task/statusor.h"
+#include "google/protobuf/stubs/statusor.h"
 #include "google/protobuf/stubs/status_macros.h"
 
 #include "commandline_parser.h"
@@ -60,6 +59,7 @@ Status VisqolApi::Create(const VisqolConfig config) {
   bool speech_mode = false;
   bool unscaled_speech_map = false;
   bool allow_sr_override = false;
+  int search_window = 60;
   std::string model_file =
       FilePath::currentWorkingDir() + kDefaultAudioModelFile;
   if (config.has_options()) {
@@ -69,6 +69,9 @@ Status VisqolApi::Create(const VisqolConfig config) {
     allow_sr_override = config_options.allow_unsupported_sample_rates();
     if (!config_options.svr_model_path().empty()) {
       model_file = config_options.svr_model_path();
+    }
+    if (config_options.search_window_radius()) {
+      search_window = config_options.search_window_radius();
     }
   }
 
@@ -89,15 +92,14 @@ Status VisqolApi::Create(const VisqolConfig config) {
   }
 
   // Initialize ViSQOL with the model file.
-  RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map));
+  RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map,
+                               search_window));
 
   return Status();
 }
 
 StatusOr<SimilarityResultMsg> VisqolApi::Measure(
-    const absl::Span<double>& reference,
-    const absl::Span<double>& degraded) {
-
+    const absl::Span<double>& reference, const absl::Span<double>& degraded) {
   // Initialize the audio signals and perform comparison.
   AudioSignal ref_sig{reference, sample_rate_};
   AudioSignal deg_sig{degraded, sample_rate_};

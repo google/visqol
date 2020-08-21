@@ -18,17 +18,16 @@
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"
-#include "util/task/statusor.h"
+#include "google/protobuf/stubs/statusor.h"
 
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
 
 namespace Visqol {
-util::StatusOr<std::vector<size_t>>
-    ImagePatchCreator::CreateRefPatchIndices(
-        const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
-        const AnalysisWindow &window) const {
+google::protobuf::util::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
+    const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
+    const AnalysisWindow &window) const {
   return CreateRefPatchIndices(spectrogram);
 }
 
@@ -48,9 +47,8 @@ std::vector<ImagePatch> ImagePatchCreator::CreatePatchesFromIndices(
   return patches;
 }
 
-util::StatusOr<std::vector<size_t>>
-    ImagePatchCreator::CreateRefPatchIndices(
-        const AMatrix<double> &spectrogram) const {
+google::protobuf::util::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
+    const AMatrix<double> &spectrogram) const {
   std::vector<size_t> refPatchIndices;
   auto spectrum_length = spectrogram.NumCols();
   auto init_patch_index = patch_size_ / 2;

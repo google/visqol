@@ -50,7 +50,8 @@ TEST_P(ConformanceTest, ConformanceWithKnownScores) {
 
   auto status = visqol.Init(GetParam().test_inputs.sim_to_quality_mapper_model,
       GetParam().test_inputs.use_speech_mode,
-      GetParam().test_inputs.use_unscaled_speech_mos_mapping);
+      GetParam().test_inputs.use_unscaled_speech_mos_mapping,
+      GetParam().test_inputs.search_window_radius);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -144,7 +145,10 @@ INSTANTIATE_TEST_CASE_P(
             "testdata/conformance_testdata_subset/"
             "guitar48_stereo.wav",
             "testdata/clean_speech/CA01_01.wav", true,
-            kConformanceDifferentAudios)));
-
+            kConformanceDifferentAudios),
+        ConformanceTestData(
+            "testdata/alignment/reference.wav",
+            "testdata/alignment/degraded.wav", true,
+            kConformanceBadDegraded)));
 } // namespace
 } // namespace Visqol

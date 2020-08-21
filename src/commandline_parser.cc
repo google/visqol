@@ -24,8 +24,7 @@
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
-#include "devtools/build/runtime/get_runfiles_dir.h"
-#include "util/task/statusor.h"
+#include "google/protobuf/stubs/statusor.h"
 
 ABSL_FLAG(std::string, reference_file, "",
           "The wav file path used as the reference audio.");
@@ -59,20 +58,27 @@ ABSL_FLAG(std::string, output_debug, "",
           "not need to previously exist. Contents will be appended to the file "
           "if it\n"
           "does already exist or if ViSQOL is run in batch mode.");
-ABSL_FLAG(
-    std::string, similarity_to_quality_model, "",
-    "The libsvm model to use during comparison. Use this only if you want to\n"
-    "explicitly specify the model file location, otherwise the default model "
-    "will\n"
-    "be used.");
+ABSL_FLAG(std::string, similarity_to_quality_model, "",
+          "The libsvm model to use during comparison. Use this only if you "
+          "want to explicitly specify the model file location, otherwise the "
+          "default model will be used.");
 ABSL_FLAG(bool, use_speech_mode, false,
-"Use a wideband model (sensitive up to 8kHz) with voice activity detection\n"
-"that normalizes the polynomial NSIM->MOS mapping so that a perfect NSIM\n"
-"score of 1.0 translates to 5.0.");
+          "Use a wideband model (sensitive up to 8kHz) with voice activity "
+          "detection\n"
+          "that normalizes the polynomial NSIM->MOS mapping so that a perfect "
+          "NSIM\n"
+          "score of 1.0 translates to 5.0.");
 ABSL_FLAG(bool, use_unscaled_speech_mos_mapping, false,
-"When used in conjunction with --use_speech_mode, this flag will prevent a\n"
-"perfect NSIM score of 1.0 being translated to a MOS score of 5.0. Perfect\n"
-"NSIM scores will instead result in MOS scores of ~4.x.");
+          "When used in conjunction with --use_speech_mode, this flag will "
+          "prevent a\n"
+          "perfect NSIM score of 1.0 being translated to a MOS score of 5.0. "
+          "Perfect\n"
+          "NSIM scores will instead result in MOS scores of ~4.x.");
+ABSL_FLAG(int, search_window_radius, 60,
+          "The search_window parameter determines how far the algorithm will "
+          "search to discover patch matches. For a given reference frame, it "
+          "will look at 2*search_window_radius + 1 patches to find the most "
+          "optimal match.");
 
 namespace Visqol {
 ABSL_CONST_INIT const char kDefaultAudioModelFile[] =
@@ -80,9 +86,8 @@ ABSL_CONST_INIT const char kDefaultAudioModelFile[] =
 ABSL_CONST_INIT const char kDefaultSpeechModelFile[] =
     "/model/tcdvoip_nu.568_c5.31474325639_g3.17773760038_model.txt";
 
-
-util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
-    (int argc, char **argv) {
+google::protobuf::util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
+                                                               char **argv) {
   absl::SetProgramUsageMessage(
       "Perceptual quality estimator for speech and audio");
   absl::ParseCommandLine(argc, argv);
@@ -97,6 +102,7 @@ util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
   bool verbose = false;
   bool use_speech = false;
   bool use_unscaled_mapping = false;
+  int search_window = 60;
 
   batch_input = absl::GetFlag(FLAGS_batch_input_csv);
   if (!batch_input.empty()) {
@@ -118,7 +124,7 @@ util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
   use_unscaled_mapping = absl::GetFlag(FLAGS_use_unscaled_speech_mos_mapping);
   use_speech = absl::GetFlag(FLAGS_use_speech_mode);
   verbose = absl::GetFlag(FLAGS_verbose);
-
+  search_window = absl::GetFlag(FLAGS_search_window_radius);
   debug_output = absl::GetFlag(FLAGS_output_debug);
 
   if (errorFound) {
@@ -140,18 +146,20 @@ util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
           " <path/to/libsvm_nu_svr_model.txt>'?");
     }
   }
-  auto cmd_line_results = CommandLineArgs{ref_file, deg_file, sim_to_qual_model,
-      result_output_csv, batch_input, verbose, debug_output, use_speech,
-      use_unscaled_mapping};
+  auto cmd_line_results =
+      CommandLineArgs{ref_file,          deg_file,    sim_to_qual_model,
+                      result_output_csv, batch_input, verbose,
+                      debug_output,      use_speech,  use_unscaled_mapping,
+                      search_window};
   return cmd_line_results;
 }
 
 std::vector<ReferenceDegradedPathPair>
 VisqolCommandLineParser::ReadFilesToCompare(
-    const FilePath &batch_inputPath) {
+    const FilePath &batch_input_path) {
   std::vector<ReferenceDegradedPathPair> file_paths;
   std::vector<FilePath> line_file_paths;
-  std::ifstream fin(batch_inputPath.Path());
+  std::ifstream fin(batch_input_path.Path());
   std::string item, line;
   const char delimiter = ',';
 
@@ -190,7 +198,7 @@ std::vector<ReferenceDegradedPathPair>
 VisqolCommandLineParser::BuildFilePairPaths(
     const CommandLineArgs &cmd_res) {
   std::vector<ReferenceDegradedPathPair> pairs;
-  if (cmd_res.batch_input_csv.Path() != "") {
+  if (!cmd_res.batch_input_csv.Path().empty()) {
     pairs = ReadFilesToCompare(cmd_res.batch_input_csv.Path());
   } else if (cmd_res.reference_signal_path.Exists() &&
              cmd_res.degraded_signal_path.Exists()) {

@@ -25,7 +25,7 @@ namespace Visqol {
 Visqol::CommandLineArgs CommandLineArgsHelper(
     const std::string &ref_file, const std::string &deg_file,
     const std::string &batch_file = "", const bool speech_mode = false,
-    const bool unscaled_speech = false) {
+    const bool unscaled_speech = false, const int search_window = 60) {
   const std::string simToQualModel = FilePath::currentWorkingDir() + kDefaultAudioModelFile;
   const std::string emptyStr;
   return  CommandLineArgs{
@@ -37,7 +37,8 @@ Visqol::CommandLineArgs CommandLineArgsHelper(
         false,       // verbose
         emptyStr,    // debugOutput
         speech_mode,
-        unscaled_speech
+        unscaled_speech,
+        search_window
         };
 }
 

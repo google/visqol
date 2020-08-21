@@ -74,7 +74,6 @@ cc_library(
         "@svm_lib//:libsvm",
         "@armadillo_headers//:armadillo_header",
         "//util/task:status",
-        "//util/task:statusor",
     ],
 )
 
@@ -92,8 +91,8 @@ cc_binary(
         ":visqol_lib",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:raw_logging_internal",
+        "@com_google_absl//absl/status:statusor",
         "//util/task:status",
-        "//util/task:statusor",
     ],
 )
 
@@ -241,6 +240,7 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
 
@@ -253,6 +253,8 @@ cc_test(
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
+        "//testdata:alignment/degraded.wav",
+        "//testdata:alignment/reference.wav",
         "//testdata:clean_speech/CA01_01.wav",
         "//testdata:clean_speech/transcoded_CA01_01.wav",
         "//testdata:short_duration/5_second/guitar48_stereo_5_sec.wav",

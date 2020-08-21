@@ -7,6 +7,7 @@
 #include "conformance.h"
 #include "visqol_api.h"
 #include "visqol_manager.h"
+#include "third_party/visqol/src/proto/similarity_result.proto.h"
 #include "third_party/visqol/src/proto/visqol_config.pb.h"
 
 namespace Visqol {
@@ -30,6 +31,8 @@ PYBIND11_MODULE(visqol_lib_py, m) {
 
   pybind11::class_<Visqol::FilePath>(m, "FilePath")
       .def(pybind11::init<const std::string &>());
+
+  pybind11::google::RegisterProtoMessageType<SimilarityResultMsg>(m);
 
   m.def("MakeVisqolConfig", []() { return Visqol::VisqolConfig(); });
 }

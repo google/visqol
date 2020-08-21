@@ -41,13 +41,15 @@ class ComparisonPatchesSelectorPeer {
                            double end_time) {
     return ComparisonPatchesSelector::Slice(in_signal, start_time, end_time);
   }
-  util::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
+  google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
       const std::vector<ImagePatch>& ref_patches,
       const std::vector<size_t>& ref_patch_indices,
       const AMatrix<double>& spectrogram_data,
-      const double frame_duration) const {
+      const double frame_duration,
+      const int search_window) const {
     return cps_->FindMostOptimalDegPatches(ref_patches, ref_patch_indices,
-                                           spectrogram_data, frame_duration);
+                                           spectrogram_data, frame_duration,
+                                           search_window);
   }
 
  private:
@@ -134,13 +136,15 @@ TEST_F(ComparisonPatchesSelectorTest, OptimalPatches) {
 
   // Check if the output of the algorithm is consistent with the logic
   double frame_duration = 1.0;
+  const int search_window = 8;
   auto res = selectorPeer.FindMostOptimalDegPatches(ref_patches, patch_indices,
-                                                    deg_matrix, frame_duration);
+                                                    deg_matrix, frame_duration,
+                                                    search_window);
   ASSERT_TRUE(res.ok());
   auto best_patches = res.value();
-  EXPECT_DOUBLE_EQ(best_patches[3].deg_patch_start_time, 13);
-  EXPECT_DOUBLE_EQ(best_patches[4].deg_patch_start_time, 0);
-  EXPECT_DOUBLE_EQ(best_patches[5].deg_patch_start_time, 14);
+  EXPECT_DOUBLE_EQ(best_patches[3].deg_patch_start_time, 0);
+  EXPECT_DOUBLE_EQ(best_patches[4].deg_patch_start_time, 7);
+  EXPECT_DOUBLE_EQ(best_patches[5].deg_patch_start_time, 8);
 }
 
 TEST_F(ComparisonPatchesSelectorTest, OutOfOrderMatches) {
@@ -175,8 +179,10 @@ TEST_F(ComparisonPatchesSelectorTest, OutOfOrderMatches) {
 
   // Check if the output of the algorithm is consistent with the logic
   double frame_duration = 1.0;
+  const int search_window = 60;
   auto res = selectorPeer.FindMostOptimalDegPatches(ref_patches, patch_indices,
-                                                    deg_matrix, frame_duration);
+                                                    deg_matrix, frame_duration,
+                                                    search_window);
   ASSERT_TRUE(res.ok());
   auto best_patches = res.value();
   EXPECT_DOUBLE_EQ(best_patches[0].deg_patch_start_time, 1);
@@ -220,8 +226,10 @@ TEST_F(ComparisonPatchesSelectorTest, DifferentResults) {
 
   // Check if the output of the algorithm is consistent with the logic
   double frame_duration = 1.0;
+  const int search_window = 60;
   auto res = selectorPeer.FindMostOptimalDegPatches(ref_patches, patch_indices,
-                                                    deg_matrix, frame_duration);
+                                                    deg_matrix, frame_duration,
+                                                    search_window);
   ASSERT_TRUE(res.ok());
   auto best_patches = res.value();
   EXPECT_DOUBLE_EQ(best_patches[0].deg_patch_start_time, 6);
@@ -265,8 +273,10 @@ TEST_F(ComparisonPatchesSelectorTest, BigExample) {
 
   // Check if the output of the algorithm is consistent with the logic
   double frame_duration = 1.0;
+  const int search_window = 60;
   auto res = selectorPeer.FindMostOptimalDegPatches(ref_patches, patch_indices,
-                                                    deg_matrix, frame_duration);
+                                                    deg_matrix, frame_duration,
+                                                    search_window);
   ASSERT_TRUE(res.ok());
   auto best_patches = res.value();
   EXPECT_DOUBLE_EQ(best_patches[0].deg_patch_start_time, 6);

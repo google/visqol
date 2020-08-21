@@ -20,7 +20,7 @@
 #include <memory>
 #include <vector>
 
-#include "util/task/statusor.h"
+#include "google/protobuf/stubs/statusor.h"
 
 #include "amatrix.h"
 #include "image_patch_creator.h"
@@ -57,16 +57,21 @@ class ComparisonPatchesSelector {
    * @param spectrogram_data The spectrogram that represents the degraded
    *    signal.
    * @param frame_duration The duration of the frame in seconds.
+   * @param search_window_radius The parameter that determines how far you
+   *    should search to discover patch matches. For a given reference frame,
+   *    one looks at 2*search_window_radius + 1 patches to find the most
+   *    optimal match.
    *
    * @return A vector of similarity results. Each similary result is the result
    *    of the comparison between a patch from the reference spectrogram with
    *    its corresponding patch in the degraded spectrogram.
    */
-  util::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
+  google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
       const std::vector<ImagePatch> &ref_patches,
       const std::vector<size_t> &ref_patch_indices,
       const AMatrix<double> &spectrogram_data,
-      const double frame_duration) const;
+      const double frame_duration,
+      const int search_window_radius) const;
 
   /**
    * Given roughly aligned ref/deg patches, realign the original audio within
@@ -83,7 +88,7 @@ class ComparisonPatchesSelector {
    * @return A StatusOr that may contain a vector of new, finely aligned
    *    PatchSimilarityResults.
    */
-  util::StatusOr<std::vector<PatchSimilarityResult>>
+  google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
       FinelyAlignAndRecreatePatches(
           const std::vector<PatchSimilarityResult>& sim_results,
           const AudioSignal &ref_signal,
@@ -153,7 +158,7 @@ class ComparisonPatchesSelector {
    *    patch_creator.
    * @param search_window The search space parameter that determines how far you
    *    should search in to discover patch matches. For a given reference frame,
-   *    one looks at 2*search_window + 1 patches to find the most optimal match.
+   *    one looks at 2*search_window + 1 frames to find the most optimal match.
    *
    * @return The function returns nothing. It's purpose is to populate the
    *    cumulative_similarity_dp and backtrace vectors.

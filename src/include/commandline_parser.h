@@ -21,7 +21,7 @@
 #include <vector>
 #include <utility>
 
-#include "util/task/statusor.h"
+#include "google/protobuf/stubs/statusor.h"
 
 #include "file_path.h"
 
@@ -92,13 +92,21 @@ struct CommandLineArgs {
   bool use_unscaled_speech_mos_mapping;
 
   /**
+   * The search_window_radius parameter determines how far the algorithm will
+   * search to discover patch matches. For a given reference frame, it will look
+   * at 2*search_window_radius + 1 patches to find the most optimal match.
+   */
+  int search_window_radius;
+
+  /**
    * Constructs the parsed command line args struct.
    */
   CommandLineArgs(const FilePath &ref_sig, const FilePath &deg_sig,
                      const FilePath &sim_to_qual_mapper,
                      const FilePath &out_csv, const FilePath &batch_in,
                      const bool verbose_mode, const FilePath &debug_out,
-                     const bool use_speech, const bool use_unscaled_speech)
+                     const bool use_speech, const bool use_unscaled_speech,
+                     const int search_window )
       : reference_signal_path{ref_sig},
         degraded_signal_path{deg_sig},
         sim_to_quality_mapper_model{sim_to_qual_mapper},
@@ -107,7 +115,8 @@ struct CommandLineArgs {
         debug_output_path{debug_out},
         verbose{verbose_mode},
         use_speech_mode{use_speech},
-        use_unscaled_speech_mos_mapping{use_unscaled_speech} {}
+        use_unscaled_speech_mos_mapping{use_unscaled_speech},
+        search_window_radius{search_window} {}
 
   /**
    * Public no-args constructor needed for StatusOr.
@@ -130,8 +139,7 @@ class VisqolCommandLineParser {
    * @return A struct which holds the parsed args, if parsing was successful.
    *    Else an error status.
    */
-  static util::StatusOr<CommandLineArgs> Parse(int argc,
-                                                                 char **argv);
+  static google::protobuf::util::StatusOr<CommandLineArgs> Parse(int argc, char **argv);
 
   /**
    * Takes the files to be compared (either individual or batch) that were
