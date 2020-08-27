@@ -28,11 +28,8 @@ ViSQOL can be run from the command line, or integrated into a project and used t
 #### Linux Build Instructions
 1. ##### Install Bazel
 - Bazel can be install for Linux from [here](https://docs.bazel.build/versions/master/install-ubuntu.html).
-- Tested with Bazel version 0.22.0.
-2. ##### Install Boost
-- Boost can be installed on Linux with the following command: `sudo apt-get install libboost-all-dev`
-- Tested with Boost version 1.65.0.
-3. ##### Build ViSQOL
+- Tested with Bazel version `3.4.1`.
+2. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
 #### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2020 August)
