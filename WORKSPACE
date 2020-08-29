@@ -3,6 +3,7 @@
 ########################
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 
 # GoogleTest/GoogleMock framework.
 http_archive(
@@ -72,11 +73,10 @@ cc_library(
 # Platform Linux #
 ##################
 # PFFFT - Linux
-http_archive(
+new_git_repository(
     name = "pffft_lib_linux",
-    strip_prefix = "jpommier-pffft-29e4f76ac53b",
-    urls = ["https://bitbucket.org/jpommier/pffft/get/29e4f76ac53b.zip"],
-    sha256 = "bb10afba127904a0c6c553fa445082729b7d72373511bda1b12a5be0e03f318a",
+    remote = "https://bitbucket.org/jpommier/pffft.git",
+    branch = "master",
     build_file_content = """
 cc_library(
     name = "pffft_linux",
@@ -91,11 +91,10 @@ cc_library(
 # Platform Windows #
 ####################
 # PFFFT - Windows
-http_archive(
+new_git_repository(
     name = "pffft_lib_win",
-    strip_prefix = "jpommier-pffft-29e4f76ac53b",
-    urls = ["https://bitbucket.org/jpommier/pffft/get/29e4f76ac53b.zip"],
-    sha256 = "bb10afba127904a0c6c553fa445082729b7d72373511bda1b12a5be0e03f318a",
+    remote = "https://bitbucket.org/jpommier/pffft.git",
+    branch = "master",
     build_file_content = """
 cc_library(
     name = "pffft_win",
