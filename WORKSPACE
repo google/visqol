@@ -4,6 +4,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 # GoogleTest/GoogleMock framework.
 http_archive(
@@ -28,11 +29,10 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 # Google Abseil Libs
-http_archive(
+git_repository(
     name = "com_google_absl",
-    strip_prefix = "abseil-cpp-20190808",
-    url = "https://github.com/abseil/abseil-cpp/archive/20190808.zip",
-    sha256 = "0b62fc2d00c2b2bc3761a892a17ac3b8af3578bd28535d90b4c914b0a7460d4e",
+    remote = "https://github.com/abseil/abseil-cpp.git",
+    tag = "20200225.2",
 )
 
 # LIBSVM
