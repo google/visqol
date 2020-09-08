@@ -9,6 +9,9 @@ ViSQOL (Virtual Speech Quality Objective Listener) is an objective, full-referen
 - [API Usage](#api-usage)
 - [Dependencies](#dependencies)
 - [License](#license)
+- [Papers](#papers)
+- [FAQ](#faq)
+- [Acknowledgement](#acknowledgement)
 
 ## Features
 ViSQOL can be run from the command line, or integrated into a project and used through its API. Whether being used from the command line, or used through the API, ViSQOL is capable of running in two modes:
@@ -34,19 +37,15 @@ ViSQOL can be run from the command line, or integrated into a project and used t
 
 #### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2020 August)
 
-1. ##### Install Visual Studio
-- Bazel requires Visual Studio 2015 or later. See further details [here](https://docs.bazel.build/versions/master/windows.html#build-c).
-- Install Visual Studio from [here](https://visualstudio.microsoft.com/vs/community/). Ensure that the C++ build tools are installed and the Windows SDK e.g. the 'Desktop development with C++' option in the VS installer.
-
-2. ##### Install Bazel
+1. ##### Install Bazel
 - Bazel can be install for Windows from [here](https://docs.bazel.build/versions/master/windows.html).
-- Tested with Bazel version `3.4.1`.
+- Tested with Bazel version `3.5.0`.
 
-3. ##### Install git
+2. ##### Install git
 - `git` for Windows can be obtained from the [official git website](https://git-scm.com/downloads).
 - When installing, select the option that allows `git` to be accessed from the system shells.
 
-5. ##### Build ViSQOL:
+3. ##### Build ViSQOL:
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
 ## Command Line Usage
