@@ -24,7 +24,7 @@
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/statusor.h"
 
 ABSL_FLAG(std::string, reference_file, "",
           "The wav file path used as the reference audio.");
@@ -80,7 +80,7 @@ ABSL_CONST_INIT const char kDefaultSpeechModelFile[] =
     "/model/tcdvoip_nu.568_c5.31474325639_g3.17773760038_model.txt";
 
 
-google::protobuf::util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
+absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
     (int argc, char **argv) {
   absl::SetProgramUsageMessage(
       "Perceptual quality estimator for speech and audio");
@@ -121,8 +121,8 @@ google::protobuf::util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
   debug_output = absl::GetFlag(FLAGS_output_debug);
 
   if (errorFound) {
-    return google::protobuf::util::Status(
-        google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return absl::Status(
+        absl::StatusCode::kInvalidArgument,
         "Invalid command line arg detected. Run with --helpfull for usage.");
   }
   if (sim_to_qual_model.empty()) {
@@ -132,8 +132,8 @@ google::protobuf::util::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
       sim_to_qual_model = FilePath::currentWorkingDir() + kDefaultAudioModelFile;
     }
     if (!sim_to_qual_model.empty() && !FileExists(sim_to_qual_model)) {
-      return google::protobuf::util::Status(
-          google::protobuf::util::error::Code::INVALID_ARGUMENT,
+      return absl::Status(
+          absl::StatusCode::kInvalidArgument,
           "Failed to load the default SVR model " + sim_to_qual_model + ". "
           "Specify the correct path using '--similarity_to_quality_model"
           " <path/to/libsvm_nu_svr_model.txt>'?");

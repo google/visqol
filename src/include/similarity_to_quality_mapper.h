@@ -20,7 +20,7 @@
 #include <vector>
 
 
-#include "google/protobuf/stubs/status.h"
+#include "absl/status/status.h"
 
 namespace Visqol {
 
@@ -52,7 +52,7 @@ class SimilarityToQualityMapper {
    * @return An OK status if the model was successfully initialized with the
    * model file. Else, an error status is returned.
    */
-  virtual google::protobuf::util::Status Init() = 0;
+  virtual absl::Status Init() = 0;
 };
 }  // namespace Visqol
 

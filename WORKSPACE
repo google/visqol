@@ -32,7 +32,7 @@ protobuf_deps()
 git_repository(
     name = "com_google_absl",
     remote = "https://github.com/abseil/abseil-cpp.git",
-    tag = "20200225.2",
+    tag = "20200923",
 )
 
 # LIBSVM

@@ -15,7 +15,7 @@
 #include "visqol_api.h"
 
 #include "gtest/gtest.h"
-#include "google/protobuf/stubs/status.h"
+#include "absl/status/status.h"
 
 #include "audio_signal.h"
 #include "commandline_parser.h"
@@ -86,7 +86,7 @@ TEST(VisqolApi, happy_path_specified_model) {
   auto result = visqol.Measure(ref_span, deg_span);
 
   ASSERT_TRUE(result.ok());
-  auto sim_result = result.ValueOrDie();
+  auto sim_result = result.value();
   ASSERT_NEAR(kConformanceContrabassoon24aac, sim_result.moslqo(), kTolerance);
   ASSERT_NEAR(kContrabassoonVnsim, sim_result.vnsim(), kTolerance);
   for (int i = 0; i < sim_result.fvnsim_size(); i++) {
@@ -116,7 +116,7 @@ TEST(VisqolApi, happy_path_default_model) {
   auto result = visqol.Measure(ref_span, deg_span);
 
   ASSERT_TRUE(result.ok());
-  auto sim_result = result.ValueOrDie();
+  auto sim_result = result.value();
   ASSERT_NEAR(kConformanceContrabassoon24aac, sim_result.moslqo(), kTolerance);
   ASSERT_NEAR(kContrabassoonVnsim, sim_result.vnsim(), kTolerance);
   for (int i = 0; i < sim_result.fvnsim_size(); i++) {
@@ -218,7 +218,7 @@ TEST(VisqolApi, speech_mode_disabled) {
   auto result = visqol.Measure(ref_span, deg_span);
 
   ASSERT_TRUE(result.ok());
-  auto sim_result = result.ValueOrDie();
+  auto sim_result = result.value();
   ASSERT_NEAR(kCA01_01AsAudio, sim_result.moslqo(), kTolerance);
 }
 
@@ -250,7 +250,7 @@ TEST(VisqolApi, speech_mode_with_scaled_mapping) {
   auto result = visqol.Measure(ref_span, deg_span);
 
   ASSERT_TRUE(result.ok());
-  auto sim_result = result.ValueOrDie();
+  auto sim_result = result.value();
   ASSERT_NEAR(kPerfectScore, sim_result.moslqo(), kTolerance);
 }
 
@@ -282,7 +282,7 @@ TEST(VisqolApi, speech_mode_with_unscaled_mapping) {
   auto result = visqol.Measure(ref_span, deg_span);
 
   ASSERT_TRUE(result.ok());
-  auto sim_result = result.ValueOrDie();
+  auto sim_result = result.value();
   ASSERT_NEAR(kCA01_01UnscaledPerfectScore, sim_result.moslqo(), kTolerance);
 }
 

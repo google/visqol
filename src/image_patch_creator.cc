@@ -18,14 +18,14 @@
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/statusor.h"
 
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
 
 namespace Visqol {
-google::protobuf::util::StatusOr<std::vector<size_t>>
+absl::StatusOr<std::vector<size_t>>
     ImagePatchCreator::CreateRefPatchIndices(
         const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
         const AnalysisWindow &window) const {
@@ -48,7 +48,7 @@ std::vector<ImagePatch> ImagePatchCreator::CreatePatchesFromIndices(
   return patches;
 }
 
-google::protobuf::util::StatusOr<std::vector<size_t>>
+absl::StatusOr<std::vector<size_t>>
     ImagePatchCreator::CreateRefPatchIndices(
         const AMatrix<double> &spectrogram) const {
   std::vector<size_t> refPatchIndices;
@@ -56,8 +56,8 @@ google::protobuf::util::StatusOr<std::vector<size_t>>
   auto init_patch_index = patch_size_ / 2;
   // Ensure that the spectrum is at least as big as a single patch
   if (spectrum_length < patch_size_ + init_patch_index) {
-    return google::protobuf::util::Status(
-      google::protobuf::util::error::Code::INVALID_ARGUMENT, "Reference spectrum "
+    return absl::Status(
+      absl::StatusCode::kInvalidArgument, "Reference spectrum "
       "size (" + std::to_string(spectrum_length) + ") smaller than minimum "
       "patch size (" + std::to_string(patch_size_ + init_patch_index) + ").");
   }

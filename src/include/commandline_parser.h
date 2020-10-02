@@ -21,7 +21,7 @@
 #include <vector>
 #include <utility>
 
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/statusor.h"
 
 #include "file_path.h"
 
@@ -130,7 +130,7 @@ class VisqolCommandLineParser {
    * @return A struct which holds the parsed args, if parsing was successful.
    *    Else an error status.
    */
-  static google::protobuf::util::StatusOr<CommandLineArgs> Parse(int argc,
+  static absl::StatusOr<CommandLineArgs> Parse(int argc,
                                                                  char **argv);
 
   /**

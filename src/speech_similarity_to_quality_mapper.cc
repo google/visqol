@@ -18,7 +18,7 @@
 #include <numeric>
 #include <vector>
 
-#include "google/protobuf/stubs/status.h"
+#include "absl/status/status.h"
 
 #include "amatrix.h"
 
@@ -27,8 +27,8 @@ SpeechSimilarityToQualityMapper::SpeechSimilarityToQualityMapper(
     bool scale_to_max_mos) : scale_to_max_mos_{scale_to_max_mos} {}
 
 
-google::protobuf::util::Status SpeechSimilarityToQualityMapper::Init() {
-  return google::protobuf::util::Status();
+absl::Status SpeechSimilarityToQualityMapper::Init() {
+  return absl::Status();
 }
 
 double SpeechSimilarityToQualityMapper::PredictQuality(

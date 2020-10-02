@@ -31,7 +31,7 @@
 #include "spectrogram_builder.h"
 
 namespace Visqol {
-google::protobuf::util::StatusOr<SimilarityResult>
+absl::StatusOr<SimilarityResult>
 Visqol::CalculateSimilarity(
     const AudioSignal &ref_signal, AudioSignal &deg_signal,
     SpectrogramBuilder *spect_builder, const AnalysisWindow &window,
@@ -58,8 +58,8 @@ Visqol::CalculateSimilarity(
     return deg_spectro_result.status();
   }
 
-  Spectrogram ref_spectrogram = ref_spectro_result.ValueOrDie();
-  Spectrogram deg_spectrogram = deg_spectro_result.ValueOrDie();
+  Spectrogram ref_spectrogram = ref_spectro_result.value();
+  Spectrogram deg_spectrogram = deg_spectro_result.value();
   MiscAudio::PrepareSpectrogramsForComparison(ref_spectrogram, deg_spectrogram);
 
   /////////////// Stage 2: Feature selection and similarity measure ////////////
@@ -70,7 +70,7 @@ Visqol::CalculateSimilarity(
                  ref_patch_result.status().ToString().c_str());
     return ref_patch_result.status();
   }
-  auto ref_patch_indices = ref_patch_result.ValueOrDie();
+  auto ref_patch_indices = ref_patch_result.value();
   const double frame_duration = CalcFrameDuration(window.size * window.overlap,
                                                   ref_signal.sample_rate);
 
@@ -83,7 +83,7 @@ Visqol::CalculateSimilarity(
   if (!most_sim_patch_result.ok()) {
     return most_sim_patch_result.status();
   }
-  auto sim_match_info = most_sim_patch_result.ValueOrDie();
+  auto sim_match_info = most_sim_patch_result.value();
 
   // Realign the patches in time domain subsignals that start at the coarse
   // patch times.
@@ -95,7 +95,7 @@ Visqol::CalculateSimilarity(
     return realign_result.status();
   }
 
-  sim_match_info = realign_result.ValueOrDie();
+  sim_match_info = realign_result.value();
 
   auto fvnsim = CalcPerPatchMeanFreqBandMeans(sim_match_info);
   double moslqo = PredictMos(fvnsim, sim_to_qual_mapper);
