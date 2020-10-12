@@ -7,12 +7,10 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 # GoogleTest/GoogleMock framework.
-http_archive(
+git_repository(
     name = "com_google_googletest",
-    strip_prefix = "googletest-4e4df226fc197c0dda6e37f5c8c3845ca1e73a49",
-    # Google Test has not produced a recent release, so instead depending on a recent stable commit.
-    url = "https://github.com/google/googletest/archive/4e4df226fc197c0dda6e37f5c8c3845ca1e73a49.zip",
-    sha256 = "d4179caf54410968d1fff0b869e7d74803dd30209ee6645ccf1ca65ab6cf5e5a",
+    remote = "https://github.com/google/googletest.git",
+    tag = "release-1.10.0",
 )
 
 # proto_library, cc_proto_library, and java_proto_library rules implicitly
