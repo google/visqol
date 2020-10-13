@@ -22,6 +22,7 @@
 
 #include "neurogram_similiarity_index_measure.h"
 #include "gtest/gtest.h"
+#include "absl/status/statusor.h"
 #include "image_patch_creator.h"
 #include "patch_similarity_comparator.h"
 

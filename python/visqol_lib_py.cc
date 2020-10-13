@@ -13,6 +13,9 @@
 namespace Visqol {
 
 PYBIND11_MODULE(visqol_lib_py, m) {
+  pybind11::google::ImportStatusModule();
+  pybind11::google::ImportProtoModule();
+
   m.doc() = "ViSQOL plugin";
   m.def("ConformanceSpeechCA01TranscodedValue",
         []() { return kConformanceSpeechCA01Transcoded; });

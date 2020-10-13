@@ -24,6 +24,7 @@
 #include "equivalent_rectangular_bandwidth.h"
 #include "signal_filter.h"
 #include "spectrogram.h"
+#include "absl/status/statusor.h"
 
 namespace Visqol {
 

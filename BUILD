@@ -138,6 +138,7 @@ test_suite(
 cc_test(
     name = "visqol_manager_test",
     size = "large",
+    timeout = "long",
     srcs = [
         "tests/test_utility.h",
         "tests/visqol_manager_test.cc",
@@ -152,6 +153,7 @@ cc_test(
         "//testdata/conformance_testdata_subset:guitar48_stereo.wav",
         "//testdata/conformance_testdata_subset:guitar48_stereo_64kbps_aac.wav",
     ],
+    shard_count = 15,
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -174,6 +176,7 @@ cc_test(
 cc_test(
     name = "visqol_api_test",
     size = "medium",
+    timeout = "long",
     srcs = ["tests/visqol_api_test.cc"],
     data = [
         "//model:libsvm_nu_svr_model.txt",
@@ -182,6 +185,7 @@ cc_test(
         "//testdata/conformance_testdata_subset:contrabassoon48_stereo.wav",
         "//testdata/conformance_testdata_subset:contrabassoon48_stereo_24kbps_aac.wav",
     ],
+    shard_count = 15,
     deps = [
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
@@ -247,6 +251,7 @@ cc_test(
 cc_test(
     name = "conformance_test",
     size = "large",
+    timeout = "long",
     srcs = [
         "tests/conformance_test.cc",
         "tests/test_utility.h",
@@ -278,6 +283,7 @@ cc_test(
         "//testdata/conformance_testdata_subset:strauss48_stereo.wav",
         "//testdata/conformance_testdata_subset:strauss48_stereo_lp35.wav",
     ],
+    shard_count = 15,
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -378,6 +384,7 @@ cc_test(
         "//testdata:mismatched_duration/guitar48_stereo_x2.wav",
         "//testdata/conformance_testdata_subset:guitar48_stereo.wav",
     ],
+    shard_count = 15,
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -443,6 +450,7 @@ cc_test(
 cc_test(
     name = "multithreading_test",
     size = "medium",
+    timeout = "long",
     srcs = [
         "tests/multithreading_test.cc",
         "tests/test_utility.h",

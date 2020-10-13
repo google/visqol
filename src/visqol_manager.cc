@@ -30,12 +30,11 @@
 #include "speech_similarity_to_quality_mapper.h"
 #include "absl/base/internal/raw_logging.h"
 #include "absl/memory/memory.h"
-#include "util/task/status.h"
+#include "google/protobuf/stubs/status.h"
+#include "absl/status/statusor.h"
 #include "google/protobuf/stubs/status_macros.h"
 #include "vad_patch_creator.h"
 #include "visqol.h"
-// This 'using' declaration is necessary for the ASSIGN_OR_RETURN macro.
-using namespace util;
 
 namespace Visqol {
 
@@ -49,10 +48,10 @@ const double VisqolManager::kMinimumFreq = 50;  // wideband
 const double VisqolManager::kOverlap = 0.25;    // 25% overlap
 const double VisqolManager::kDurationMismatchTolerance = 1.0;
 
-Status VisqolManager::Init(const FilePath sim_to_quality_mapper_model,
-                           const bool use_speech_mode,
-                           const bool use_unscaled_speech,
-                           const int search_window) {
+google::protobuf::util::Status VisqolManager::Init(const FilePath sim_to_quality_mapper_model,
+                                 const bool use_speech_mode,
+                                 const bool use_unscaled_speech,
+                                 const int search_window) {
   use_speech_mode_ = use_speech_mode;
   use_unscaled_speech_mos_mapping_ = use_unscaled_speech;
   search_window_ = search_window;
@@ -94,7 +93,7 @@ void VisqolManager::InitSpectrogramBuilder() {
   }
 }
 
-Status VisqolManager::InitSimilarityToQualityMapper(
+google::protobuf::util::Status VisqolManager::InitSimilarityToQualityMapper(
     FilePath sim_to_quality_mapper_model) {
   if (use_speech_mode_) {
     sim_to_qual_ = absl::make_unique<SpeechSimilarityToQualityMapper>(
@@ -129,7 +128,7 @@ std::vector<SimilarityResultMsg> VisqolManager::Run(
   return sim_results;
 }
 
-StatusOr<SimilarityResultMsg> VisqolManager::Run(
+google::protobuf::util::StatusOr<SimilarityResultMsg> VisqolManager::Run(
     const FilePath& ref_signal_path, const FilePath& deg_signal_path) {
   // Ensure the initialization succeeded.
   RETURN_IF_ERROR(ErrorIfNotInitialized());
@@ -147,8 +146,8 @@ StatusOr<SimilarityResultMsg> VisqolManager::Run(
   return sim_result_msg;
 }
 
-StatusOr<SimilarityResultMsg> VisqolManager::Run(const AudioSignal& ref_signal,
-                                                 AudioSignal& deg_signal) {
+google::protobuf::util::StatusOr<SimilarityResultMsg> VisqolManager::Run(
+    const AudioSignal& ref_signal, AudioSignal& deg_signal) {
   // Ensure the initialization succeeded.
   RETURN_IF_ERROR(ErrorIfNotInitialized());
 
@@ -203,12 +202,12 @@ SimilarityResultMsg VisqolManager::PopulateSimResultMsg(
   return sim_result_msg;
 }
 
-Status VisqolManager::ErrorIfNotInitialized() {
+google::protobuf::util::Status VisqolManager::ErrorIfNotInitialized() {
   if (is_initialized_ == false) {
-    return Status(google::protobuf::util::error::Code::ABORTED,
-                  "VisqolManager must be initialized before use.");
+    return google::protobuf::util::Status(google::protobuf::util::error::Code::ABORTED,
+                        "VisqolManager must be initialized before use.");
   } else {
-    return Status();
+    return google::protobuf::util::Status();
   }
 }
 
@@ -230,9 +229,10 @@ util::Status VisqolManager::ValidateInputAudio(const AudioSignal& ref_signal,
     return util::Status(
         google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "Input audio signals have different sample rates! Reference audio "
-        "sample rate: " + std::to_string(ref_signal.sample_rate) +
-        ". Degraded audio sample rate: " +
-        std::to_string(deg_signal.sample_rate));
+        "sample rate: " +
+            std::to_string(ref_signal.sample_rate) +
+            ". Degraded audio sample rate: " +
+            std::to_string(deg_signal.sample_rate));
   }
 
   if (use_speech_mode_) {

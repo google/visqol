@@ -30,17 +30,14 @@
 
 #include "google/protobuf/port_def.inc"
 
-// This 'using' declaration is necessary for the ASSIGN_OR_RETURN macro.
-using namespace util;
-
 namespace Visqol {
 
 const size_t VisqolApi::k48kSampleRate = 48000;
 
-Status VisqolApi::Create(const VisqolConfig config) {
+google::protobuf::util::Status VisqolApi::Create(const VisqolConfig config) {
   // If audio info was not supplied, return error.
   if (!config.has_audio()) {
-    return Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return google::protobuf::util::Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "Audio info must be supplied for config.");
   }
 
@@ -51,7 +48,7 @@ Status VisqolApi::Create(const VisqolConfig config) {
 
   // Ensure a sample rate value was provided.
   if (sample_rate_ == 0) {
-    return Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return google::protobuf::util::Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "The sample rate for the signals must be set.");
   }
 
@@ -86,7 +83,7 @@ Status VisqolApi::Create(const VisqolConfig config) {
   if (sample_rate_ != k48kSampleRate &&
       speech_mode == false  &&
       allow_sr_override == false) {
-    return Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return google::protobuf::util::Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
         "Currently, 48k is the only sample rate supported by ViSQOL Audio. "
         "See README for details of overriding.");
   }
@@ -95,10 +92,10 @@ Status VisqolApi::Create(const VisqolConfig config) {
   RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map,
                                search_window));
 
-  return Status();
+  return google::protobuf::util::Status();
 }
 
-StatusOr<SimilarityResultMsg> VisqolApi::Measure(
+google::protobuf::util::StatusOr<SimilarityResultMsg> VisqolApi::Measure(
     const absl::Span<double>& reference, const absl::Span<double>& degraded) {
   // Initialize the audio signals and perform comparison.
   AudioSignal ref_sig{reference, sample_rate_};

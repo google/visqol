@@ -17,18 +17,18 @@
 #include <utility>
 #include <vector>
 
-#include "absl/base/internal/raw_logging.h"
-
 #include "amatrix.h"
+#include "comparison_patches_selector.h"
 #include "file_path.h"
+#include "image_patch_creator.h"
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
-#include "spectrogram.h"
-#include "comparison_patches_selector.h"
-#include "image_patch_creator.h"
 #include "similarity_result.h"
 #include "similarity_to_quality_mapper.h"
+#include "spectrogram.h"
 #include "spectrogram_builder.h"
+#include "absl/base/internal/raw_logging.h"
+#include "absl/status/statusor.h"
 
 namespace Visqol {
 google::protobuf::util::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
