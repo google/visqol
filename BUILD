@@ -65,7 +65,6 @@ cc_library(
     deps = [
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
@@ -77,12 +76,11 @@ cc_library(
         "@armadillo_headers//:armadillo_header",
         "@svm_lib//:libsvm",
         "@pffft_lib//:pffft_lib",
-        "@avcodec_headers//:headeravcodec",
-        "@avformat_headers//:headeravformat",
         "@boost//:filesystem",
         "@boost//:system",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_protobuf//:protobuf_lite",
-        "@svm_lib//:libsvm",
     ],
 )
 
@@ -200,6 +198,7 @@ cc_test(
         ":visqol_config_cc_proto",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -515,5 +514,6 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/status",
     ],
 )
