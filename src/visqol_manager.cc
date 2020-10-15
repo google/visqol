@@ -162,7 +162,7 @@ absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
   // Else, return the StatusOr failure.
   const Visqol visqol;
   SimilarityResult sim_result;
-  ASSIGN_OR_RETURN(sim_result,
+  VISQOL_ASSIGN_OR_RETURN(sim_result,
                    visqol.CalculateSimilarity(
                        ref_signal, deg_signal, spectrogram_builder_.get(),
                        window, patch_creator_.get(), patch_selector_.get(),

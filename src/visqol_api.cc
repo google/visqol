@@ -90,7 +90,8 @@ absl::Status VisqolApi::Create(const VisqolConfig config) {
   }
 
   // Initialize ViSQOL with the model file.
-  VISQOL_RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map));
+  VISQOL_RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map,
+                               search_window));
 
   return absl::Status();
 }
