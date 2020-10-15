@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
   auto parse_statusor = Visqol::VisqolCommandLineParser::Parse(argc, argv);
   if (!parse_statusor.ok()) {
     ABSL_RAW_LOG(ERROR, "%s",
-        parse_statusor.status().error_message().c_str());
+        parse_statusor.status().ToString().c_str());
     return -1;
   }
   Visqol::CommandLineArgs cmd_args = parse_statusor.value();
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
       cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius);
   if (!init_status.ok()) {
     ABSL_RAW_LOG(ERROR, "%s",
-        init_status.error_message().c_str());
+        init_status.ToString().c_str());
     return -1;
   }
 

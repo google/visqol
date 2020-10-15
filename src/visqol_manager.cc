@@ -31,7 +31,7 @@
 #include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "statusor_macros.h"
+#include "status_macros.h"
 #include "vad_patch_creator.h"
 #include "visqol.h"
 
@@ -62,7 +62,7 @@ absl::Status VisqolManager::Init(const FilePath sim_to_quality_mapper_model,
   if (status.ok()) {
     is_initialized_ = true;
   } else {
-    ABSL_RAW_LOG(ERROR, "%s", status.error_message().c_str());
+    ABSL_RAW_LOG(ERROR, "%s", status.ToString().c_str());
   }
 
   return status;

@@ -21,7 +21,7 @@
 
 // Placeholder for runfiles.
 #include "absl/status/statusor.h"
-#include "statusor_macros.h"
+#include "status_macros.h"
 
 #include "commandline_parser.h"
 #include "similarity_result.h"
