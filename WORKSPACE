@@ -172,11 +172,10 @@ cc_library(
 	copts = select({
     "@bazel_tools//src/conditions:windows": [
         "/D_USE_MATH_DEFINES",
+        "/W0",
 	],
     "//conditions:default": [
-    ]) + [
-		"/W0",
-    ]
+    ]}),
     visibility = ["//visibility:public"],
 )
 """,

@@ -9,6 +9,9 @@ ViSQOL (Virtual Speech Quality Objective Listener) is an objective, full-referen
 - [API Usage](#api-usage)
 - [Dependencies](#dependencies)
 - [License](#license)
+- [Papers](#papers)
+- [FAQ](#faq)
+- [Acknowledgement](#acknowledgement)
 
 ## Features
 ViSQOL can be run from the command line, or integrated into a project and used through its API. Whether being used from the command line, or used through the API, ViSQOL is capable of running in two modes:
@@ -28,31 +31,21 @@ ViSQOL can be run from the command line, or integrated into a project and used t
 #### Linux Build Instructions
 1. ##### Install Bazel
 - Bazel can be install for Linux from [here](https://docs.bazel.build/versions/master/install-ubuntu.html).
-- Tested with Bazel version 0.22.0.
-2. ##### Install Boost
-- Boost can be installed on Linux with the following command: `sudo apt-get install libboost-all-dev`
-- Tested with Boost version 1.65.0.
-3. ##### Build ViSQOL
+- Tested with Bazel version `3.4.1`.
+2. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
-#### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2019 March)
+#### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2020 August)
 
-1. ##### Install Visual Studio
-- Bazel requires Visual Studio 2015 or later. See further details [here](https://docs.bazel.build/versions/master/windows.html#build-c).
-- Install Visual Studio from [here](https://visualstudio.microsoft.com/vs/community/). Ensure that the C++ build tools are installed and the Windows SDK e.g. the 'Desktop development with C++' option in the VS installer.
-
-2. ##### Install Bazel
+1. ##### Install Bazel
 - Bazel can be install for Windows from [here](https://docs.bazel.build/versions/master/windows.html).
-- Tested with Bazel version 0.22.0.
+- Tested with Bazel version `3.5.0`.
 
-3. ##### Install Boost
-- Tested with version 1.60.0.
-- Download the Windows version from [here](https://www.boost.org/users/history/version_1_60_0.html).
-- Extract the contents of the download to the `C:` directory, and rename the extracted folder to remove any version info. You should now have the following directory structure: `C:\boost`
-- Navigate to this directory and build the Boost binaries for x64. For version 1.60.0, these instructions can be found [here](https://www.boost.org/doc/libs/1_60_0/more/getting_started/windows.html#prepare-to-use-a-boost-library-binary).
+2. ##### Install git
+- `git` for Windows can be obtained from the [official git website](https://git-scm.com/downloads).
+- When installing, select the option that allows `git` to be accessed from the system shells.
 
-
-4. ##### Build ViSQOL:
+3. ##### Build ViSQOL:
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
 ## Command Line Usage
@@ -195,7 +188,7 @@ int main(int argc, char **argv) {
   // Create an instance of the ViSQOL API. A new instance
   // is required for each signal pair to be compared.
   Visqol::VisqolApi visqol;
-  util::Status status = visqol.Create(config);
+  absl::Status status = visqol.Create(config);
 
   // Ensure that the creation succeeded.
   if (!status.ok()) {
@@ -214,7 +207,7 @@ int main(int argc, char **argv) {
   }
 
   // Extract the comparison result from the StatusOr.
-  Visqol::SimilarityResultMsg similarity_result = comparison_status_or.ValueOrDie();
+  Visqol::SimilarityResultMsg similarity_result = comparison_status_or.value();
 
   // Get the "Mean Opinion Score - Listening Quality Objective" for the degraded
   // signal, following the comparison to the reference signal.
@@ -291,9 +284,11 @@ Use of this source code is governed by a Apache v2.0 license that can be found i
 There have been several papers that describe the design of the ViSQOL algorithm and compare it to other metrics.
 These three should serve as an overview:
 
-[ViSQOL: The virtual speech quality objective listener](https://arrow.dit.ie/cgi/viewcontent.cgi?article=1168&context=scschcomcon) (IWAENC 2012)
-[Robustness of speech quality metrics to background noise and network degradations: Comparing ViSQOL, PESQ and POLQA](https://arrow.dit.ie/cgi/viewcontent.cgi?article=1160&context=scschcomcon) (ICASSP 2013)
-[ViSQOLAudio: An objective audio quality metric for low bitrate codecs](https://asa.scitation.org/doi/full/10.1121/1.4921674) (Journal of the Acoustic Society of America, 2015)
+[ViSQOL v3: An Open Source Production Ready Objective Speech and Audio Metric](https://arxiv.org/abs/2004.09584) (2020 Twelfth International Conference on Quality of Multimedia Experience (QoMEX))
+
+[ViSQOL: an objective speech quality model](https://asmp-eurasipjournals.springeropen.com/track/pdf/10.1186/s13636-015-0054-9) (2015 EURASIP Journal on Audio, Speech, and Music Processing)
+
+[Objective Assessment of Perceptual Audio Quality Using ViSQOLAudio](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=7940042) (The 2017 IEEE Transactions on Broadcasting)
 
 ## FAQ
 
