@@ -35,7 +35,6 @@ const double kLag = 0.05;  // 50ms
 const double k10kCenterFreqBand = 10261.08660;
 const size_t k10kCenterFreqBandIndex = 26;
 const double kPerfectScore = 5.0;
-const double kCA01_01UnscaledPerfectScore = 4.456782;
 
 /**
  *  Compare against the ground truth obtained from the KNOWN version
@@ -56,7 +55,7 @@ TEST(RegressionTest, Mono) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  EXPECT_NEAR(kMonoKnownMos, status_or.ValueOrDie().moslqo(), kTolerance);
+  EXPECT_NEAR(kMonoKnownMos, status_or.value().moslqo(), kTolerance);
 }
 
 /**
@@ -78,7 +77,7 @@ TEST(RegressionTest, Stereo) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  EXPECT_NEAR(kConformanceGuitar64aac, status_or.ValueOrDie().moslqo(), kTolerance);
+  EXPECT_NEAR(kConformanceGuitar64aac, status_or.value().moslqo(), kTolerance);
 }
 
 /**
@@ -89,8 +88,8 @@ TEST(VisqolCommandLineTest, FailedInit) {
   Visqol::VisqolManager visqol;
   auto status = visqol.Init(FilePath("non/existent/file.txt"), false, false, 60);
   ASSERT_FALSE(status.ok());
-  ASSERT_EQ(google::protobuf::util::error::Code::INVALID_ARGUMENT,
-      status.error_code());
+  ASSERT_EQ(absl::StatusCode::kInvalidArgument,
+      status.code());
 }
 
 /**
@@ -108,8 +107,8 @@ TEST(VisqolCommandLineTest, MissingInit) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_FALSE(status_or.ok());
-  ASSERT_EQ(google::protobuf::util::error::Code::ABORTED,
-      status_or.status().error_code());
+  ASSERT_EQ(absl::StatusCode::kAborted,
+      status_or.status().code());
 }
 
 /**
@@ -142,7 +141,7 @@ TEST(VisqolCommandLineTest, FilteredFreqs) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  auto sim_result_msg = status_or.ValueOrDie();
+  auto sim_result_msg = status_or.value();
   auto fvnsim = sim_result_msg.fvnsim();
   auto cfb = sim_result_msg.center_freq_bands();
   ASSERT_EQ(fvnsim.size(), cfb.size());
@@ -264,7 +263,7 @@ TEST(VisqolCommandLineTest, PatchTimestampsIdenticalFiles) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  auto patch_sims = status_or.ValueOrDie().patch_sims();
+  auto patch_sims = status_or.value().patch_sims();
   ASSERT_EQ(kGuitarNumPatches, patch_sims.size());
   for (size_t i = 0; i < kGuitarNumPatches; i++) {
     if (i == 0) {
@@ -308,7 +307,7 @@ TEST(VisqolCommandLineTest, PatchTimestampsMissing50ms) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  auto patch_sims = status_or.ValueOrDie().patch_sims();
+  auto patch_sims = status_or.value().patch_sims();
   ASSERT_EQ(kGuitarNumPatches, patch_sims.size());
 
   // Test the non-lagged patches
@@ -366,7 +365,7 @@ TEST(VisqolCommandLineTest, SpeechModeDisabled) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  EXPECT_NEAR(kMonoKnownMos, status_or.ValueOrDie().moslqo(), kTolerance);
+  EXPECT_NEAR(kMonoKnownMos, status_or.value().moslqo(), kTolerance);
 }
 
 /**
@@ -390,7 +389,7 @@ TEST(VisqolCommandLineTest, ScaledSpeechMode) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  EXPECT_NEAR(kPerfectScore, status_or.ValueOrDie().moslqo(), kTolerance);
+  EXPECT_NEAR(kPerfectScore, status_or.value().moslqo(), kTolerance);
 }
 
 /**
@@ -413,7 +412,7 @@ TEST(VisqolCommandLineTest, UnscaledSpeechMode) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  EXPECT_NEAR(kCA01_01UnscaledPerfectScore, status_or.ValueOrDie().moslqo(),
+  EXPECT_NEAR(kCA01_01UnscaledPerfectScore, status_or.value().moslqo(),
               kTolerance);
 }
 

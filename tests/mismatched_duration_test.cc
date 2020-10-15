@@ -49,8 +49,8 @@ TEST(MismatchedLengths, deg_too_short) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kMinMoslqo);
-  EXPECT_NEAR(kConformanceGuitarX2MisMatch, status_or.ValueOrDie().moslqo(),
+  ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
+  EXPECT_NEAR(kConformanceGuitarX2MisMatch, status_or.value().moslqo(),
               kTolerance);
 }
 
@@ -75,8 +75,8 @@ TEST(MismatchedLengths, deg_too_long) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kMinMoslqo);
-  EXPECT_NEAR(kConformanceGuitar2secMisMatch, status_or.ValueOrDie().moslqo(),
+  ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
+  EXPECT_NEAR(kConformanceGuitar2secMisMatch, status_or.value().moslqo(),
               kTolerance);
 }
 
@@ -103,8 +103,8 @@ TEST(MismatchedLengths, deg_long) {
   auto status_or =
       visqol.Run(files_to_compare[0].reference, files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kMinMoslqo);
-  EXPECT_NEAR(kConformanceGuitar50msMisMatch, status_or.ValueOrDie().moslqo(),
+  ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
+  EXPECT_NEAR(kConformanceGuitar50msMisMatch, status_or.value().moslqo(),
               kTolerance);
 }
 

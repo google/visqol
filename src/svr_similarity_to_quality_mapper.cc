@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include "util/task/status.h"
+#include "absl/status/status.h"
 
 #include "file_path.h"
 
@@ -25,7 +25,7 @@ SvrSimilarityToQualityMapper::SvrSimilarityToQualityMapper(
     const FilePath &support_vector_model)
     : model_path_{support_vector_model} {}
 
-util::Status SvrSimilarityToQualityMapper::Init() {
+absl::Status SvrSimilarityToQualityMapper::Init() {
   return model_.Init(model_path_);
 }
 

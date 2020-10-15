@@ -24,7 +24,6 @@
 
 #include "absl/synchronization/mutex.h"
 #include "svm.h"
-#include "util/task/status.h"
 
 namespace Visqol {
 /**
@@ -51,7 +50,7 @@ class SupportVectorRegressionModel {
    * @return An OK status if the model was successfully initialized with the
    * model file. Else, an error status is returned.
    */
-  google::protobuf::util::Status Init(const FilePath &model_path);
+  absl::Status Init(const FilePath &model_path);
 
   /**
    * Initialize the SVR model using vectors of observations and targets. These

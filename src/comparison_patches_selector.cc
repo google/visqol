@@ -28,8 +28,8 @@
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
 #include "absl/base/internal/raw_logging.h"
-#include "google/protobuf/stubs/statusor.h"
-#include "util/task/status.h"
+#include "absl/status/statusor.h"
+#include "absl/status/status.h"
 
 namespace Visqol {
 ComparisonPatchesSelector::ComparisonPatchesSelector(
@@ -130,7 +130,7 @@ size_t ComparisonPatchesSelector::CalcMaxNumPatches(
   return num_patches;
 }
 
-google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
+absl::StatusOr<std::vector<PatchSimilarityResult>>
 ComparisonPatchesSelector::FindMostOptimalDegPatches(
     const std::vector<ImagePatch>& ref_patches,
     const std::vector<size_t>& ref_patch_indices,
@@ -144,8 +144,8 @@ ComparisonPatchesSelector::FindMostOptimalDegPatches(
       ref_patch_indices, num_frames_in_deg_spectro, num_frames_per_patch);
 
   if (!num_patches) {
-    return util::Status(
-        google::protobuf::util::error::Code::CANCELLED,
+    return absl::Status(
+        absl::StatusCode::kCancelled,
         "Degraded file was too short, different, or misaligned to score any "
         "of the reference patches.");
   } else if (num_patches < ref_patch_indices.size()) {
@@ -291,7 +291,7 @@ AudioSignal ComparisonPatchesSelector::Slice(
   return sliced_signal;
 }
 
-google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
+absl::StatusOr<std::vector<PatchSimilarityResult>>
 ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
     const std::vector<PatchSimilarityResult>& sim_results,
     const AudioSignal& ref_signal, const AudioSignal& deg_signal,
@@ -331,7 +331,7 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
                    ref_spectro_result.status().ToString().c_str());
       return ref_spectro_result.status();
     }
-    Spectrogram ref_spectrogram = ref_spectro_result.ValueOrDie();
+    Spectrogram ref_spectrogram = ref_spectro_result.value();
 
     const auto deg_spectro_result = spect_builder->Build(deg_audio_aligned,
                                                          window);
@@ -340,7 +340,7 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
                    deg_spectro_result.status().ToString().c_str());
       return deg_spectro_result.status();
     }
-    Spectrogram deg_spectrogram = deg_spectro_result.ValueOrDie();
+    Spectrogram deg_spectrogram = deg_spectro_result.value();
 
     MiscAudio::PrepareSpectrogramsForComparison(ref_spectrogram,
                                                 deg_spectrogram);

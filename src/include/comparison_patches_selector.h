@@ -20,7 +20,7 @@
 #include <memory>
 #include <vector>
 
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/statusor.h"
 
 #include "amatrix.h"
 #include "image_patch_creator.h"
@@ -66,7 +66,7 @@ class ComparisonPatchesSelector {
    *    of the comparison between a patch from the reference spectrogram with
    *    its corresponding patch in the degraded spectrogram.
    */
-  google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
+  absl::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
       const std::vector<ImagePatch> &ref_patches,
       const std::vector<size_t> &ref_patch_indices,
       const AMatrix<double> &spectrogram_data,
@@ -88,7 +88,7 @@ class ComparisonPatchesSelector {
    * @return A StatusOr that may contain a vector of new, finely aligned
    *    PatchSimilarityResults.
    */
-  google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
+  absl::StatusOr<std::vector<PatchSimilarityResult>>
       FinelyAlignAndRecreatePatches(
           const std::vector<PatchSimilarityResult>& sim_results,
           const AudioSignal &ref_signal,

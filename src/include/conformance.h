@@ -26,12 +26,15 @@
 // The C++ version introduces fixes and starts at 250.
 // As of 300, the first digit is the major version and last two digits are the
 // minor version.
-#define kVisqolConformanceNumber (300)
+// Major version change history:
+// Feb 2020: v300 - polynomial fitting for speech mode, SVR for audio mode.
+// Oct 2020: v310 - exponential fitting for speech mode, (audio mode unchanged).
+#define kVisqolConformanceNumber (310)
 
 // If the scores for these known files changes, tests/conformance_test will fail
 // Whenever these constants need to be updated, kVisqolConformanceNumber should
 // be incremented.
-#define kConformanceSpeechCA01Transcoded (2.472834)
+#define kConformanceSpeechCA01Transcoded (2.3691150188221259)
 
 #define kConformanceStraussLp35 (1.9905729378864558)
 
@@ -47,11 +50,11 @@
 
 #define kConformanceGuitar64aac (4.5123244380958774)
 
-#define kConformanceGuitarShortDegradedPatch (4.0120925346530543)
+#define kConformanceGuitarShortDegradedPatch (4.4056028414814765)
 
-#define kConformanceGuitarShortReferencePatch (4.9771152297354284)
+#define kConformanceGuitarShortReferencePatch (4.6761039922498471)
 
-#define kConformanceDifferentAudios (1)
+#define kConformanceDifferentAudios (1.5093694203696959)
 
 #define kConformanceGlock48aac (4.333169489109431)
 
@@ -59,6 +62,12 @@
 
 #define kConformanceCastanetsIdentity (4.7321012530423481)
 
-#define kConformanceBadDegraded (1.0021)
+#define kConformanceBadDegraded (1.5260486187764308)
+
+#define kConformanceGuitarLongDuration (4.5177618344298294)
+
+#define kCA01_01UnscaledPerfectScore (4.1557613014690995)
+
+#define kCA01_01AsAudio (2.0003927800390828)
 
 #endif // VISQOL_INCLUDE_CONFORMANCE_H

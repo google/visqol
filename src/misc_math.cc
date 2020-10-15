@@ -48,4 +48,8 @@ std::vector<double> MiscMath::NormalizeInt16ToDouble(
   return output_vector;
 }
 
+double MiscMath::ExponentialFromFit(double x, double a, double b, double x0) {
+  return a + exp(b * (x - x0));
+}
+
 }  // namespace Visqol

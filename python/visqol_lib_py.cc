@@ -8,7 +8,7 @@
 #include "visqol_api.h"
 #include "visqol_manager.h"
 #include "third_party/visqol/src/proto/similarity_result.proto.h"
-#include "third_party/visqol/src/proto/visqol_config.pb.h"
+#include "src/proto/visqol_config.pb.h"
 
 namespace Visqol {
 

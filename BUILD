@@ -47,6 +47,15 @@ cc_library(
         exclude = ["**/main.cc"],
     ),
     hdrs = glob(["src/include/*.h"]),
+    copts = select({
+        "@bazel_tools//src/conditions:windows": [
+            # Windows Compile Opts
+            "/D_USE_MATH_DEFINES",
+        ],
+        "//conditions:default": [
+            # Mac/Linux Compile Opts
+        ],
+    }),
     includes = [
         "src/include",
         "src/proto",
@@ -54,26 +63,26 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "@avcodec_headers//:headeravcodec",
-        "@avformat_headers//:headeravformat",
-        "@com_google_protobuf//:protobuf_lite",
-        "@svm_lib//:libsvm",
-        "@com_google_googletest//:gtest_main",
-        "@com_google_absl//absl/types:optional",
-        # Linux Dependencies
-        "@pffft_lib_linux//:pffft_linux",
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
+        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
-        "@com_google_absl//absl/flags:usage",
         "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
-        "@svm_lib//:libsvm",
         "@armadillo_headers//:armadillo_header",
-        "//util/task:status",
+        "@svm_lib//:libsvm",
+        "@pffft_lib//:pffft_lib",
+        "@avcodec_headers//:headeravcodec",
+        "@avformat_headers//:headeravformat",
+        "@boost//:filesystem",
+        "@boost//:system",
+        "@com_google_protobuf//:protobuf_lite",
+        "@svm_lib//:libsvm",
     ],
 )
 
@@ -91,8 +100,8 @@ cc_binary(
         ":visqol_lib",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:raw_logging_internal",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
-        "//util/task:status",
     ],
 )
 
@@ -191,7 +200,6 @@ cc_test(
         ":visqol_config_cc_proto",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
-        "//util/task:status",
     ],
 )
 
@@ -478,8 +486,8 @@ cc_test(
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
-        "//testdata:long_duration/1_min/guitar48_stereo_deg_1min.wav",
-        "//testdata:long_duration/1_min/guitar48_stereo_ref_1min.wav",
+        "//testdata:long_duration/1_min/guitar48_stereo_deg_25s.wav",
+        "//testdata:long_duration/1_min/guitar48_stereo_ref_25s.wav",
     ],
     deps = [
         ":visqol_lib",
@@ -507,6 +515,5 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
-        "//util/task:status",
     ],
 )

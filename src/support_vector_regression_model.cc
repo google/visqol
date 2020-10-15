@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "absl/synchronization/mutex.h"
-#include "util/task/status.h"
+#include "absl/status/status.h"
 #include "svm.h"
 
 #include "file_path.h"
@@ -101,18 +101,18 @@ double SupportVectorRegressionModel::Predict(
   return prediction;
 }
 
-util::Status SupportVectorRegressionModel::Init(
+absl::Status SupportVectorRegressionModel::Init(
     const FilePath &model_path) {
   absl::MutexLock lock(&load_model_mutex_);
   model_ = svm_load_model(model_path.Path().c_str());
 
   if (model_ == nullptr) {
-    return util::Status(
-        google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return absl::Status(
+        absl::StatusCode::kInvalidArgument,
         "Failed to load the SVR model file: " + model_path.Path());
   }
 
-  return util::Status();
+  return absl::Status();
 }
 
 }  // namespace Visqol

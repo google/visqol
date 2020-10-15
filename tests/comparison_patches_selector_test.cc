@@ -42,7 +42,7 @@ class ComparisonPatchesSelectorPeer {
                            double end_time) {
     return ComparisonPatchesSelector::Slice(in_signal, start_time, end_time);
   }
-  google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
+  absl::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
       const std::vector<ImagePatch>& ref_patches,
       const std::vector<size_t>& ref_patch_indices,
       const AMatrix<double>& spectrogram_data,

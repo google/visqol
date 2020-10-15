@@ -43,6 +43,17 @@ class MiscMath {
   static AMatrix<double> Mean(const AMatrix<double>& mat);
   static std::vector<double> NormalizeInt16ToDouble(std::vector<int16_t>
     &input_vec);
+  /**
+   * Evaluates an exponential function given learned parameters.
+   *
+   * The function is of the form `a + exp(b * (x - x0))`.
+   * @param x (double) the input point to evalute.
+   * @param a (double) the learned bias parameter.
+   * @param b (double) the learned slope of the exponent parameter.
+   * @param x0 (double) the learned intercept parameter.
+   * @return (double) that is the function evaluated at `x`.
+   */
+  static double ExponentialFromFit(double x, double a, double b, double x0);
 };
 }  // namespace Visqol
 

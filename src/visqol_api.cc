@@ -19,7 +19,8 @@
 
 #include "absl/types/span.h"
 
-#include "google/protobuf/stubs/statusor.h"
+// Placeholder for runfiles.
+#include "absl/status/statusor.h"
 #include "google/protobuf/stubs/status_macros.h"
 
 #include "commandline_parser.h"
@@ -34,10 +35,10 @@ namespace Visqol {
 
 const size_t VisqolApi::k48kSampleRate = 48000;
 
-google::protobuf::util::Status VisqolApi::Create(const VisqolConfig config) {
+absl::Status VisqolApi::Create(const VisqolConfig config) {
   // If audio info was not supplied, return error.
   if (!config.has_audio()) {
-    return google::protobuf::util::Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return absl::Status(absl::StatusCode::kInvalidArgument,
         "Audio info must be supplied for config.");
   }
 
@@ -48,7 +49,7 @@ google::protobuf::util::Status VisqolApi::Create(const VisqolConfig config) {
 
   // Ensure a sample rate value was provided.
   if (sample_rate_ == 0) {
-    return google::protobuf::util::Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return absl::Status(absl::StatusCode::kInvalidArgument,
         "The sample rate for the signals must be set.");
   }
 
@@ -83,7 +84,7 @@ google::protobuf::util::Status VisqolApi::Create(const VisqolConfig config) {
   if (sample_rate_ != k48kSampleRate &&
       speech_mode == false  &&
       allow_sr_override == false) {
-    return google::protobuf::util::Status(google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return absl::Status(absl::StatusCode::kInvalidArgument,
         "Currently, 48k is the only sample rate supported by ViSQOL Audio. "
         "See README for details of overriding.");
   }
@@ -92,10 +93,10 @@ google::protobuf::util::Status VisqolApi::Create(const VisqolConfig config) {
   RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map,
                                search_window));
 
-  return google::protobuf::util::Status();
+  return absl::Status();
 }
 
-google::protobuf::util::StatusOr<SimilarityResultMsg> VisqolApi::Measure(
+absl::StatusOr<SimilarityResultMsg> VisqolApi::Measure(
     const absl::Span<double>& reference, const absl::Span<double>& degraded) {
   // Initialize the audio signals and perform comparison.
   AudioSignal ref_sig{reference, sample_rate_};

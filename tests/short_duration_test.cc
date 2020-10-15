@@ -15,7 +15,7 @@
 #include "visqol_manager.h"
 
 #include "gtest/gtest.h"
-#include "util/task/status.h"
+#include "absl/status/status.h"
 
 #include "similarity_result.h"
 #include "test_utility.h"
@@ -84,8 +84,8 @@ TEST_P(ShortDurationTest, InvalidArgsTest) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_FALSE(status_or.ok());
-  ASSERT_EQ(google::protobuf::util::error::Code::INVALID_ARGUMENT,
-            status_or.status().error_code());
+  ASSERT_EQ(absl::StatusCode::kInvalidArgument,
+            status_or.status().code());
 }
 
 // Test visqol with input that is 1 second long (which at a sample rate of
@@ -109,7 +109,7 @@ TEST(ShortDuration, 1_second) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kIdenticalMinMoslqo);
+  ASSERT_TRUE(status_or.value().moslqo() > kIdenticalMinMoslqo);
 }
 
 // Test visqol with input that is 5 second long (which at a sample rate of
@@ -133,7 +133,7 @@ TEST(ShortDuration, 5_second) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kIdenticalMinMoslqo);
+  ASSERT_TRUE(status_or.value().moslqo() > kIdenticalMinMoslqo);
 }
 
 } // namespace

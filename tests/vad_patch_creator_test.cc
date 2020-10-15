@@ -69,7 +69,7 @@ TEST(VadPatchCreatorTest, PatchIndices) {
           GammatoneFilterBank{kNumBands, kMinimumFreq}, true);
   const auto spectro_result = spectro_builder->Build(ref_signal, window);
   ASSERT_TRUE(spectro_result.ok());
-  const auto spectro = spectro_result.ValueOrDie();
+  const auto spectro = spectro_result.value();
 
   // Create the reference signal patch indices.
   VadPatchCreator vad(kPatchSize);
@@ -77,7 +77,7 @@ TEST(VadPatchCreatorTest, PatchIndices) {
                                                         ref_signal,
                                                         window);
   ASSERT_TRUE(patches_result.ok());
-  const auto patches = patches_result.ValueOrDie();
+  const auto patches = patches_result.value();
   ASSERT_TRUE(kCA01_01Patches == patches);
 }
 

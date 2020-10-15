@@ -19,7 +19,7 @@
 
 #include "gammatone_filterbank.h"
 #include "spectrogram_builder.h"
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/statusor.h"
 
 namespace Visqol {
 
@@ -48,7 +48,7 @@ class GammatoneSpectrogramBuilder : public SpectrogramBuilder {
       const bool use_speech_mode);
 
   // Docs inherited from parent.
-  google::protobuf::util::StatusOr<Spectrogram> Build(
+  absl::StatusOr<Spectrogram> Build(
       const AudioSignal &signal,
       const AnalysisWindow &window) override;
 

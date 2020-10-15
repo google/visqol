@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
   }
 
   // Perform the comparison.
-  google::protobuf::util::StatusOr<Visqol::SimilarityResultMsg> comparison_status_or =
+  absl::StatusOr<Visqol::SimilarityResultMsg> comparison_status_or =
           visqol.Measure(reference_signal, degraded_signal);
 
   // Ensure that the comparison succeeded.

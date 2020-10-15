@@ -57,7 +57,7 @@ TEST_P(ConformanceTest, ConformanceWithKnownScores) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  EXPECT_NEAR(GetParam().expected_result, status_or.ValueOrDie().moslqo(),
+  EXPECT_NEAR(GetParam().expected_result, status_or.value().moslqo(),
               kTolerance);
 }
 
@@ -134,13 +134,13 @@ INSTANTIATE_TEST_CASE_P(
             "guitar48_stereo.wav",
             "testdata/short_duration/5_second/"
             "guitar48_stereo_5_sec.wav",
-            true, kConformanceGuitarShortDegradedPatch),
+            false, kConformanceGuitarShortDegradedPatch),
         ConformanceTestData(
             "testdata/short_duration/5_second/"
             "guitar48_stereo_5_sec.wav",
             "testdata/conformance_testdata_subset/"
             "guitar48_stereo.wav",
-            true, kConformanceGuitarShortReferencePatch),
+            false, kConformanceGuitarShortReferencePatch),
         ConformanceTestData(
             "testdata/conformance_testdata_subset/"
             "guitar48_stereo.wav",

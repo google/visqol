@@ -30,5 +30,14 @@ TEST(MiscMath, NextPowTwoTest) {
   }
 }
 
+TEST(MiscMath, ExponentialFromFitTest) {
+  // Test some realistic values from NSIM->MOS case where we expect
+  // a certain range.
+  EXPECT_DOUBLE_EQ(1.4461764166502666,
+                   MiscMath::ExponentialFromFit(0.5, 1.15, 4.68, .76));
+  EXPECT_DOUBLE_EQ(4.2246774455486502,
+                   MiscMath::ExponentialFromFit(1.0, 1.15, 4.68, .76));
+}
+
 }  // namespace
 }  // namespace Visqol

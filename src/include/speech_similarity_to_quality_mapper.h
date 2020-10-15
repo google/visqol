@@ -19,7 +19,7 @@
 
 #include <vector>
 
-#include "util/task/status.h"
+#include "absl/status/status.h"
 
 #include "similarity_to_quality_mapper.h"
 #include "support_vector_regression_model.h"
@@ -47,7 +47,7 @@ class SpeechSimilarityToQualityMapper : public SimilarityToQualityMapper {
       const override;
 
   // Docs inherited from parent.
-  util::Status Init() override;
+  absl::Status Init() override;
 
  protected:
   /**

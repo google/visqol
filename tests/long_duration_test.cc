@@ -16,6 +16,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
+#include "conformance.h"
 #include "similarity_result.h"
 #include "test_utility.h"
 
@@ -24,7 +25,6 @@ namespace {
 
 const double kMinMoslqo = 1.0;
 const double kTolerance = 0.0001;
-const double kConformanceGuitarLongDuration = 4.8179655940874921;
 
 // Confirm that a run can succesfully complete with a long file. In this test,
 // file duration is 1 min.
@@ -32,10 +32,10 @@ TEST(LongFiles, 1_min) {
   // Build command line args.
   const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper(
       "testdata/long_duration/1_min/"
-      "guitar48_stereo_ref_1min.wav",
+      "guitar48_stereo_ref_25s.wav",
       "testdata/long_duration/1_min/"
-      "guitar48_stereo_deg_1min.wav",
-      "", true);
+      "guitar48_stereo_deg_25s.wav",
+      "", false);
   auto files_to_compare = VisqolCommandLineParser::BuildFilePairPaths(cmd_args);
 
   // Init ViSQOL.
@@ -50,8 +50,8 @@ TEST(LongFiles, 1_min) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kMinMoslqo);
-  EXPECT_NEAR(kConformanceGuitarLongDuration, status_or.ValueOrDie().moslqo(),
+  ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
+  EXPECT_NEAR(kConformanceGuitarLongDuration, status_or.value().moslqo(),
               kTolerance);
 }
 

@@ -23,7 +23,6 @@
 #include "similarity_to_quality_mapper.h"
 #include "support_vector_regression_model.h"
 
-#include "util/task/status.h"
 
 namespace Visqol {
 /**
@@ -45,7 +44,7 @@ class SvrSimilarityToQualityMapper : public SimilarityToQualityMapper {
       override;
 
   // Docs inherited from parent.
-  google::protobuf::util::Status Init() override;
+  absl::Status Init() override;
 
  private:
   /**

@@ -19,7 +19,7 @@
 
 #include <vector>
 
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/statusor.h"
 
 #include "amatrix.h"
 #include "analysis_window.h"
@@ -55,7 +55,7 @@ class ImagePatchCreator {
    * @param If successful, the vector of patch indices is returned. Else, an
    *    error status.
    */
-  virtual google::protobuf::util::StatusOr<std::vector<size_t>>
+  virtual absl::StatusOr<std::vector<size_t>>
       CreateRefPatchIndices(const AMatrix<double> &spectrogram,
                             const AudioSignal &ref_signal,
                             const AnalysisWindow &window) const;
@@ -93,7 +93,7 @@ class ImagePatchCreator {
    * @param If successful, the vector of patch indices is returned. Else, an
    *    error status.
    */
-  google::protobuf::util::StatusOr<std::vector<size_t>> CreateRefPatchIndices(
+  absl::StatusOr<std::vector<size_t>> CreateRefPatchIndices(
       const AMatrix<double> &spectrogram) const;
 };
 }  // namespace Visqol
