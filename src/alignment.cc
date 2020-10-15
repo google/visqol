@@ -15,7 +15,6 @@
 #include "alignment.h"
 
 #include <memory>
-#include <tuple>
 #include <utility>
 
 #include "amatrix.h"

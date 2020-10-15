@@ -43,7 +43,8 @@ void thread_glock_test() {
 
   // Init ViSQOL.
   Visqol::VisqolManager visqol;
-  auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model, false, false);
+  auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model, false, false,
+                            60);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.
@@ -62,7 +63,7 @@ void thread_guitar_test(const FilePath model, const double moslqo) {
 
   // Init ViSQOL.
   Visqol::VisqolManager visqol;
-  auto status = visqol.Init(model, false, false);
+  auto status = visqol.Init(model, false, false, 60);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.

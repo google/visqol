@@ -1,7 +1,5 @@
 licenses(["notice"])  # BSD
 
-exports_files(["LICENSE"])
-
 py_binary(
     name = "fit_nsim_to_mos_poly",
     srcs = ["fit_nsim_to_mos_poly.py"],

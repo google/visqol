@@ -159,46 +159,27 @@ pybind_library(
 """
 )
 
-##################
-# Platform Linux #
-##################
-# PFFFT - Linux
+# PFFFT
 new_git_repository(
-    name = "pffft_lib_linux",
+    name = "pffft_lib",
     remote = "https://bitbucket.org/jpommier/pffft.git",
     branch = "master",
     build_file_content = """
 cc_library(
-    name = "pffft_linux",
+    name = "pffft_lib",
     srcs = glob(["pffft.c"]),
     hdrs = glob(["pffft.h"]),
-    visibility = ["//visibility:public"],
-)
-""",
-)
-
-####################
-# Platform Windows #
-####################
-# PFFFT - Windows
-new_git_repository(
-    name = "pffft_lib_win",
-    remote = "https://bitbucket.org/jpommier/pffft.git",
-    branch = "master",
-    build_file_content = """
-cc_library(
-    name = "pffft_win",
-    srcs = glob(["pffft.c"]),
-    hdrs = glob(["pffft.h"]),
-	copts = [
-		"/D_USE_MATH_DEFINES",
-		"/W0",
+	copts = select({
+    "@bazel_tools//src/conditions:windows": [
+        "/D_USE_MATH_DEFINES",
+        "/W0",
 	],
+    "//conditions:default": [
+    ]}),
     visibility = ["//visibility:public"],
 )
 """,
 )
-
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 

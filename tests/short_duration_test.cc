@@ -76,7 +76,8 @@ TEST_P(ShortDurationTest, InvalidArgsTest) {
   // Init ViSQOL.
   auto status = visqol.Init(GetParam().test_inputs.sim_to_quality_mapper_model,
       GetParam().test_inputs.use_speech_mode,
-      GetParam().test_inputs.use_unscaled_speech_mos_mapping);
+      GetParam().test_inputs.use_unscaled_speech_mos_mapping,
+      GetParam().test_inputs.search_window_radius);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL and assert failure.
@@ -100,7 +101,8 @@ TEST(ShortDuration, 1_second) {
   Visqol::VisqolManager visqol;
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
-      cmd_args.use_unscaled_speech_mos_mapping);
+      cmd_args.use_unscaled_speech_mos_mapping,
+      cmd_args.search_window_radius);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.
@@ -123,7 +125,8 @@ TEST(ShortDuration, 5_second) {
   Visqol::VisqolManager visqol;
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
-      cmd_args.use_unscaled_speech_mos_mapping);
+      cmd_args.use_unscaled_speech_mos_mapping,
+      cmd_args.search_window_radius);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.

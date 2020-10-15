@@ -64,8 +64,7 @@ class VisqolApi {
    *    details. If the comparison fails, an error is returned.
    */
   absl::StatusOr<SimilarityResultMsg> Measure(
-      const absl::Span<double>& reference,
-      const absl::Span<double>& degraded);
+      const absl::Span<double>& reference, const absl::Span<double>& degraded);
 
  private:
   /**

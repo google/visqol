@@ -55,10 +55,9 @@ std::vector<double> VadPatchCreator::GetVoiceActivity(
   return rms_vad.GetVadResults();
 }
 
-absl::StatusOr<std::vector<size_t>>
-    VadPatchCreator::CreateRefPatchIndices(const AMatrix<double> &spectrogram,
-                                           const AudioSignal &ref_signal,
-                                           const AnalysisWindow &window) const {
+absl::StatusOr<std::vector<size_t>> VadPatchCreator::CreateRefPatchIndices(
+    const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
+    const AnalysisWindow &window) const {
   const auto norm_mat = MiscMath::Normalize(ref_signal.data_matrix);
   const AudioSignal norm_sig{norm_mat, ref_signal.sample_rate};
   const double frame_size = window.size * window.overlap;

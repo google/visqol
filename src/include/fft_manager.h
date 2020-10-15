@@ -172,7 +172,7 @@ class FftManager {
   const float inverse_fft_scale_;
 
   /**
-   *  Stored the PFFFT state for performing operations.
+   *  Stored the PFFFT state for performaing operations.
    */
   PFFFT_Setup* fft_;
 

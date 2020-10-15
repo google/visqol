@@ -6,6 +6,7 @@ licenses(["notice"])
 pybind_extension(
     name = "visqol_lib_py",
     srcs = ["visqol_lib_py.cc"],
+    visibility = ["//visibility:public"],
     deps = [
         "@com_google_absl//absl/status",
         "@pybind11_bazel//:pybind11_eigen",
@@ -13,6 +14,7 @@ pybind_extension(
         "@pybind11_abseil//:absl_numpy_span_caster",
         "@pybind11_abseil//:status_casters",
         "@pybind11_protobuf//:proto_casters",
+        "//third_party/visqol:similarity_result_cc_proto",
         "//:visqol_config_cc_proto",
         "//:visqol_lib",
     ],

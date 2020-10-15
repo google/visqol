@@ -45,8 +45,9 @@ class ComparisonPatchesSelector {
 
   /**
    * For each patch provided (from the reference spectrogram) find the most
-   * similar degraded patch that matches it and compare the two patches. Return
-   * the set of all such comparisons.
+   * optimal degraded patch within a given search space that matches it such
+   * that the cumulative similarity score across all reference patches is
+   * maximized. It returns the set of all such comparisons.
    *
    * @param ref_patches A vector containing all of the patches created from the
    *    reference spectrogram.
@@ -55,16 +56,22 @@ class ComparisonPatchesSelector {
    *    spectrogram where this patch starts from.
    * @param spectrogram_data The spectrogram that represents the degraded
    *    signal.
+   * @param frame_duration The duration of the frame in seconds.
+   * @param search_window_radius The parameter that determines how far you
+   *    should search to discover patch matches. For a given reference frame,
+   *    one looks at 2*search_window_radius + 1 patches to find the most
+   *    optimal match.
    *
    * @return A vector of similarity results. Each similary result is the result
    *    of the comparison between a patch from the reference spectrogram with
    *    its corresponding patch in the degraded spectrogram.
    */
-  absl::StatusOr<std::vector<PatchSimilarityResult>>
-      FindMostSimilarDegPatches(const std::vector<ImagePatch> &ref_patches,
-          const std::vector<size_t> &ref_patch_indices,
-          const AMatrix<double> &spectrogram_data,
-          const double frame_duration) const;
+  absl::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
+      const std::vector<ImagePatch> &ref_patches,
+      const std::vector<size_t> &ref_patch_indices,
+      const AMatrix<double> &spectrogram_data,
+      const double frame_duration,
+      const int search_window_radius) const;
 
   /**
    * Given roughly aligned ref/deg patches, realign the original audio within
@@ -96,6 +103,7 @@ class ComparisonPatchesSelector {
    * @param in_signal An AudioSignal.
    * @param start_time The start time of the sliced audio in seconds.
    * @param end_time The end time of the sliced audio in seconds.
+   *
    * @return A new AudioSignal containing the subregion.
    */
   static AudioSignal Slice(const AudioSignal &in_signal, double start_time,
@@ -122,28 +130,46 @@ class ComparisonPatchesSelector {
                                 const;
 
   /**
-   * For a given patch from the reference spectrogram, find the most similar
-   * degraded patch from within the given bounds in the degraded spectrogram.
+   * For a given patch from the reference spectrogram, find the most optimal
+   * degraded patch, such that it maximizes the cumulative similarity score
+   * calculated from the 0th patch index to the current one from within the
+   * given bounds(search_window patches on either side) in the degraded
+   * spectrogram.
    *
-   * This function takes the provided ref_frame_index, constructs patches that
-   * occur before and after, comparing it to the provided reference patch. This
-   * process is repreated until the patch that starts at the provided end index
-   * has been crated and compared. The result of the most similar patch
-   * comparison is returned.
+   * This function takes the provided ref_frame_index, constructs all patches in
+   * the degarded signal that occur in the given bounds, comparing it to the
+   * provided reference patch and stores the cumulative similarity score formed
+   * till this reference patch in the cumulative_similarity_dp vector. The
+   * backtrace vector is used to store the offset where the previous reference
+   * frame matched the best. Returns nothing but populates the
+   * cumulative_similarity_dp vector and backtrace vector accordingly.
    *
    * @param spectrogram_data The spectrogram that represents the degraded
    *    signal.
    * @param ref_patch The reference patch to find the best match for.
-   * @param ref_frame_index The index of the column in the spectrogram data from
-   *    around which to construct patches for comparison.
-   * @param frame_duration The duration of a frame in seconds.
+   * @param cumulative_similarity_dp A 2D array to record the cumulative
+   *    similarity scores from reference patches to degraded patches.
+   * @param backtrace A 2D array to record the matching patch information of
+   *    previous patch indices.
+   * @param ref_patch_indices The indices for the set of reference patches. Each
+   *    index corresponds to the index of the column in the reference
+   *    spectrogram where this patch starts from.
+   * @param patch_index The patch number in the multiple patches created by
+   *    patch_creator.
+   * @param search_window The search space parameter that determines how far you
+   *    should search in to discover patch matches. For a given reference frame,
+   *    one looks at 2*search_window + 1 frames to find the most optimal match.
    *
-   * @return The similarity result from the comparison of the most similar
-   *    degraded patch with the reference patch.
+   * @return The function returns nothing. It's purpose is to populate the
+   *    cumulative_similarity_dp and backtrace vectors.
    */
-  PatchSimilarityResult FindMostSimilarDegPatch(
+  void FindMostOptimalDegPatch(
       const AMatrix<double> &spectrogram_data, const ImagePatch &ref_patch,
-      int ref_frame_index, const double frame_duration) const;
+      std::vector<ImagePatch> &deg_patches,
+      std::vector<std::vector<double>> &cumulative_similarity_dp,
+      std::vector<std::vector<int>> &backtrace,
+      const std::vector<size_t> &ref_patch_indices, int patch_index,
+      const int search_window) const;
 
   /**
    * Calculate the maximum number of patches that the degraded spectrogram can
@@ -152,14 +178,16 @@ class ComparisonPatchesSelector {
    * @param ref_patch_indices The indices for the set of reference patches. Each
    *    index corresponds to the index of the column in the reference
    *    spectrogram where this patch starts from.
-   * @param num_deg_frames The number of frames in the degraded spectrogram.
-   * @param num_frames The number of frames in a patch.
+   * @param num_frames_in_deg_spectro The number of frames in the degraded
+   *    spectrogram.
+   * @param num_frames_per_patch The number of frames in a patch.
    *
    * @return The maximum number of patches that the degraded spectrogram can
    *    support.
    */
   size_t CalcMaxNumPatches(const std::vector<size_t> &ref_patch_indices,
-                           size_t max_slide_offset, size_t num_frames) const;
+                           size_t num_frames_in_deg_spectro,
+                           size_t num_frames_per_patch) const;
 
   /**
    * Friend class used for unit testing.
