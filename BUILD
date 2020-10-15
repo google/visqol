@@ -65,11 +65,13 @@ cc_library(
     deps = [
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
-        "//third_party/absl/base",
+        "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/flags:usage",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
@@ -78,8 +80,6 @@ cc_library(
         "@pffft_lib//:pffft_lib",
         "@boost//:filesystem",
         "@boost//:system",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
         "@com_google_protobuf//:protobuf_lite",
     ],
 )
@@ -96,8 +96,7 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":visqol_lib",
-        "//third_party/absl/base",
-        "//third_party/absl/base:raw_logging_internal",
+        "@com_google_absl//absl/base",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
     ],
