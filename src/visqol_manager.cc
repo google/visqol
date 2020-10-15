@@ -130,7 +130,7 @@ std::vector<SimilarityResultMsg> VisqolManager::Run(
 absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
     const FilePath& ref_signal_path, const FilePath& deg_signal_path) {
   // Ensure the initialization succeeded.
-  RETURN_IF_ERROR(ErrorIfNotInitialized());
+  VISQOL_RETURN_IF_ERROR(ErrorIfNotInitialized());
 
   // Load the wav audio files as mono.
   const AudioSignal ref_signal = MiscAudio::LoadAsMono(ref_signal_path);
@@ -139,7 +139,7 @@ absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
   // If the sim result was successfully calculated, set the signal file paths.
   // Else, return the StatusOr failure.
   SimilarityResultMsg sim_result_msg;
-  ASSIGN_OR_RETURN(sim_result_msg, Run(ref_signal, deg_signal));
+  VISQOL_ASSIGN_OR_RETURN(sim_result_msg, Run(ref_signal, deg_signal));
   sim_result_msg.set_reference_filepath(ref_signal_path.Path());
   sim_result_msg.set_degraded_filepath(deg_signal_path.Path());
   return sim_result_msg;
@@ -148,9 +148,9 @@ absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
 absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
     const AudioSignal& ref_signal, AudioSignal& deg_signal) {
   // Ensure the initialization succeeded.
-  RETURN_IF_ERROR(ErrorIfNotInitialized());
+  VISQOL_RETURN_IF_ERROR(ErrorIfNotInitialized());
 
-  RETURN_IF_ERROR(ValidateInputAudio(ref_signal, deg_signal));
+  VISQOL_RETURN_IF_ERROR(ValidateInputAudio(ref_signal, deg_signal));
 
   // Adjust for codec initial padding.
   auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal);

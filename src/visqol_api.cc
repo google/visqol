@@ -90,8 +90,7 @@ absl::Status VisqolApi::Create(const VisqolConfig config) {
   }
 
   // Initialize ViSQOL with the model file.
-  RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map,
-                               search_window));
+  VISQOL_RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map));
 
   return absl::Status();
 }
@@ -102,7 +101,7 @@ absl::StatusOr<SimilarityResultMsg> VisqolApi::Measure(
   AudioSignal ref_sig{reference, sample_rate_};
   AudioSignal deg_sig{degraded, sample_rate_};
   SimilarityResultMsg sim_result_msg;
-  ASSIGN_OR_RETURN(sim_result_msg, visqol_.Run(ref_sig, deg_sig));
+  VISQOL_ASSIGN_OR_RETURN(sim_result_msg, visqol_.Run(ref_sig, deg_sig));
 
   return sim_result_msg;
 }

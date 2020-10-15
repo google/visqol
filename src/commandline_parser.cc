@@ -87,8 +87,9 @@ ABSL_CONST_INIT const char kDefaultAudioModelFile[] =
 ABSL_CONST_INIT const char kDefaultSpeechModelFile[] =
     "/model/tcdvoip_nu.568_c5.31474325639_g3.17773760038_model.txt";
 
-absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
-                                                               char **argv) {
+
+absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse
+    (int argc, char **argv) {
   absl::SetProgramUsageMessage(
       "Perceptual quality estimator for speech and audio");
   absl::ParseCommandLine(argc, argv);

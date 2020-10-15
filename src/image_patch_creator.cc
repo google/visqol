@@ -25,9 +25,10 @@
 #include "audio_signal.h"
 
 namespace Visqol {
-absl::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
-    const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
-    const AnalysisWindow &window) const {
+absl::StatusOr<std::vector<size_t>>
+    ImagePatchCreator::CreateRefPatchIndices(
+        const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
+        const AnalysisWindow &window) const {
   return CreateRefPatchIndices(spectrogram);
 }
 
@@ -47,8 +48,9 @@ std::vector<ImagePatch> ImagePatchCreator::CreatePatchesFromIndices(
   return patches;
 }
 
-absl::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
-    const AMatrix<double> &spectrogram) const {
+absl::StatusOr<std::vector<size_t>>
+    ImagePatchCreator::CreateRefPatchIndices(
+        const AMatrix<double> &spectrogram) const {
   std::vector<size_t> refPatchIndices;
   auto spectrum_length = spectrogram.NumCols();
   auto init_patch_index = patch_size_ / 2;
