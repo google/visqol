@@ -65,7 +65,7 @@ cc_library(
     deps = [
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
-        "@com_google_absl//absl/base",
+        "//third_party/absl/base",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/flags:usage",
@@ -87,7 +87,7 @@ cc_library(
 # Application
 # =========================================================
 cc_binary(
-    name = "main",
+    name = "visqol",
     srcs = ["src/main.cc"],
     data = [
         "//model:libsvm_nu_svr_model.txt",
@@ -96,8 +96,8 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/base",
-        "@com_google_absl//absl/base:raw_logging_internal",
+        "//third_party/absl/base",
+        "//third_party/absl/base:raw_logging_internal",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
     ],
