@@ -19,6 +19,7 @@
 
 #include "gammatone_filterbank.h"
 #include "spectrogram_builder.h"
+#include "absl/status/statusor.h"
 
 namespace Visqol {
 

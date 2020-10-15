@@ -45,6 +45,28 @@ TEST(LoadAsMono, Mono) {
   ASSERT_NEAR(kMonoDuration, wavreader_audio.GetDuration(), kDurationTolerance);
 }
 
+TEST(LoadAsMono, MonoFromStream) {
+  std::ifstream wav_file("testdata/clean_speech/CA01_01.wav",
+                         std::ios::binary);
+  std::stringstream wav_string_stream;
+  wav_string_stream << wav_file.rdbuf();
+  wav_file.close();
+
+  auto wavreader_audio = Visqol::MiscAudio::LoadAsMono(&wav_string_stream);
+  ASSERT_EQ(kMonoTestsample_rate, wavreader_audio.sample_rate);
+  ASSERT_EQ(kMonoTestNumRows, wavreader_audio.data_matrix.NumRows());
+  ASSERT_EQ(kMonoTestNumCols, wavreader_audio.data_matrix.NumCols());
+  ASSERT_EQ(kMonoTestNumRows, wavreader_audio.data_matrix.NumElements());
+  ASSERT_NEAR(kMonoDuration, wavreader_audio.GetDuration(), kDurationTolerance);
+}
+
+TEST(LoadAsMono, MonoFromEmptyStream) {
+  std::stringstream wav_string_stream;
+  auto wavreader_audio = Visqol::MiscAudio::LoadAsMono(&wav_string_stream);
+  // sample_rate will be garbage in this case.
+  ASSERT_NE(kMonoTestsample_rate, wavreader_audio.sample_rate);
+}
+
 TEST(LoadAsMono, Stereo) {
   FilePath stereo_file{
       "testdata/conformance_testdata_subset/guitar48_stereo.wav"};

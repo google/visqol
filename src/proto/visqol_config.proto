@@ -52,6 +52,11 @@ message VisqolConfig {
     // of 5.0. If this bool is instead set to true, a perfect NSIM score will
     // instead be mapped to a MOS-LQO of ~4.x.
     bool use_unscaled_speech_mos_mapping = 6;
+
+    // If provided, this value will be used to determine how far the comparison
+    // algorithm will search to find the most optimal match for a given
+    // reference frame.
+    int32 search_window_radius = 7;
   }
 
   VisqolAudioInfo audio = 1;

@@ -17,25 +17,18 @@
 #ifndef VISQOL_INCLUDE_FFT_MANAGER_H
 #define VISQOL_INCLUDE_FFT_MANAGER_H
 
-#if defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(_M_IX86)
 #include <xmmintrin.h>
-typedef __m128 SimdVector;
-#define SIMD_LENGTH 4
-#define SIMD_MULTIPLY(a, b) _mm_mul_ps(a, b)
-#define SIMD_LOAD_ONE_FLOAT(p) _mm_set1_ps(p)
-#elif defined(__arm__) || defined(__aarch64__) || defined(__arm64__)
-#include <arm_neon.h>
-typedef float32x4_t SimdVector;
-#define SIMD_LENGTH 4
-#define SIMD_MULTIPLY(a, b) vmulq_f32(a, b)
-#define SIMD_LOAD_ONE_FLOAT(p) vld1q_dup_f32(&(p))
-#endif
 
 #include "pffft.h"
 
 #include "audio_channel.h"
 
 namespace Visqol {
+
+  typedef __m128 SimdVector;
+  #define SIMD_LENGTH 4
+  #define SIMD_MULTIPLY(a, b) _mm_mul_ps(a, b)
+  #define SIMD_LOAD_ONE_FLOAT(p) _mm_set1_ps(p)
 
 /**
  * This class acts as a wrapper for the PFFFT library operations. It is not
@@ -172,7 +165,7 @@ class FftManager {
   const float inverse_fft_scale_;
 
   /**
-   *  Stored the PFFFT state for performing operations.
+   *  Stored the PFFFT state for performaing operations.
    */
   PFFFT_Setup* fft_;
 

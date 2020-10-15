@@ -7,6 +7,8 @@ import numpy as np
 # Placeholder for resource import.
 import unittest
 from visqol.python import visqol_lib_py
+from concurrent import futures
+from absl import logging
 
 MODEL_FILE = 'model/libsvm_nu_svr_model.txt'
 REF_FILE = 'testdata/clean_speech/CA01_01.wav'
@@ -14,22 +16,65 @@ DEG_FILE = 'testdata/clean_speech/transcoded_CA01_01.wav'
 
 CONFORMANCE_TOLERANCE = 0.0001
 
+
+def _CalculateVisqol(reference_file, degraded_file):
+
+  files_dir = os.path.dirname(__file__)
+
+  model_path = visqol_lib_py.FilePath(os.path.join(files_dir, MODEL_FILE))
+  ref_path = visqol_lib_py.FilePath(os.path.join(files_dir, reference_file))
+  deg_path = visqol_lib_py.FilePath(os.path.join(files_dir, degraded_file))
+  manager = visqol_lib_py.VisqolManager()
+  manager.Init(model_path, True, False, 60)
+  similarity_result = manager.Run(ref_path, deg_path)
+  return similarity_result
+
+
+def _log_wrapper(method, args, kwargs):
+  try:
+    return_value = method(*args, **kwargs)
+  except:
+    logging.exception('Exception in %s', method)
+    raise
+  return return_value
+
+
 class VisqolLibPyTest(unittest.TestCase):
+
+  def test_Parallel(self):
+    methods_and_args = []
+    methods_and_args.append((_CalculateVisqol, [REF_FILE, DEG_FILE]))
+    methods_and_args.append((_CalculateVisqol, [REF_FILE, DEG_FILE]))
+    results = []
+    with futures.ThreadPoolExecutor(
+        max_workers=len(methods_and_args)) as executor:
+      started_futures = []
+      # This is pretty much a map() but we have better control over the chunk
+      # size.
+      for method, args in methods_and_args:
+        future = executor.submit(_log_wrapper, method, args, {})
+        started_futures.append((future, method, args))
+      last_exception = None
+      for f, method, args in started_futures:
+        try:
+          results.append(f.result())
+        except Exception as ex:  # pylint: disable=broad-except
+          e = ex  # This assigment works around pytype bug http://b/136279340.
+          msg = (
+              'Execution of method %s with args %s in a separate thread failed.'
+              % (method, args))
+          msg += " The last failed method's exception will be re-thrown."
+          last_exception = e
+          logging.exception(msg)
+      if last_exception:
+        raise last_exception  # Can only be Exception pylint: disable=raising-bad-type
+      return results
 
   def test_docstring(self):
     self.assertContainsInOrder(['ViSQOL'], visqol_lib_py.__doc__)
 
   def test_VisqolManager(self):
-    files_dir = os.path.dirname(__file__)
-
-    model_path = visqol_lib_py.FilePath(os.path.join(files_dir, MODEL_FILE))
-    ref_path = visqol_lib_py.FilePath(os.path.join(files_dir, REF_FILE))
-    deg_path = visqol_lib_py.FilePath(os.path.join(files_dir, DEG_FILE))
-
-    manager = visqol_lib_py.VisqolManager()
-    manager.Init(model_path, True, False)
-
-    similarity_result = manager.Run(ref_path, deg_path)
+    similarity_result = _CalculateVisqol(REF_FILE, DEG_FILE)
 
     # The conformance value lives in a c++ header.
     conformance_value = visqol_lib_py.ConformanceSpeechCA01TranscodedValue()

@@ -17,27 +17,27 @@
 #include <utility>
 #include <vector>
 
-#include "absl/base/internal/raw_logging.h"
-
 #include "amatrix.h"
+#include "comparison_patches_selector.h"
 #include "file_path.h"
+#include "image_patch_creator.h"
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
-#include "spectrogram.h"
-#include "comparison_patches_selector.h"
-#include "image_patch_creator.h"
 #include "similarity_result.h"
 #include "similarity_to_quality_mapper.h"
+#include "spectrogram.h"
 #include "spectrogram_builder.h"
+#include "absl/base/internal/raw_logging.h"
+#include "absl/status/statusor.h"
 
 namespace Visqol {
-absl::StatusOr<SimilarityResult>
-Visqol::CalculateSimilarity(
+absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
     const AudioSignal &ref_signal, AudioSignal &deg_signal,
     SpectrogramBuilder *spect_builder, const AnalysisWindow &window,
     const ImagePatchCreator *patch_creator,
     const ComparisonPatchesSelector *comparison_patches_selector,
-    const SimilarityToQualityMapper *sim_to_qual_mapper) const {
+    const SimilarityToQualityMapper *sim_to_qual_mapper,
+    const int search_window) const {
   /////////////////// Stage 1: Preprocessing ///////////////////
   deg_signal = MiscAudio::ScaleToMatchSoundPressureLevel(ref_signal,
       deg_signal);
@@ -77,9 +77,9 @@ Visqol::CalculateSimilarity(
   auto ref_patches = patch_creator->CreatePatchesFromIndices(
       ref_spectrogram.Data(), ref_patch_indices);
   auto most_sim_patch_result =
-      comparison_patches_selector->FindMostSimilarDegPatches(
+      comparison_patches_selector->FindMostOptimalDegPatches(
           ref_patches, ref_patch_indices, deg_spectrogram.Data(),
-          frame_duration);
+          frame_duration, search_window);
   if (!most_sim_patch_result.ok()) {
     return most_sim_patch_result.status();
   }

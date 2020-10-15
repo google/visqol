@@ -24,6 +24,7 @@
 #include "equivalent_rectangular_bandwidth.h"
 #include "signal_filter.h"
 #include "spectrogram.h"
+#include "absl/status/statusor.h"
 
 namespace Visqol {
 
@@ -33,9 +34,8 @@ GammatoneSpectrogramBuilder::GammatoneSpectrogramBuilder(
     const GammatoneFilterBank &filter_bank, const bool use_speech_mode) :
     filter_bank_(filter_bank), speech_mode_(use_speech_mode) {}
 
-absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build
-    (const AudioSignal &signal,
-     const AnalysisWindow &window) {
+absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
+    const AudioSignal &signal, const AnalysisWindow &window) {
   const auto &sig = signal.data_matrix;
   size_t sample_rate = signal.sample_rate;
   double max_freq = speech_mode_ ? kSpeechModeMaxFreq : sample_rate / 2.0;

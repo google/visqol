@@ -195,11 +195,13 @@ class SimilarityResultsWriter {
    * @param csv_res_path The path to the output CSV file. If the file already
    *    exists, values will be appended to it.
    * @param sim_res_msg The comparison result to write.
+   * @param output_moslqo If true, write a column for the mean opinion score.
+   * @param If True, write a column with the average nsim value per frequency.
    */
   static void WriteResultsToCSV(const FilePath &csv_res_path,
                                 const SimilarityResultMsg &sim_res_msg,
-                                const bool output_moslqo=true,
-                                const bool output_fvnsim=false) {
+                                const bool output_moslqo = true,
+                                const bool output_fvnsim = true) {
     // If this file does not already exist, we need to write the header.
     const bool write_header = !csv_res_path.Exists();
     std::ofstream out_file;

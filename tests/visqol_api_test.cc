@@ -40,12 +40,12 @@ const char kCleanSpeechRef[] =
 const char kCleanSpeechDeg[] =
   "testdata/clean_speech/transcoded_CA01_01.wav";
 const char kNoSampleRateErrMsg[] =
-    "INVALID_ARGUMENT:Audio info must be supplied for config.";
+    "INVALID_ARGUMENT: Audio info must be supplied for config.";
 const char kNonExistantModelFile[] = "non_existant.txt";
 const char kNonExistantModelFileErrMsg[] =
-    "INVALID_ARGUMENT:Failed to load the SVR model file: non_existant.txt";
+    "INVALID_ARGUMENT: Failed to load the SVR model file: non_existant.txt";
 const char kNon48kSampleRateErrMsg[] =
-    "INVALID_ARGUMENT:Currently, 48k is the only sample rate supported by "
+    "INVALID_ARGUMENT: Currently, 48k is the only sample rate supported by "
     "ViSQOL Audio. See README for details of overriding.";
 
 // These values match the known version.
@@ -58,9 +58,7 @@ const double kContrabassoonFvnsim[] = {
   0.805530, 0.786122, 0.823594, 0.878549
 };
 
-const double kCA01_01AsAudio = 2.0003927800390828;
 const double kPerfectScore = 5.0;
-const double kCA01_01UnscaledPerfectScore = 4.456782;
 
 /**
  *  Happy path test for the ViSQOL API with a model file specified.

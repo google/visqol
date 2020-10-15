@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "absl/status/status.h"
+#include "misc_math.h"
 
 #include "amatrix.h"
 
@@ -33,28 +34,24 @@ absl::Status SpeechSimilarityToQualityMapper::Init() {
 
 double SpeechSimilarityToQualityMapper::PredictQuality(
     const std::vector<double> &similarity_vector) const {
-  // Third order polynomial fitting coefficients on the mean NSIM value over
-  // the TCD-VOIP Dataset.
+  // The prediction uses the fit of three parameters for the function
+  // ExponentialFromFit given an NSIM value fit over the TCD-VOIP Dataset.
   // See scripts/fit_nsim_to_mos_poly.py for recalculation.
   // The new coefficients yet has an upper mapping of NSIM=1.0->MOS=~4.5,
   // which we optionally scale to be 1.0->5.0 to provide a perfect score.
-  constexpr std::array<double, 4> kNsimToMosCoefs = {{41.644078,
-                                                      -77.034652,
-                                                      47.334363,
-                                                      -7.487007}};
+  constexpr float kFitParameterA = 1.15594553;
+  constexpr float kFitParameterB = 4.685115504;
+  constexpr float kFitParameterX0 = 0.76552319;
+  constexpr float kFitScale = 1.2031409;
+  double nsim_mean = std::accumulate(similarity_vector.begin(),
+                                     similarity_vector.end(),
+                                     0.0) / static_cast<double>(
+                                         similarity_vector.size());
 
-  auto nsim_mean = std::accumulate(similarity_vector.begin(),
-                                    similarity_vector.end(),
-                                    0.0) / static_cast<double>(
-                                      similarity_vector.size());
+  double mos = MiscMath::ExponentialFromFit(
+      nsim_mean, kFitParameterA, kFitParameterB, kFitParameterX0);
 
-  auto mos = 0.0;
-  for (size_t i = 0; i < kNsimToMosCoefs.size(); i++) {
-    mos += kNsimToMosCoefs[i] * pow(nsim_mean,
-        kNsimToMosCoefs.size() - (i + 1));
-  }
-
-  float scale = scale_to_max_mos_ ? 1.121886 : 1.0;
+  float scale = scale_to_max_mos_ ? kFitScale : 1.0;
 
   // Clamp to 1-5 range
   return std::min(std::max(mos * scale, 1.), 5.);

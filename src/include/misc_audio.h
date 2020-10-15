@@ -25,6 +25,8 @@
 #include "misc_math.h"
 #include "spectrogram.h"
 
+#include "absl/types/optional.h"
+
 namespace Visqol {
 
 class MiscAudio {
@@ -71,7 +73,23 @@ class MiscAudio {
    */
   static AudioSignal LoadAsMono(const FilePath &path);
 
- /**
+  /**
+   * For a given audio stream, load it in mono. Audio with more than 1 channel
+   * will be downmixed to mono.
+   *
+   * Currently only WAV streams are supported.
+   *
+   * @param string_stream Audio stream to load.
+   *
+   * @param filepath Optional filepath for logging purposes.
+   *
+   * @return The mono audio signal.
+   */
+  static AudioSignal LoadAsMono(
+      std::stringstream *string_stream,
+      absl::optional<std::string> filepath = absl::nullopt);
+
+  /**
    * Performs some basic preparation on the input spectrograms so that they are
    * suitable for comparison to each other.
    *

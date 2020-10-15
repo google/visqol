@@ -12,20 +12,24 @@ exports_files(["LICENSE"])
 proto_library(
     name = "similarity_result",
     srcs = ["src/proto/similarity_result.proto"],
+    visibility = ["//visibility:public"],
 )
 
 proto_library(
     name = "visqol_config",
     srcs = ["src/proto/visqol_config.proto"],
+    visibility = ["//visibility:public"],
 )
 
 cc_proto_library(
     name = "similarity_result_cc_proto",
+    visibility = ["//visibility:public"],
     deps = [":similarity_result"],
 )
 
 cc_proto_library(
     name = "visqol_config_cc_proto",
+    visibility = ["//visibility:public"],
     deps = [":visqol_config"],
 )
 
@@ -48,11 +52,8 @@ cc_library(
             # Windows Compile Opts
             "/D_USE_MATH_DEFINES",
         ],
-        "@bazel_tools//src/conditions:darwin_x86_64": [
-            # Mac Compile Opts
-        ],
         "//conditions:default": [
-            # Linux Compile Opts
+            # Mac/Linux Compile Opts
         ],
     }),
     includes = [
@@ -60,40 +61,26 @@ cc_library(
         "src/proto",
         "src/svr_training",
     ],
-    linkopts = select({
-        "//conditions:default": [
-            # Linux Link Opts
-        ],
-    }),
     visibility = ["//visibility:public"],
-    deps = select({
-        "@bazel_tools//src/conditions:windows": [
-            # Windows Dependencies
-            "@boost//:system",
-            "@boost//:filesystem",
-            "@pffft_lib_win//:pffft_win",
-        ],
-        "//conditions:default": [
-            # Linux Dependencies
-            "@boost//:system",
-            "@boost//:filesystem",
-            "@pffft_lib_linux//:pffft_linux",
-        ],
-    }) + [
+    deps = [
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/flags:flag",
-        "@com_google_absl//absl/flags:usage",
         "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
-        "@com_google_protobuf//:protobuf_lite",
-        "@svm_lib//:libsvm",
         "@armadillo_headers//:armadillo_header",
+        "@svm_lib//:libsvm",
+        "@pffft_lib//:pffft_lib",
+        "@boost//:filesystem",
+        "@boost//:system",
+        "@com_google_protobuf//:protobuf_lite",
     ],
 )
 
@@ -107,7 +94,12 @@ cc_binary(
         "//model:tcdvoip_nu.568_c5.31474325639_g3.17773760038_model.txt",
     ],
     visibility = ["//visibility:public"],
-    deps = [":visqol_lib"],
+    deps = [
+        ":visqol_lib",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+    ],
 )
 
 # Tests
@@ -152,6 +144,7 @@ test_suite(
 cc_test(
     name = "visqol_manager_test",
     size = "large",
+    timeout = "long",
     srcs = [
         "tests/test_utility.h",
         "tests/visqol_manager_test.cc",
@@ -166,6 +159,7 @@ cc_test(
         "//testdata/conformance_testdata_subset:guitar48_stereo.wav",
         "//testdata/conformance_testdata_subset:guitar48_stereo_64kbps_aac.wav",
     ],
+    shard_count = 15,
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -180,14 +174,15 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/memory",
     ],
 )
 
 cc_test(
     name = "visqol_api_test",
     size = "medium",
+    timeout = "long",
     srcs = ["tests/visqol_api_test.cc"],
     data = [
         "//model:libsvm_nu_svr_model.txt",
@@ -196,11 +191,13 @@ cc_test(
         "//testdata/conformance_testdata_subset:contrabassoon48_stereo.wav",
         "//testdata/conformance_testdata_subset:contrabassoon48_stereo_24kbps_aac.wav",
     ],
+    shard_count = 15,
     deps = [
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/status",
     ],
 )
 
@@ -253,20 +250,25 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
 
 cc_test(
     name = "conformance_test",
     size = "large",
+    timeout = "long",
     srcs = [
         "tests/conformance_test.cc",
         "tests/test_utility.h",
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
+        "//testdata:alignment/degraded.wav",
+        "//testdata:alignment/reference.wav",
         "//testdata:clean_speech/CA01_01.wav",
         "//testdata:clean_speech/transcoded_CA01_01.wav",
+        "//testdata:short_duration/5_second/guitar48_stereo_5_sec.wav",
         "//testdata/conformance_testdata_subset:castanets48_stereo.wav",
         "//testdata/conformance_testdata_subset:contrabassoon48_stereo.wav",
         "//testdata/conformance_testdata_subset:contrabassoon48_stereo_24kbps_aac.wav",
@@ -287,6 +289,7 @@ cc_test(
         "//testdata/conformance_testdata_subset:strauss48_stereo.wav",
         "//testdata/conformance_testdata_subset:strauss48_stereo_lp35.wav",
     ],
+    shard_count = 15,
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -305,8 +308,8 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -383,9 +386,11 @@ cc_test(
     data = [
         "//model:libsvm_nu_svr_model.txt",
         "//testdata:mismatched_duration/guitar48_stereo_middle_2sec_cut.wav",
+        "//testdata:mismatched_duration/guitar48_stereo_middle_50ms_cut.wav",
         "//testdata:mismatched_duration/guitar48_stereo_x2.wav",
         "//testdata/conformance_testdata_subset:guitar48_stereo.wav",
     ],
+    shard_count = 15,
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -423,8 +428,8 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/memory",
     ],
 )
 
@@ -451,6 +456,7 @@ cc_test(
 cc_test(
     name = "multithreading_test",
     size = "medium",
+    timeout = "long",
     srcs = [
         "tests/multithreading_test.cc",
         "tests/test_utility.h",
@@ -478,8 +484,8 @@ cc_test(
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
-        "//testdata:long_duration/1_min/guitar48_stereo_deg_1min.wav",
-        "//testdata:long_duration/1_min/guitar48_stereo_ref_1min.wav",
+        "//testdata:long_duration/1_min/guitar48_stereo_deg_25s.wav",
+        "//testdata:long_duration/1_min/guitar48_stereo_ref_25s.wav",
     ],
     deps = [
         ":visqol_lib",
@@ -507,5 +513,6 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/status",
     ],
 )

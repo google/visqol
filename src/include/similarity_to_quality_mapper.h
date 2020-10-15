@@ -19,7 +19,6 @@
 
 #include <vector>
 
-
 #include "absl/status/status.h"
 
 namespace Visqol {
