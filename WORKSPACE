@@ -28,11 +28,10 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 # Google Abseil Libs
-http_archive(
+git_repository(
     name = "com_google_absl",
-    strip_prefix = "abseil-cpp-20190808",
-    url = "https://github.com/abseil/abseil-cpp/archive/20190808.zip",
-    sha256 = "0b62fc2d00c2b2bc3761a892a17ac3b8af3578bd28535d90b4c914b0a7460d4e",
+    remote = "https://github.com/abseil/abseil-cpp.git",
+    tag = "20200923",
 )
 
 # LIBSVM
@@ -161,61 +160,27 @@ pybind_library(
 """
 )
 
-##################
-# Platform Linux #
-##################
-# PFFFT - Linux
-http_archive(
-    name = "pffft_lib_linux",
-    strip_prefix = "jpommier-pffft-29e4f76ac53b",
-    urls = ["https://bitbucket.org/jpommier/pffft/get/29e4f76ac53b.zip"],
-    sha256 = "bb10afba127904a0c6c553fa445082729b7d72373511bda1b12a5be0e03f318a",
+# PFFFT
+new_git_repository(
+    name = "pffft_lib",
+    remote = "https://bitbucket.org/jpommier/pffft.git",
+    branch = "master",
     build_file_content = """
 cc_library(
-    name = "pffft_linux",
+    name = "pffft_lib",
     srcs = glob(["pffft.c"]),
     hdrs = glob(["pffft.h"]),
-    visibility = ["//visibility:public"],
-)
-""",
-)
-
-####################
-# Platform Windows #
-####################
-# Boost Headers
-new_local_repository(
-    name = "boost_headers_windows",
-    path = "C:\\boost",
-    build_file_content = """
-cc_library(
-    name = "boost_header",
-    hdrs = glob(["boost/**/*.hpp","boost/**/*.h"]),
-    visibility = ["//visibility:public"],
-)
-""",
-)
-
-# PFFFT - Windows
-http_archive(
-    name = "pffft_lib_win",
-    strip_prefix = "jpommier-pffft-29e4f76ac53b",
-    urls = ["https://bitbucket.org/jpommier/pffft/get/29e4f76ac53b.zip"],
-    sha256 = "bb10afba127904a0c6c553fa445082729b7d72373511bda1b12a5be0e03f318a",
-    build_file_content = """
-cc_library(
-    name = "pffft_win",
-    srcs = glob(["pffft.c"]),
-    hdrs = glob(["pffft.h"]),
-	copts = [
-		"/D_USE_MATH_DEFINES",
-		"/W0",
+	copts = select({
+    "@bazel_tools//src/conditions:windows": [
+        "/D_USE_MATH_DEFINES",
+        "/W0",
 	],
+    "//conditions:default": [
+    ]}),
     visibility = ["//visibility:public"],
 )
 """,
 )
-
 
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
