@@ -22,8 +22,8 @@
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"
-#include "google/protobuf/stubs/status.h"
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
 
 #include "alignment.h"
 #include "amatrix.h"
@@ -81,7 +81,7 @@ PatchSimilarityResult ComparisonPatchesSelector::FindMostSimilarDegPatch(
   return res;
 }
 
-google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
+absl::StatusOr<std::vector<PatchSimilarityResult>>
 ComparisonPatchesSelector::FindMostSimilarDegPatches(
     const std::vector<ImagePatch>& ref_patches,
     const std::vector<size_t>& ref_patch_indices,
@@ -95,8 +95,8 @@ ComparisonPatchesSelector::FindMostSimilarDegPatches(
       num_frames_in_deg_spectro, num_frames_per_patch);
 
   if (!num_patches) {
-    return google::protobuf::util::Status(
-        google::protobuf::util::error::Code::CANCELLED ,
+    return absl::Status(
+        absl::StatusCode::kCancelled,
         "Degraded file was too short, different, or misaligned to score any "
         "of the reference patches.");
   } else if (num_patches < ref_patch_indices.size()) {
@@ -194,7 +194,7 @@ AudioSignal ComparisonPatchesSelector::Slice(
   return sliced_signal;
 }
 
-google::protobuf::util::StatusOr<std::vector<PatchSimilarityResult>>
+absl::StatusOr<std::vector<PatchSimilarityResult>>
 ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
     const std::vector<PatchSimilarityResult>& sim_results,
     const AudioSignal &ref_signal,
@@ -230,7 +230,7 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
                    ref_spectro_result.status().ToString().c_str());
       return ref_spectro_result.status();
     }
-    Spectrogram ref_spectrogram = ref_spectro_result.ValueOrDie();
+    Spectrogram ref_spectrogram = ref_spectro_result.value();
 
     const auto deg_spectro_result = spect_builder->Build(deg_audio_aligned,
                                                          window);
@@ -239,7 +239,7 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
                    deg_spectro_result.status().ToString().c_str());
       return deg_spectro_result.status();
     }
-    Spectrogram deg_spectrogram = deg_spectro_result.ValueOrDie();
+    Spectrogram deg_spectrogram = deg_spectro_result.value();
 
     MiscAudio::PrepareSpectrogramsForComparison(ref_spectrogram,
                                                 deg_spectrogram);

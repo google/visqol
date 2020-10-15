@@ -19,7 +19,7 @@
 
 #include <vector>
 
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/statusor.h"
 
 #include "analysis_window.h"
 #include "audio_signal.h"
@@ -49,7 +49,7 @@ class VadPatchCreator : public ImagePatchCreator {
       : ImagePatchCreator(patch_size) {}
 
   // Docs inherited from parent.
-  google::protobuf::util::StatusOr<std::vector<size_t>> CreateRefPatchIndices(
+  absl::StatusOr<std::vector<size_t>> CreateRefPatchIndices(
     const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
     const AnalysisWindow &window) const override;
 

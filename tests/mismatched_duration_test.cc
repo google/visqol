@@ -44,7 +44,7 @@ TEST(MismatchedLengths, deg_too_short) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kMinMoslqo);
+  ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
 }
 
 // Test that when the degraded file is longer than the reference (by more than
@@ -67,7 +67,7 @@ TEST(MismatchedLengths, deg_too_long) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_TRUE(status_or.ValueOrDie().moslqo() > kMinMoslqo);
+  ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
 }
 
 } // namespace

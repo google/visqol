@@ -33,7 +33,7 @@ GammatoneSpectrogramBuilder::GammatoneSpectrogramBuilder(
     const GammatoneFilterBank &filter_bank, const bool use_speech_mode) :
     filter_bank_(filter_bank), speech_mode_(use_speech_mode) {}
 
-google::protobuf::util::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build
+absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build
     (const AudioSignal &signal,
      const AnalysisWindow &window) {
   const auto &sig = signal.data_matrix;
@@ -56,8 +56,8 @@ google::protobuf::util::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build
 
   // ensure that the signal is large enough.
   if (sig.NumRows() <= window.size) {
-    return google::protobuf::util::Status(
-        google::protobuf::util::error::Code::INVALID_ARGUMENT,
+    return absl::Status(
+        absl::StatusCode::kInvalidArgument,
         "Too few samples ("+std::to_string(sig.NumRows())+") in signal to build"
         " spectrogram ("+std::to_string(hop_size)+" required minimum).");
   }

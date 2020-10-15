@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
   // Create an instance of the ViSQOL API. A new instance
   // is required for each signal pair to be compared.
   Visqol::VisqolApi visqol;
-  google::protobuf::util::Status status = visqol.Create(config);
+  absl::Status status = visqol.Create(config);
 
   // Ensure that the creation succeeded.
   if (!status.ok()) {
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
   }
 
   // Perform the comparison.
-  google::protobuf::util::StatusOr<Visqol::SimilarityResultMsg> comparison_status_or =
+  absl::StatusOr<Visqol::SimilarityResultMsg> comparison_status_or =
           visqol.Measure(reference_signal, degraded_signal);
 
   // Ensure that the comparison succeeded.
@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
   }
 
   // Extract the comparison result from the StatusOr.
-  Visqol::SimilarityResultMsg similarity_result = comparison_status_or.ValueOrDie();
+  Visqol::SimilarityResultMsg similarity_result = comparison_status_or.value();
 
   // Get the "Mean Opinion Score - Listening Quality Objective" for the degraded
   // signal, following the comparison to the reference signal.

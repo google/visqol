@@ -56,7 +56,7 @@ TEST_P(ConformanceTest, ConformanceWithKnownScores) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  EXPECT_NEAR(GetParam().expected_result, status_or.ValueOrDie().moslqo(),
+  EXPECT_NEAR(GetParam().expected_result, status_or.value().moslqo(),
               kTolerance);
 }
 

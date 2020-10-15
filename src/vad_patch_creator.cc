@@ -18,7 +18,7 @@
 #include <numeric>
 #include <vector>
 
-#include "google/protobuf/stubs/statusor.h"
+#include "absl/status/statusor.h"
 
 #include "amatrix.h"
 #include "analysis_window.h"
@@ -55,7 +55,7 @@ std::vector<double> VadPatchCreator::GetVoiceActivity(
   return rms_vad.GetVadResults();
 }
 
-google::protobuf::util::StatusOr<std::vector<size_t>>
+absl::StatusOr<std::vector<size_t>>
     VadPatchCreator::CreateRefPatchIndices(const AMatrix<double> &spectrogram,
                                            const AudioSignal &ref_signal,
                                            const AnalysisWindow &window) const {

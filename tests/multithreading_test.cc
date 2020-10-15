@@ -50,7 +50,7 @@ void thread_glock_test() {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_NEAR(kConformanceGlock48aac, status_or.ValueOrDie().moslqo(), kTolerance);
+  ASSERT_NEAR(kConformanceGlock48aac, status_or.value().moslqo(), kTolerance);
 }
 
 void thread_guitar_test(const FilePath model, const double moslqo) {
@@ -69,7 +69,7 @@ void thread_guitar_test(const FilePath model, const double moslqo) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  ASSERT_NEAR(moslqo, status_or.ValueOrDie().moslqo(), kTolerance);
+  ASSERT_NEAR(moslqo, status_or.value().moslqo(), kTolerance);
 }
 
 // Run two visqol tests simultaneously with the same input files for each run
