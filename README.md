@@ -143,16 +143,16 @@ To compare two files using unscaled speech mode and output their similarity to t
 #### ViSQOL Integration
 To integrate ViSQOL with your Bazel project:
 1. Add ViSQOL to your WORKSPACE file as a local_repository:
-	```
-	local_repository (
-	    name = "visqol",
-	    path = "/path/to/visqol",
-	)
-	```
+    ```
+    local_repository (
+        name = "visqol",
+        path = "/path/to/visqol",
+    )
+    ```
 2. Then in your project's BUILD file, add the ViSQOL library as a dependency to your binary/library dependency list:
-	```
+    ```
     deps = ["@visqol//:visqol_lib"],
-	```
+    ```
 3. Note that Bazel does not currently resolve transitive dependencies (see [issue #2391](https://github.com/bazelbuild/bazel/issues/2391)). As a workaround, it is required that you copy the contents of the ViSQOL WORKSPACE file to your own project's WORKSPACE file until this is resolved.
 
 #### Sample Program
