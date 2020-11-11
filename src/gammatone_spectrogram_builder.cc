@@ -58,8 +58,9 @@ absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
   if (sig.NumRows() <= window.size) {
     return absl::Status(
         absl::StatusCode::kInvalidArgument,
-        "Too few samples ("+std::to_string(sig.NumRows())+") in signal to build"
-        " spectrogram ("+std::to_string(hop_size)+" required minimum).");
+        "Too few samples (" + std::to_string(sig.NumRows()) + ") in signal to "
+        "build spectrogram (" + std::to_string(window.size) +
+        " required minimum).");
   }
   size_t num_cols = 1 + floor((sig.NumRows() - window.size) / hop_size);
   AMatrix<double> out_matrix(filter_bank_.GetNumBands(), num_cols);
