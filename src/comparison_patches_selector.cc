@@ -62,7 +62,7 @@ void ComparisonPatchesSelector::FindMostOptimalDegPatch(
       slide_offset = -1;
       continue;
     }
-    if (slide_offset >= spectrogram_data.NumCols()) {
+    if (slide_offset >= static_cast<int>(spectrogram_data.NumCols())) {
       // The start of the degraded is past the end of the spectrogram, so
       // nothing left to compare.
       break;
@@ -190,11 +190,10 @@ ComparisonPatchesSelector::FindMostOptimalDegPatches(
   // The for loop is used to find the offset which maximizes the similarity
   // score across all the patches.
   for (int slide_offset = lower_limit;
-       slide_offset <= ref_patch_indices[last_index] + search_window;
+       slide_offset <= static_cast<int>(ref_patch_indices[last_index] + search_window);
        slide_offset++) {
-    if (slide_offset >= num_frames_in_deg_spectro) {
-      // The frame offset for degraded start patch cannot be more than the
-      // number of frames in the degraded spectrogram.
+    if (slide_offset >= (static_cast<int>(num_frames_in_deg_spectro-num_frames_per_patch))) {
+      // This prevents the final degraded patch from running over the end of the audio file.
       break;
     }
     if (cumulative_similarity_dp[last_index][slide_offset] >
