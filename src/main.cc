@@ -49,8 +49,8 @@ int main(int argc, char **argv) {
   // Write the results.
   for (const auto& sim_result_msg : sim_result_msgs) {
     Visqol::SimilarityResultsWriter::Write(
-        cmd_args.verbose, cmd_args.results_output_csv, cmd_args.debug_output_path,
-        sim_result_msg, cmd_args.use_speech_mode);
+        cmd_args.verbose, cmd_args.results_output_csv,
+        cmd_args.debug_output_path, sim_result_msg, cmd_args.use_speech_mode);
   }
 
   return 0;
