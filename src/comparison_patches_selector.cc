@@ -185,8 +185,8 @@ ComparisonPatchesSelector::FindMostOptimalDegPatches(
   // The last_offset stores the offset at which the last reference patch got the
   // maximal similarity score over all the reference patches.
   int last_offset;
-  int lower_limit =
-      std::max(0, int(ref_patch_indices[last_index] - search_window));
+  int lower_limit = std::max(
+      0, static_cast<int>(ref_patch_indices[last_index] - search_window));
   // The for loop is used to find the offset which maximizes the similarity
   // score across all the patches.
   for (int slide_offset = lower_limit;
@@ -281,6 +281,13 @@ AudioSignal ComparisonPatchesSelector::Slice(
   // end index.
   auto sliced_matrix = in_signal.data_matrix.GetRows(
        start_index, end_index - 1);
+  // Adds silence at the end of degraded patch, if required for alignment.
+  auto end_time_diff =
+      end_time * in_signal.sample_rate - in_signal.data_matrix.NumRows();
+  if (end_time_diff > 0) {
+    auto postsilence_matrix = AMatrix<double>::Filled(end_time_diff, 1, 0.0);
+    sliced_matrix = postsilence_matrix.JoinVertically(sliced_matrix);
+  }
   if (start_time < 0) {
     auto presilence_matrix = AMatrix<double>::Filled(-1 * start_time *
                                                      in_signal.sample_rate,

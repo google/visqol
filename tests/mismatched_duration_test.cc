@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "visqol_manager.h"
 #include <iostream>
-#include "gtest/gtest.h"
 
+#include "gtest/gtest.h"
 #include "similarity_result.h"
+#include "visqol_manager.h"
 #include "test_utility.h"
 
 namespace Visqol {
 namespace {
 
 const double kMinMoslqo = 1.0;
-const double kConformanceGuitarX2MisMatch = 4.7321012530423481;
+const double kConformanceGuitarX2MisMatch = 4.7280547464172038;
 const double kConformanceGuitar2secMisMatch = 4.7262192026045007;
 const double kConformanceGuitar50msMisMatch = 4.6672912779523177;
 const double kTolerance = 0.0001;
@@ -32,9 +32,10 @@ const double kTolerance = 0.0001;
 // 1 second) visqol will still run to completion without failure.
 TEST(MismatchedLengths, deg_too_short) {
   // Build command line args.
-  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper
-      ("testdata/mismatched_duration/guitar48_stereo_x2.wav",
-       "testdata/conformance_testdata_subset/guitar48_stereo.wav");
+  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper(
+      "testdata/mismatched_duration/guitar48_stereo_x2.wav",
+      "testdata/conformance_testdata_subset/"
+      "guitar48_stereo.wav");
   auto files_to_compare = VisqolCommandLineParser::BuildFilePairPaths(cmd_args);
 
   // Init ViSQOL.
@@ -58,9 +59,11 @@ TEST(MismatchedLengths, deg_too_short) {
 // 1 second) visqol will still run to completion without failure.
 TEST(MismatchedLengths, deg_too_long) {
   // Build command line args.
-  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper
-      ("testdata/mismatched_duration/guitar48_stereo_middle_2sec_cut.wav",
-       "testdata/conformance_testdata_subset/guitar48_stereo.wav");
+  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper(
+      "testdata/mismatched_duration/"
+      "guitar48_stereo_middle_2sec_cut.wav",
+      "testdata/conformance_testdata_subset/"
+      "guitar48_stereo.wav");
   auto files_to_compare = VisqolCommandLineParser::BuildFilePairPaths(cmd_args);
 
   // Init ViSQOL.
@@ -108,5 +111,5 @@ TEST(MismatchedLengths, deg_long) {
               kTolerance);
 }
 
-} // namespace
-} // namespace Visqol
+}  // namespace
+}  // namespace Visqol
