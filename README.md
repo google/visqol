@@ -13,17 +13,25 @@ ViSQOL (Virtual Speech Quality Objective Listener) is an objective, full-referen
 - [FAQ](#faq)
 - [Acknowledgement](#acknowledgement)
 
-## Features
+## Guidelines
 ViSQOL can be run from the command line, or integrated into a project and used through its API. Whether being used from the command line, or used through the API, ViSQOL is capable of running in two modes:
 1. #### Audio Mode:
-- When running in audio mode, input signals must have a 48k sample rate. Non-48k sample rate inputs can be used, but the comparison will likely be negatively impacted.
+- When running in audio mode, input signals must have a 48kHz sample rate.  Input should be resampled to 48kHz.
 - Input signals can be multi-channel, but they will be down-mixed to mono for performing the comparison.
 - Audio mode uses support vector regression, with the maximum range at ~4.75.
 2. #### Speech Mode:
-- When running in speech mode, ViSQOL uses a wideband model. It therefore expects input sample rates of 16k. Higher sample rate input can be used, but frequencies above 8kHz will not be included in the comparison.
+- When running in speech mode, ViSQOL uses a wideband model. It therefore expects input sample rates of 16kHz.  Input should be resampled to 16kHz.
 - As part of the speech mode processing, a root mean square implementation for voice activity detection is performed on the reference signal to determine what parts of the signal have voice activity and should therefore be included in the comparison. The signal is normalized before performing the voice activity detection.
 - Input signals can be multi-channel, but they will be down-mixed to mono for performing the comparison.
 - Speech mode is scaled to have a maximum MOS of 5.0 to match previous version behavior.
+
+#### General guidelines for input
+ViSQOL was trained with data from subjective tests that roughly follow industry standards, such as ITU-T Rec. P.863.  As a result certain assumptions are made, and your input to ViSQOL should probably have these properties:
+- The input audio is 5-10 seconds long.
+- The reference audio is clean and equal or higher quality than the degraded audio.
+
+#### General guidelines for interpreting the output
+Single scores are not very meaningful.  Rather, treatments should be aggregated over several samples that have the same treatment.
 
 
 ## Build
