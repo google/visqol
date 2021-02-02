@@ -201,7 +201,9 @@ class SimilarityResultsWriter {
   static void WriteResultsToCSV(const FilePath &csv_res_path,
                                 const SimilarityResultMsg &sim_res_msg,
                                 const bool output_moslqo = true,
-                                const bool output_fvnsim = true) {
+                                const bool output_fvnsim = true,
+                                const bool output_stddev = true,
+                                const bool output_fvdegenergy = true) {
     // If this file does not already exist, we need to write the header.
     const bool write_header = !csv_res_path.Exists();
     std::ofstream out_file;
@@ -218,6 +220,16 @@ class SimilarityResultsWriter {
           out_file << ",fvnsim" << i;
         }
       }
+      if (output_stddev) {
+        for (size_t i = 0; i < sim_res_msg.fstdnsim_size(); i++) {
+          out_file << ",fstdnsim" << i;
+        }
+      }
+      if (output_fvdegenergy) {
+        for (size_t i = 0; i < sim_res_msg.fvdegenergy_size(); i++) {
+          out_file << ",fvdegenergy" << i;
+        }
+      }
       out_file << std::endl;
     }
 
@@ -231,6 +243,16 @@ class SimilarityResultsWriter {
     if (output_fvnsim) {
       for (size_t i = 0; i < sim_res_msg.fvnsim_size(); i++) {
         out_file << "," << std::setprecision(9) << sim_res_msg.fvnsim(i);
+      }
+    }
+    if (output_stddev) {
+      for (size_t i = 0; i < sim_res_msg.fstdnsim_size(); i++) {
+        out_file << "," << std::setprecision(9) << sim_res_msg.fstdnsim(i);
+      }
+    }
+    if (output_fvdegenergy) {
+      for (size_t i = 0; i < sim_res_msg.fvdegenergy_size(); i++) {
+        out_file << "," << std::setprecision(9) << sim_res_msg.fvdegenergy(i);
       }
     }
 

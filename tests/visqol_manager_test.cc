@@ -141,8 +141,9 @@ TEST(VisqolCommandLineTest, FilteredFreqs) {
   auto status_or = visqol.Run(files_to_compare[0].reference,
                               files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
-  auto sim_result_msg = status_or.value();
+  SimilarityResultMsg sim_result_msg = status_or.value();
   auto fvnsim = sim_result_msg.fvnsim();
+  auto fstdnsim = sim_result_msg.fstdnsim();
   auto cfb = sim_result_msg.center_freq_bands();
   ASSERT_EQ(fvnsim.size(), cfb.size());
 
@@ -152,12 +153,14 @@ TEST(VisqolCommandLineTest, FilteredFreqs) {
   // Assert that the 10k freq band FVNSIM is the lowest value of the FVNSIMs.
   const double fvnsim_10k = fvnsim[k10kCenterFreqBandIndex];
   double lowest_fvnsim = 1.0;
-  for (auto each_fvnsim : fvnsim) {
+  for (double each_fvnsim : fvnsim) {
     if (each_fvnsim < lowest_fvnsim) {
       lowest_fvnsim = each_fvnsim;
     }
   }
   ASSERT_NEAR(fvnsim_10k, lowest_fvnsim, kTolerance);
+
+  ASSERT_GT(fstdnsim[k10kCenterFreqBandIndex], 0.0);
 
   // Assert that the ordering of the per-patch FVNSIMs matches the overall
   // FVNSIM ordering by testing the 10k band for both.
@@ -168,6 +171,42 @@ TEST(VisqolCommandLineTest, FilteredFreqs) {
   }
   fbm_10k = fbm_10k / per_patch_dbg.size();
   ASSERT_NEAR(fvnsim_10k, fbm_10k, kTolerance);
+}
+
+/**
+ * Test idential files and check that stddev is 0 and nsim is 1.
+ */
+TEST(VisqolCommandLineTest, IdenticalStddevNsim) {
+  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper(
+      "testdata/conformance_testdata_subset/"
+      "guitar48_stereo.wav",
+      "testdata/conformance_testdata_subset/"
+      "guitar48_stereo.wav");
+  Visqol::VisqolManager visqol;
+  auto files_to_compare = VisqolCommandLineParser::BuildFilePairPaths(cmd_args);
+
+  auto status = visqol.Init(
+      cmd_args.sim_to_quality_mapper_model, cmd_args.use_speech_mode,
+      cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius);
+  ASSERT_TRUE(status.ok());
+
+  auto status_or =
+      visqol.Run(files_to_compare[0].reference, files_to_compare[0].degraded);
+  ASSERT_TRUE(status_or.ok());
+  SimilarityResultMsg sim_result_msg = status_or.value();
+  auto fvnsim = sim_result_msg.fvnsim();
+  auto fstdnsim = sim_result_msg.fstdnsim();
+  auto fvdegenergy = sim_result_msg.fvdegenergy();
+
+  for (double each_fvnsim : fvnsim) {
+    ASSERT_EQ(each_fvnsim, 1.0);
+  }
+  for (double each_fstdnsim : fstdnsim) {
+    ASSERT_EQ(each_fstdnsim, 0.0);
+  }
+  for (double each_fvdegenergy : fvdegenergy) {
+    ASSERT_GT(each_fvdegenergy, 0.0);
+  }
 }
 
 /**

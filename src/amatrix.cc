@@ -14,13 +14,13 @@
 
 #include "amatrix.h"
 
+#include <armadillo>
 #include <complex>
 #include <utility>
 #include <valarray>
 #include <vector>
 
 #include "absl/types/span.h"
-#include <armadillo>
 
 namespace Visqol {
 template <typename T>
@@ -331,6 +331,13 @@ inline AMatrix<T> AMatrix<T>::FlipUpDown() const {
 template <typename T>
 inline AMatrix<T> AMatrix<T>::Mean(kDimension dim) const {
   return AMatrix<T>(arma::mean(matrix_, static_cast<int>(dim)));
+}
+
+template <typename T>
+inline AMatrix<double> AMatrix<T>::StdDev(kDimension dim) const {
+  // The second parameter of arma::stddev is norm_type.
+  // norm_type=0 means that stddev should use the unbiased estimate.
+  return AMatrix<double>(arma::stddev(matrix_, 0, static_cast<int>(dim)));
 }
 
 template <typename T>

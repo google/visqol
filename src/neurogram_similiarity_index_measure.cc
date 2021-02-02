@@ -68,7 +68,11 @@ PatchSimilarityResult NeurogramSimiliarityIndexMeasure::MeasurePatchSimilarity(
   auto structure = structure_numer.PointWiseDivide(structure_denom);
   auto sim_map = intensity.PointWiseProduct(structure);
 
-  auto freq_band_means = sim_map.Mean(kDimension::ROW);  // A.K.A. FVNSIM
+  // These three matrices correspond to the similarity_result.proto fields
+  // such as fvnsim.
+  auto freq_band_deg_energy = deg_patch.Mean(kDimension::ROW);
+  auto freq_band_means = sim_map.Mean(kDimension::ROW);
+  auto freq_band_stddevs = sim_map.StdDev(kDimension::ROW);
 
   double freq_band_sim_sum = 0;
   std::for_each(freq_band_means.begin(), freq_band_means.end(),
@@ -78,7 +82,9 @@ PatchSimilarityResult NeurogramSimiliarityIndexMeasure::MeasurePatchSimilarity(
 
   PatchSimilarityResult r;
   r.similarity = mean_freq_band_means;
+  r.freq_band_deg_energy = std::move(freq_band_deg_energy);
   r.freq_band_means = std::move(freq_band_means);
+  r.freq_band_stddevs = std::move(freq_band_stddevs);
   return r;
 }
 }  // namespace Visqol

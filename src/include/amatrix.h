@@ -94,6 +94,7 @@ class AMatrix {
   AMatrix<T> JoinVertically(const AMatrix<T> &other) const;
   AMatrix<T> FlipUpDown() const;
   AMatrix<T> Mean(kDimension dim) const;
+  AMatrix<double> StdDev(kDimension dim) const;
 
   size_t NumRows() const;
   size_t NumCols() const;

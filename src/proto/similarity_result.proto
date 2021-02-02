@@ -17,7 +17,6 @@ syntax = "proto3";
 package Visqol;
 
 message SimilarityResultMsg {
-
   // Contains info related to the similarity result for each patch.
   message PatchSimilarityMsg {
     // Similarity score for this patch.
@@ -48,8 +47,16 @@ message SimilarityResultMsg {
   double vnsim = 2;
 
   // Mean of per patch mean frequency band similarity across all patches.
-  // Lowest to highest frequency bands:
+  // The order of the elements is lowest to highest in frequency bands.
   repeated double fvnsim = 3;
+
+  // Stddev of per patch mean frequency band similarity across all patches.
+  // The order of the elements is lowest to highest in frequency bands.
+  repeated double fstdnsim = 8;
+
+  // Mean/Average energy over patches for each frequency band in the degraded
+  // signal.
+  repeated double fvdegenergy = 9;
 
   // Lowest to highest center frequency bands:
   repeated double center_freq_bands = 4;

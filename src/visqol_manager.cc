@@ -176,18 +176,25 @@ SimilarityResultMsg VisqolManager::PopulateSimResultMsg(
   sim_result_msg.set_moslqo(sim_result.moslqo);
   sim_result_msg.set_vnsim(sim_result.vnsim);
 
-  auto fvnsim = sim_result.fvnsim;
-  for (auto itr = fvnsim.begin(); itr != fvnsim.end(); ++itr) {
-    sim_result_msg.add_fvnsim(*itr);
+  for (double val : sim_result.fvnsim) {
+    sim_result_msg.add_fvnsim(val);
   }
 
-  auto cfb = sim_result.center_freq_bands;
-  for (auto itr = cfb.begin(); itr != cfb.end(); ++itr) {
-    sim_result_msg.add_center_freq_bands(*itr);
+  for (double val : sim_result.fstdnsim) {
+    sim_result_msg.add_fstdnsim(val);
   }
 
-  for (const auto& patch : sim_result.debug_info.patch_sims) {
-    auto patch_msg = sim_result_msg.add_patch_sims();
+  for (double val : sim_result.center_freq_bands) {
+    sim_result_msg.add_center_freq_bands(val);
+  }
+
+  for (double val : sim_result.fvdegenergy) {
+    sim_result_msg.add_fvdegenergy(val);
+  }
+
+  for (const PatchSimilarityResult& patch : sim_result.debug_info.patch_sims) {
+    SimilarityResultMsg_PatchSimilarityMsg* patch_msg =
+        sim_result_msg.add_patch_sims();
     patch_msg->set_similarity(patch.similarity);
     patch_msg->set_ref_patch_start_time(patch.ref_patch_start_time);
     patch_msg->set_ref_patch_end_time(patch.ref_patch_end_time);
