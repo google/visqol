@@ -60,6 +60,16 @@ struct SimilarityResult {
   std::vector<double> fvnsim;
 
   /**
+   * Standard deviation in similarity for each frequency.
+   */
+  std::vector<double> fstdnsim;
+
+  /**
+   * Degraded energy for each frequency.
+   */
+  std::vector<double> fvdegenergy;
+
+  /**
    * Stores the center frequency bands that the above FVNSIM scores correspond
    * to. Values are stored running from the lowest frequency band to the
    * highest.

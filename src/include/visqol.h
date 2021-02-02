@@ -85,7 +85,7 @@ class Visqol {
                     const SimilarityToQualityMapper *mapper) const;
 
   /**
-   * Prodcues a set of FVNSIM scores, which represent the similarity between
+   * Produces a set of FVNSIM scores, which represent the similarity between
    * the two signals for each frequency band. This is done by calculating the
    * mean similarity score for each frequency band across all compared patches.
    *
@@ -94,6 +94,30 @@ class Visqol {
    * @return The resulting set of FVNSIM scores.
    */
   AMatrix<double> CalcPerPatchMeanFreqBandMeans(
+      const std::vector<PatchSimilarityResult> &sim_match_info) const;
+
+  /**
+   * Produces a set of FVNSIM scores' stddev in similarity between
+   * the two signals for each frequency band. This is done by calculating the
+   * mean similarity score for each frequency band across all compared patches.
+   *
+   * @param sim_match_info The similarity scores for each patch comparison.
+   * @param frame_duration The frame duration in seconds.
+   *
+   * @return The resulting set of FSTDNSIM scores.
+   */
+  AMatrix<double> CalcPerPatchMeanFreqBandStdDevs(
+      const std::vector<PatchSimilarityResult> &sim_match_info,
+      const double frame_duration) const;
+
+  /**
+   * Produces a set of per frequency energies in the degraded signal.
+   *
+   * @param sim_match_info The similarity scores for each patch comparison.
+   *
+   * @return The resulting set of per frequency energies.
+   */
+  AMatrix<double> CalcPerPatchMeanFreqBandDegradedEnergy(
       const std::vector<PatchSimilarityResult> &sim_match_info) const;
 
   /**

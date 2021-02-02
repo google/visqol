@@ -14,6 +14,7 @@
 
 #include "visqol.h"
 
+#include <cmath>
 #include <utility>
 #include <vector>
 
@@ -97,12 +98,16 @@ absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
 
   sim_match_info = realign_result.value();
 
-  auto fvnsim = CalcPerPatchMeanFreqBandMeans(sim_match_info);
+  AMatrix<double> fvnsim = CalcPerPatchMeanFreqBandMeans(sim_match_info);
+  AMatrix<double> fstdnsim =
+      CalcPerPatchMeanFreqBandStdDevs(sim_match_info, frame_duration);
+  AMatrix<double> fvdegenergy =
+      CalcPerPatchMeanFreqBandDegradedEnergy(sim_match_info);
   double moslqo = PredictMos(fvnsim, sim_to_qual_mapper);
 
   // calc vnsim
   double sum = 0;
-  for (auto &d : fvnsim) {
+  for (double &d : fvnsim) {
     sum += d;
   }
   double vnsim = sum / fvnsim.NumRows();
@@ -115,6 +120,8 @@ absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
   SimilarityResult r;
   r.vnsim = vnsim;
   r.fvnsim = fvnsim.ToVector();
+  r.fstdnsim = fstdnsim.ToVector();
+  r.fvdegenergy = fvdegenergy.ToVector();
   r.moslqo = moslqo;
   r.debug_info = std::move(d);
   r.center_freq_bands = ref_spectrogram.GetCenterFreqBands();
@@ -132,13 +139,78 @@ AMatrix<double> Visqol::CalcPerPatchMeanFreqBandMeans(
     const std::vector<PatchSimilarityResult> &sim_match_info) const {
   size_t num_freq_bands = sim_match_info[0].freq_band_means.NumRows();
   auto fvnsim = AMatrix<double>::Filled(num_freq_bands, 1, 0.0);
-  for (auto &p : sim_match_info) {
-    auto &patch_freq_band_means = p.freq_band_means;
-    for (size_t band = 0; band < patch_freq_band_means.NumRows(); band++) {
-      fvnsim(band) += patch_freq_band_means(band);
+  for (const PatchSimilarityResult &patch : sim_match_info) {
+    for (size_t band = 0; band < patch.freq_band_means.NumRows(); band++) {
+      fvnsim(band) += patch.freq_band_means(band);
     }
   }
   return fvnsim / sim_match_info.size();
+}
+
+AMatrix<double> Visqol::CalcPerPatchMeanFreqBandDegradedEnergy(
+    const std::vector<PatchSimilarityResult> &sim_match_info) const {
+  // All patches have the same number of frequency bands.
+  size_t num_freq_bands = sim_match_info[0].freq_band_deg_energy.NumRows();
+  // Create an empty matrix to accumulate the energy over the patches.
+  AMatrix<double> total_fvdegenergy = AMatrix<double>::Filled(
+      num_freq_bands, 1, 0.0);
+  for (const PatchSimilarityResult &patch : sim_match_info) {
+    for (size_t band = 0; band < patch.freq_band_deg_energy.NumRows(); band++) {
+      total_fvdegenergy(band) += patch.freq_band_deg_energy(band);
+    }
+  }
+  return total_fvdegenergy / sim_match_info.size();
+}
+
+AMatrix<double> Visqol::CalcPerPatchMeanFreqBandStdDevs(
+    const std::vector<PatchSimilarityResult> &sim_match_info,
+    const double frame_duration) const {
+  const size_t num_freq_bands = sim_match_info[0].freq_band_means.NumRows();
+  AMatrix<double> fvnsim = AMatrix<double>::Filled(num_freq_bands, 1, 0.0);
+
+  AMatrix<double> contribution =
+      AMatrix<double>::Filled(num_freq_bands, 1, 0.0);
+  for (const PatchSimilarityResult &patch : sim_match_info) {
+    for (size_t band = 0; band < patch.freq_band_means.NumRows(); band++) {
+      fvnsim(band) += patch.freq_band_means(band);
+    }
+  }
+  fvnsim = fvnsim / sim_match_info.size();
+
+  // Now that we have the global mean, we can compute the combined
+  // variance/stddev.
+  int total_frame_count = 0;
+  for (const PatchSimilarityResult &patch : sim_match_info) {
+    const double secs_in_patch = (patch.ref_patch_end_time -
+                                  patch.ref_patch_start_time);
+    const int frame_count = static_cast<int>(
+        std::ceil(secs_in_patch / frame_duration));
+    total_frame_count += frame_count;
+    for (size_t band = 0; band < patch.freq_band_means.NumRows(); band++) {
+      // Calculate the total variance by combining mean and stddev for each
+      // patch. https://en.wikipedia.org/wiki/Pooled_variance
+      const double stddev = patch.freq_band_stddevs(band);
+      const double mean = patch.freq_band_means(band);
+      contribution(band) += (frame_count - 1) * stddev * stddev;
+      contribution(band) += frame_count * mean * mean;
+    }
+  }
+
+  AMatrix<double> result =
+      ((contribution - (fvnsim.PointWiseProduct(fvnsim) * total_frame_count)) /
+       (total_frame_count - 1));
+  // Square root is not defined for AMatrix, so we can't include it as above.
+  // Instead, use a transform on the elements. Also, filter out negative numbers
+  // due to precision issues that would cause NaNs.
+  std::transform(result.begin(), result.end(), result.begin(),
+                 [&](double &d) {
+                   if (d < 0.0) {
+                     return 0.;
+                   } else {
+                     return sqrt(d);
+                   }
+                 });
+  return result;
 }
 
 double Visqol::AlterForSimilarityExtremes(double vnsim,

@@ -37,6 +37,18 @@ struct PatchSimilarityResult {
   AMatrix<double> freq_band_means;
 
   /**
+   * A 1-D matrix with the variance over time of each frequency.
+   */
+  AMatrix<double> freq_band_stddevs;
+
+  /**
+   * A 1-D matrix with the average energy over time of each frequency.
+   *
+   * The energy here is only for the degraded signal.
+   */
+  AMatrix<double> freq_band_deg_energy;
+
+  /**
    * The similarity score following a comparison between a single reference
    * patch and a single degraded patch.
    */
