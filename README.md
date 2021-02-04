@@ -27,12 +27,15 @@ ViSQOL can be run from the command line, or integrated into a project and used t
 
 #### General guidelines for input
 ViSQOL was trained with data from subjective tests that roughly follow industry standards, such as ITU-T Rec. P.863.  As a result certain assumptions are made, and your input to ViSQOL should probably have these properties:
-- The input audio is 5-10 seconds long.
+- The input audio files should be approximately 8-10 seconds, with not too much silence inside of them and around 0.5s of silence around the audible part.
+- When comparing audio from different sources, be aware of sample rate on the files. If you compare the result from a 16kHz file and a 48kHz file with very similar content, the scores can be quite different.
 - The reference audio is clean and equal or higher quality than the degraded audio.
+- [ITU-T P.800](https://www.itu.int/rec/T-REC-P.800-199608-I) has describes a standard listening test to measure MOS.  It has various recommendations about the audio and environment that may be useful as a reference.
+
 
 #### General guidelines for interpreting the output
-Single scores are not very meaningful.  Rather, treatments should be aggregated over several samples that have the same treatment.
-
+- Single scores are not very meaningful.  Rather, treatments should be aggregated over several samples that have the same treatment.
+- The choice of audio mode vs speech mode can have large effects on the output.
 
 ## Build
 
