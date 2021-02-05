@@ -13,18 +13,29 @@ ViSQOL (Virtual Speech Quality Objective Listener) is an objective, full-referen
 - [FAQ](#faq)
 - [Acknowledgement](#acknowledgement)
 
-## Features
+## Guidelines
 ViSQOL can be run from the command line, or integrated into a project and used through its API. Whether being used from the command line, or used through the API, ViSQOL is capable of running in two modes:
 1. #### Audio Mode:
-- When running in audio mode, input signals must have a 48k sample rate. Non-48k sample rate inputs can be used, but the comparison will likely be negatively impacted.
+- When running in audio mode, input signals must have a 48kHz sample rate.  Input should be resampled to 48kHz.
 - Input signals can be multi-channel, but they will be down-mixed to mono for performing the comparison.
 - Audio mode uses support vector regression, with the maximum range at ~4.75.
 2. #### Speech Mode:
-- When running in speech mode, ViSQOL uses a wideband model. It therefore expects input sample rates of 16k. Higher sample rate input can be used, but frequencies above 8kHz will not be included in the comparison.
+- When running in speech mode, ViSQOL uses a wideband model. It therefore expects input sample rates of 16kHz.  Input should be resampled to 16kHz.
 - As part of the speech mode processing, a root mean square implementation for voice activity detection is performed on the reference signal to determine what parts of the signal have voice activity and should therefore be included in the comparison. The signal is normalized before performing the voice activity detection.
 - Input signals can be multi-channel, but they will be down-mixed to mono for performing the comparison.
 - Speech mode is scaled to have a maximum MOS of 5.0 to match previous version behavior.
 
+#### General guidelines for input
+ViSQOL was trained with data from subjective tests that roughly follow industry standards, such as ITU-T Rec. P.863.  As a result certain assumptions are made, and your input to ViSQOL should probably have these properties:
+- The input audio files should be approximately 8-10 seconds, with not too much silence inside of them and around 0.5s of silence around the audible part.
+- When comparing audio from different sources, be aware of sample rate on the files. If you compare the result from a 16kHz file and a 48kHz file with very similar content, the scores can be quite different.
+- The reference audio is clean and equal or higher quality than the degraded audio.
+- [ITU-T P.800](https://www.itu.int/rec/T-REC-P.800-199608-I) has describes a standard listening test to measure MOS.  It has various recommendations about the audio and environment that may be useful as a reference.
+
+
+#### General guidelines for interpreting the output
+- Single scores are not very meaningful.  Rather, treatments should be aggregated over several samples that have the same treatment.
+- The choice of audio mode vs speech mode can have large effects on the output.
 
 ## Build
 
@@ -299,6 +310,7 @@ This may have to do with bazel being out of sync.  You may need to run `bazel cl
 There are a number of possible explanations, here are the most common ones:
 - In audio mode, ViSQOL was trained with a clean reference and degraded files full-band (audio containing frequencies up to 24 kHz) with bit rates as low as 24 kbps.  If the degraded audio is lower than this it may behave poorly.  If you have subjective scores, you might consider training your own model, as can be seen in scripts/make_svm_train_file.py.
 - Another explanation is that too much silence is being analyzed.  We recommend 3 to 10 seconds of audio (typically 5 seconds) that has significant activity in the reference audio.
+- ViSQOL is designed as a proxy for evaluating codecs and VoIP network degradations with a subjective test similar to ITU-T P.800.  In practice, users try it for other use cases, such as denoising, regression testing on preprocessing, and deep learning-based generative models.  ViSQOL performs reasonably for some of these, and poorly for others.
 
 ## Acknowledgement
 
