@@ -310,6 +310,7 @@ This may have to do with bazel being out of sync.  You may need to run `bazel cl
 There are a number of possible explanations, here are the most common ones:
 - In audio mode, ViSQOL was trained with a clean reference and degraded files full-band (audio containing frequencies up to 24 kHz) with bit rates as low as 24 kbps.  If the degraded audio is lower than this it may behave poorly.  If you have subjective scores, you might consider training your own model, as can be seen in scripts/make_svm_train_file.py.
 - Another explanation is that too much silence is being analyzed.  We recommend 3 to 10 seconds of audio (typically 5 seconds) that has significant activity in the reference audio.
+- ViSQOL is designed as a proxy for evaluating codecs and VoIP network degradations with a subjective test similar to ITU-T P.800.  In practice, users try it for other use cases, such as denoising, regression testing on preprocessing, and deep learning-based generative models.  ViSQOL performs reasonably for some of these, and poorly for others.
 
 ## Acknowledgement
 
