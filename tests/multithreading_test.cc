@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "visqol_manager.h"
-
 #include <thread>
 
 #include "gtest/gtest.h"
-
-#include "similarity_result.h"
+#include "absl/flags/flag.h"
 #include "conformance.h"
+#include "similarity_result.h"
+#include "visqol_manager.h"
 #include "test_utility.h"
 
 namespace Visqol {
@@ -27,10 +26,12 @@ namespace {
 
 const double kTolerance = .00001;
 
-const FilePath kDefaultModel = FilePath(FilePath::currentWorkingDir() +
-    "/model/libsvm_nu_svr_model.txt");
-const FilePath kTestModel = FilePath(FilePath::currentWorkingDir() +
-    "/testdata/test_model/cpp_model.txt");
+const FilePath kDefaultModel =
+    FilePath(FilePath::currentWorkingDir() +
+             "/model/libsvm_nu_svr_model.txt");
+const FilePath kTestModel =
+    FilePath(FilePath::currentWorkingDir() +
+             "/testdata/test_model/cpp_model.txt");
 
 const double kGuitarMoslqoNewModel = 4.7941287050621533;
 

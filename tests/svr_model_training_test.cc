@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "support_vector_regression_model.h"
-
 #include "gtest/gtest.h"
-
+#include "absl/flags/flag.h"
 #include "file_path.h"
-#include "training_data_file_reader.h"
 #include "misc_vector.h"
+#include "support_vector_regression_model.h"
+#include "training_data_file_reader.h"
 
 namespace Visqol {
 namespace {
@@ -28,8 +27,8 @@ const FilePath kTargetsPath = FilePath(
     "testdata/svr_training/training_mat_tcdaudio14_aacvopus15_moslqs.txt");
 const FilePath kObservationsPath = FilePath(
     "testdata/svr_training/training_mat_tcdaudio14_aacvopus15_fvnsims.txt");
-const FilePath kDefaultAudioModelFile = FilePath(
-    FilePath::currentWorkingDir() + "/model/libsvm_nu_svr_model.txt");
+const FilePath kDefaultAudioModelFile =
+    FilePath(FilePath::currentWorkingDir() + "/model/libsvm_nu_svr_model.txt");
 
 // This is the FVNSIM results for a ViSQOL comparison between
 // contrabassoon48_stereo.wav and contrabassoon48_stereo_24kbps_aac.wav

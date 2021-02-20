@@ -163,6 +163,7 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/flags:flag",
     ],
 )
 
@@ -197,6 +198,7 @@ cc_test(
         ":visqol_config_cc_proto",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/status",
     ],
 )
@@ -241,6 +243,7 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/flags:flag",
     ],
 )
 
@@ -472,6 +475,7 @@ cc_test(
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/flags:flag",
     ],
 )
 

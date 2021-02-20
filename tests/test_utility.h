@@ -18,6 +18,7 @@
 #define VISQOL_TESTS_TEST_UTILITY_H
 
 #include "gtest/gtest.h"
+#include "absl/flags/flag.h"
 #include "amatrix.h"
 #include "commandline_parser.h"
 
@@ -26,20 +27,15 @@ Visqol::CommandLineArgs CommandLineArgsHelper(
     const std::string &ref_file, const std::string &deg_file,
     const std::string &batch_file = "", const bool speech_mode = false,
     const bool unscaled_speech = false, const int search_window = 60) {
-  const std::string simToQualModel = FilePath::currentWorkingDir() + kDefaultAudioModelFile;
+  const std::string simToQualModel =
+      FilePath::currentWorkingDir() + kDefaultAudioModelFile;
   const std::string emptyStr;
-  return  CommandLineArgs{
-        ref_file,
-        deg_file,
-        simToQualModel,
-        emptyStr,    // outCSV
-        batch_file,  // batchIn
-        false,       // verbose
-        emptyStr,    // debugOutput
-        speech_mode,
-        unscaled_speech,
-        search_window
-        };
+  return CommandLineArgs{ref_file,    deg_file,        simToQualModel,
+                         emptyStr,    // outCSV
+                         batch_file,  // batchIn
+                         false,       // verbose
+                         emptyStr,    // debugOutput
+                         speech_mode, unscaled_speech, search_window};
 }
 
 // Perform basic matrix dimension comparison.
