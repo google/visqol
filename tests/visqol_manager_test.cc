@@ -15,7 +15,7 @@
 #include "visqol_manager.h"
 
 #include "gtest/gtest.h"
-
+#include "absl/flags/flag.h"
 #include "commandline_parser.h"
 #include "conformance.h"
 #include "similarity_result.h"
@@ -214,8 +214,9 @@ TEST(VisqolCommandLineTest, IdenticalStddevNsim) {
  */
 TEST(VisqolCommandLineTest, MultipleInputPairs) {
   Visqol::VisqolManager visqol;
-  auto status = visqol.Init(FilePath::currentWorkingDir() +
-      kDefaultAudioModelFile, false, false, 60);
+  auto status =
+      visqol.Init(FilePath::currentWorkingDir() + kDefaultAudioModelFile,
+                  false, false, 60);
   ASSERT_TRUE(status.ok());
 
   std::vector<ReferenceDegradedPathPair> path_pairs;
