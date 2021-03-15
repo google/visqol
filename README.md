@@ -39,9 +39,9 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 
 ## Build
 
-#### Linux Build Instructions
+#### Linux/Mac Build Instructions
 1. ##### Install Bazel
-- Bazel can be install for Linux from [here](https://docs.bazel.build/versions/master/install-ubuntu.html).
+- Bazel can be installed following the instructions for [Linux](https://docs.bazel.build/versions/master/install-ubuntu.html) or [Mac](https://docs.bazel.build/versions/master/install-os-x.html).
 - Tested with Bazel version `3.4.1`.
 2. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
@@ -49,7 +49,7 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 #### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2020 August)
 
 1. ##### Install Bazel
-- Bazel can be install for Windows from [here](https://docs.bazel.build/versions/master/windows.html).
+- Bazel can be installed for Windows from [here](https://docs.bazel.build/versions/master/windows.html).
 - Tested with Bazel version `3.5.0`.
 
 2. ##### Install git
@@ -114,7 +114,7 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 
   To compare two files and output their similarity to the console:
 
-##### Linux:
+##### Linux/Mac:
 - `./bazel-bin/visqol --reference_file ref1.wav --degraded_file deg1.wav --verbose`
 
 ##### Windows:
@@ -125,7 +125,7 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 To compare all reference-degraded file pairs in a CSV file, outputting the
 results to another file and also outputting additional "debug" information:
 
-##### Linux:
+##### Linux/Mac:
 - `./bazel-bin/visqol --batch_input_csv input.csv --results_csv results.csv
     --output_debug debug.json`
 
@@ -135,7 +135,7 @@ results to another file and also outputting additional "debug" information:
 ---
 
 To compare two files using scaled speech mode and output their similarity to the console:
-##### Linux:
+##### Linux/Mac:
 - `./bazel-bin/visqol --reference_file ref1.wav --degraded_file deg1.wav --use_speech_mode --verbose`
 
 ##### Windows:
@@ -144,7 +144,7 @@ To compare two files using scaled speech mode and output their similarity to the
 ---
 
 To compare two files using unscaled speech mode and output their similarity to the console:
-##### Linux:
+##### Linux/Mac:
 - `./bazel-bin/visqol --reference_file ref1.wav --degraded_file deg1.wav --use_speech_mode --use_unscaled_speech_mos_mapping --verbose`
 
 ##### Windows:
