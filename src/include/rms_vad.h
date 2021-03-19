@@ -75,7 +75,7 @@ class RmsVad {
    *
    * @return The RMS value for this chunk.
    */
-  double ProcessChunk(std::vector<int16_t> chunk);
+  double ProcessChunk(const std::vector<int16_t> &chunk);
 
   /**
    * Get the results for VAD for each chunk.
@@ -102,7 +102,7 @@ class RmsVad {
    *
    * @return The RMS for the chunk.
    */
-  double CalcRootMeanSquare(std::vector<int16_t> chunk);
+  double CalcRootMeanSquare(const std::vector<int16_t> &chunk);
 
   /**
    * If we detect a chunk with a RMS below the threshold, we only mark it as

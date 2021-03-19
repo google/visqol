@@ -33,7 +33,7 @@ RmsVad::RmsVad() {
   }
 }
 
-double RmsVad::ProcessChunk(std::vector<int16_t> chunk) {
+double RmsVad::ProcessChunk(const std::vector<int16_t> &chunk) {
   const double rms = CalcRootMeanSquare(chunk);
   if (rms < kRmsThreshold) {
     each_chunk_result_.push_back(kVoiceActivityAbsent);
@@ -59,7 +59,7 @@ std::vector<double> RmsVad::GetVadResults() {
   return vad_results_;
 }
 
-double RmsVad::CalcRootMeanSquare(std::vector<int16_t> chunk) {
+double RmsVad::CalcRootMeanSquare(const std::vector<int16_t> &chunk) {
     double square = 0.0;
     double mean = 0.0;
     for (std::size_t i = 0; i < chunk.size(); i++) {
