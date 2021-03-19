@@ -141,12 +141,22 @@ test_suite(
     ],
 )
 
+cc_library(
+    name = "test_utility",
+    testonly = True,
+    hdrs = ["tests/test_utility.h"],
+    deps = [
+        ":visqol_lib",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/flags:flag",
+    ],
+)
+
 cc_test(
     name = "visqol_manager_test",
     size = "large",
     timeout = "long",
     srcs = [
-        "tests/test_utility.h",
         "tests/visqol_manager_test.cc",
     ],
     data = [
@@ -161,6 +171,7 @@ cc_test(
     ],
     shard_count = 15,
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
@@ -208,12 +219,12 @@ cc_test(
     size = "small",
     srcs = [
         "tests/commandline_parser_test.cc",
-        "tests/test_utility.h",
     ],
     data = [
         "//testdata:example_batch/batch_input.csv",
     ],
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
     ],
@@ -263,7 +274,6 @@ cc_test(
     timeout = "long",
     srcs = [
         "tests/conformance_test.cc",
-        "tests/test_utility.h",
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
@@ -294,6 +304,7 @@ cc_test(
     ],
     shard_count = 15,
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
     ],
@@ -304,12 +315,12 @@ cc_test(
     size = "small",
     srcs = [
         "tests/fast_fourier_transform_test.cc",
-        "tests/test_utility.h",
     ],
     data = [
         "//testdata:clean_speech/CA01_01.wav",
     ],
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/memory",
@@ -321,9 +332,9 @@ cc_test(
     size = "small",
     srcs = [
         "tests/convolution_2d_test.cc",
-        "tests/test_utility.h",
     ],
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
     ],
@@ -333,10 +344,10 @@ cc_test(
     name = "test_utility_test",
     size = "small",
     srcs = [
-        "tests/test_utility.h",
         "tests/test_utility_test.cc",
     ],
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
     ],
@@ -357,9 +368,9 @@ cc_test(
     size = "small",
     srcs = [
         "tests/spectrogram_test.cc",
-        "tests/test_utility.h",
     ],
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
     ],
@@ -384,7 +395,6 @@ cc_test(
     size = "large",
     srcs = [
         "tests/mismatched_duration_test.cc",
-        "tests/test_utility.h",
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
@@ -395,6 +405,7 @@ cc_test(
     ],
     shard_count = 15,
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
     ],
@@ -462,7 +473,6 @@ cc_test(
     timeout = "long",
     srcs = [
         "tests/multithreading_test.cc",
-        "tests/test_utility.h",
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
@@ -473,6 +483,7 @@ cc_test(
         "//testdata/conformance_testdata_subset:guitar48_stereo_64kbps_aac.wav",
     ],
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
@@ -484,7 +495,6 @@ cc_test(
     size = "large",
     srcs = [
         "tests/long_duration_test.cc",
-        "tests/test_utility.h",
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
@@ -492,6 +502,7 @@ cc_test(
         "//testdata:long_duration/1_min/guitar48_stereo_ref_25s.wav",
     ],
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
     ],
@@ -502,7 +513,6 @@ cc_test(
     size = "large",
     srcs = [
         "tests/short_duration_test.cc",
-        "tests/test_utility.h",
     ],
     data = [
         "//model:libsvm_nu_svr_model.txt",
@@ -515,6 +525,7 @@ cc_test(
         "//testdata:short_duration/5_second/guitar48_stereo_5_sec.wav",
     ],
     deps = [
+        ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/status",
