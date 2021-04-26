@@ -20,6 +20,7 @@
 #include <valarray>
 #include <vector>
 
+#include "absl/memory/memory.h"
 #include "absl/types/span.h"
 
 namespace Visqol {
@@ -37,6 +38,11 @@ template <typename T>
 inline AMatrix<T>::AMatrix(const std::vector<T>& col) {
   matrix_ = arma::Mat<T>(col);
 }
+
+
+template <typename T>
+inline AMatrix<T>::AMatrix(const std::size_t mmd_size) 
+    : vec_{absl::make_unique<mmd::MmdVector<T>>(mmd_size)} , matrix_{vec_->get_memory(), mmd_size, 1, false, true} { }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(const absl::Span<T>& col) {
@@ -70,6 +76,10 @@ inline AMatrix<T>::AMatrix(size_t rows, size_t cols,
     const std::vector<T>& data) {
   matrix_ = arma::Mat<T>(&data[0], (arma::uword)rows, (arma::uword)cols);
 }
+
+template <typename T>
+inline AMatrix<T>::AMatrix(size_t rows, size_t cols, const mmd::MmdVector<T>& data) 
+    : vec_{absl::make_unique<mmd::MmdVector<T>>(data)} , matrix_{vec_->get_memory(), rows, cols, false, true} { }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(size_t rows, size_t cols) {
@@ -142,6 +152,18 @@ inline AMatrix<T> AMatrix<T>::operator+(T v) const {
 }
 
 template <typename T>
+inline std::unique_ptr<AMatrix<T>> AMatrix<T>::operator+(const T* v) const {
+  auto plus_mat = absl::make_unique<AMatrix<T>>(this->NumRows(), this->NumCols(), mmd::MmdVector<T>{this->NumRows()*this->NumCols()});
+  for (size_t col = 0; col < this->NumCols(); col++) {
+    for (size_t row = 0; row < this->NumRows(); row++) {
+      plus_mat->operator()(row, col) = this->operator()(row, col) + *v;
+    }
+  }
+  
+  return plus_mat;
+}
+
+template <typename T>
 inline AMatrix<T> AMatrix<T>::operator*(T v) const {
   return AMatrix<T>(matrix_ * v);
 }
@@ -164,6 +186,22 @@ inline AMatrix<T> AMatrix<T>::operator-(const AMatrix<T>& m) const {
 template <typename T>
 inline AMatrix<T> AMatrix<T>::PointWiseProduct(const AMatrix<T>& m) const {
   return AMatrix<T>(std::move(matrix_ % m.matrix_));
+}
+
+template <typename T>
+inline std::unique_ptr<AMatrix<T>> AMatrix<T>::PointWiseProduct(const std::unique_ptr<AMatrix<T>>& m) const {
+  auto pwp = absl::make_unique<AMatrix<T>>(this->NumRows(), this->NumCols(), mmd::MmdVector<T>{this->NumRows()*this->NumCols()});
+  for (size_t col = 0; col < this->NumCols(); col++) {
+    for (size_t row = 0; row < this->NumRows(); row++) {
+      if (row < m->NumRows() && col < m->NumCols()) {
+        pwp->operator()(row, col) = this->operator()(row, col) * m->operator()(row, col);
+      } else {
+        pwp->operator()(row, col) = this->operator()(row, col);
+      }
+    }
+  }
+  
+  return pwp;
 }
 
 template <typename T>
@@ -348,6 +386,11 @@ inline const arma::Mat<T>& AMatrix<T>::GetArmaMat() const {
 template <typename T>
 inline std::vector<T> AMatrix<T>::ToVector() const {
   return arma::conv_to<std::vector<T>>::from(matrix_.col(0));
+}
+
+template <typename T>
+inline mmd::MmdVector<T> AMatrix<T>::ToMmdVector() const {
+  return *vec_;
 }
 
 template <typename T>

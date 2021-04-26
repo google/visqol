@@ -21,9 +21,11 @@
 #include <valarray>
 #include <memory>
 
+#include "absl/memory/memory.h"
 #include "absl/types/span.h"
 #define ARMA_64BIT_WORD
 #include <armadillo>
+#include "mmd-vector.h"
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
 #pragma warning(push)
@@ -49,9 +51,12 @@ class AMatrix {
   AMatrix<T>(const absl::Span<T>& col);
   AMatrix<T>(const std::valarray<T> &va);
   AMatrix<T>(const std::vector<std::vector<T>> &vecOfCols);
+  AMatrix<T>(const std::size_t mmd_size);  // memory mapped ctor!
   AMatrix<T>(size_t rows, size_t cols);
   AMatrix<T>(size_t rows, size_t cols, std::vector<T> &&data);
   AMatrix<T>(size_t rows, size_t cols, const std::vector<T> &data);
+  AMatrix<T>(size_t rows, size_t cols,
+      const mmd::MmdVector<T> &data);  // memory mapped ctor!
   AMatrix<T>(arma::Mat<T> &&matrix);  // could this be private?
   T &operator()(size_t row, size_t column);
   T operator()(size_t row, size_t column) const;
@@ -61,6 +66,8 @@ class AMatrix {
   AMatrix<T> &operator=(const AMatrix<T> &other);
   AMatrix<T> operator+(const AMatrix<T> &other) const;
   AMatrix<T> operator+(T v) const;
+  std::unique_ptr<AMatrix<T>> operator+(
+      const T* v) const;  // memory mapped function!
   AMatrix<T> operator*(T v) const;
   AMatrix<T> operator-(T v) const;
   AMatrix<T> operator/(T v) const;
@@ -68,6 +75,8 @@ class AMatrix {
   static AMatrix<T> Filled(size_t rows, size_t cols, T initialValue);
 
   AMatrix<T> PointWiseProduct(const AMatrix<T> &m) const;
+  std::unique_ptr<AMatrix<T>> PointWiseProduct(
+      const std::unique_ptr<AMatrix<T>>& m) const;  // memory mapped function!
   AMatrix<T> PointWiseDivide(const AMatrix<T> &m) const;
   AMatrix<T> Transpose() const;
   AMatrix<double> Abs() const;
@@ -101,6 +110,7 @@ class AMatrix {
   size_t NumElements() const;
 
   std::vector<T> ToVector() const;
+  mmd::MmdVector<T> ToMmdVector() const;  // memory mapped function!
   std::valarray<T> ToValArray() const;
 
   // hack to access private member
@@ -118,6 +128,7 @@ class AMatrix {
   T *mutData() const;  // bit of a hack
 
  private:
+  std::unique_ptr<mmd::MmdVector<T>> vec_ = nullptr;
   arma::Mat<T> matrix_;
 };
 }  // namespace Visqol

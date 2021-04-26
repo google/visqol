@@ -81,6 +81,7 @@ cc_library(
         "@boost//:filesystem",
         "@boost//:system",
         "@com_google_protobuf//:protobuf_lite",
+        "@mmd_vector//:mmd-vector",
     ],
 )
 
@@ -111,11 +112,13 @@ test_suite(
     name = "all_unit_tests",
     tests = [
         "alignment_test",
+        "amatrix_test",
         "analysis_window_test",
         "commandline_parser_test",
         "comparison_patches_selector_test",
         "convolution_2d_test",
         "fast_fourier_transform_test",
+        "fast_fourier_transform_mmd_test",
         "gammatone_filterbank_test",
         "gammatone_spectrogram_builder_test",
         "misc_audio_test",
@@ -127,6 +130,7 @@ test_suite(
         "visqol_api_test",
         "visqol_manager_test",
         "xcorr_test",
+        "xcorr_mmd_test",
     ],
 )
 
@@ -328,6 +332,23 @@ cc_test(
 )
 
 cc_test(
+    name = "fast_fourier_transform_mmd_test",
+    size = "small",
+    srcs = [
+        "tests/fast_fourier_transform_mmd_test.cc",
+        "tests/test_utility.h",
+    ],
+    data = [
+        "//testdata:clean_speech/CA01_01.wav",
+    ],
+    deps = [
+        ":visqol_lib",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_test(
     name = "convolution_2d_test",
     size = "small",
     srcs = [
@@ -357,6 +378,19 @@ cc_test(
     name = "misc_math_test",
     size = "small",
     srcs = ["tests/misc_math_test.cc"],
+    deps = [
+        ":visqol_lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "amatrix_test",
+    size = "small",
+    srcs = [
+        "tests/test_utility.h",
+        "tests/amatrix_test.cc"
+    ],
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -451,6 +485,16 @@ cc_test(
     name = "xcorr_test",
     size = "small",
     srcs = ["tests/xcorr_test.cc"],
+    deps = [
+        ":visqol_lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "xcorr_mmd_test",
+    size = "small",
+    srcs = ["tests/xcorr_mmd_test.cc"],
     deps = [
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",

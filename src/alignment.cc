@@ -20,12 +20,19 @@
 #include "amatrix.h"
 #include "audio_signal.h"
 #include "envelope.h"
+#include "envelope_mmd.h"
 #include "xcorr.h"
+#include "xcorr_mmd.h"
 
 namespace Visqol {
 std::tuple<AudioSignal, AudioSignal, double> Alignment::AlignAndTruncate(
     const AudioSignal &ref_signal, const AudioSignal &deg_signal) {
-  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal);
+  // Set use memory mapping to false here, because this path gets called
+  // many times for a large number of small data structures, so using
+  // memory mapping is not worth it, even if the cmd line arg specifies
+  // to use memory mapping.
+  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal,
+      false);
   AudioSignal aligned_deg_signal = std::get<0>(alignment_result);
   double lag = std::get<1>(alignment_result);
   auto &ref_matrix = ref_signal.data_matrix;
@@ -42,11 +49,11 @@ std::tuple<AudioSignal, AudioSignal, double> Alignment::AlignAndTruncate(
   } else if (ref_matrix.NumRows() < deg_matrix.NumRows()) {
     // For positive lag, the beginning of ref is now aligned with zeros, so
     // that amount should be truncated.
-    new_ref_matrix = ref_matrix.GetRows(int(lag * ref_signal.sample_rate),
-                                        ref_matrix.NumRows() - 1);
+    new_ref_matrix = ref_matrix.GetRows(static_cast<int>(
+        lag * ref_signal.sample_rate), ref_matrix.NumRows() - 1);
     // Truncate the zeros off the deg matrix as well.
-    new_deg_matrix = deg_matrix.GetRows((int)(lag * deg_signal.sample_rate),
-                                        ref_matrix.NumRows() - 1);
+    new_deg_matrix = deg_matrix.GetRows(static_cast<int>(
+        lag * deg_signal.sample_rate), ref_matrix.NumRows() - 1);
   }
 
   AudioSignal new_deg_signal{new_deg_matrix, deg_signal.sample_rate};
@@ -55,15 +62,25 @@ std::tuple<AudioSignal, AudioSignal, double> Alignment::AlignAndTruncate(
 }
 
 std::tuple<AudioSignal, double> Alignment::GloballyAlign(
-    const AudioSignal &ref_signal, const AudioSignal &deg_signal) {
+    const AudioSignal &ref_signal, const AudioSignal &deg_signal,
+    const bool use_memory_mapping) {
   auto &ref_matrix = ref_signal.data_matrix;
   auto &deg_matrix = deg_signal.data_matrix;
-  auto ref_upper_env = Envelope::CalcUpperEnv(ref_matrix);
-  auto deg_upper_env = Envelope::CalcUpperEnv(deg_matrix);
-  auto best_lag = XCorr::CalcBestLag(ref_upper_env, deg_upper_env);
+  int64_t best_lag;
+
+  if (use_memory_mapping) {
+    auto ref_upper_env = EnvelopeMmd::CalcUpperEnv(ref_matrix);
+    auto deg_upper_env = EnvelopeMmd::CalcUpperEnv(deg_matrix);
+    best_lag = XCorrMmd::CalcBestLag(*ref_upper_env, *deg_upper_env);
+  } else {
+    auto ref_upper_env = Envelope::CalcUpperEnv(ref_matrix);
+    auto deg_upper_env = Envelope::CalcUpperEnv(deg_matrix);
+    best_lag = XCorr::CalcBestLag(ref_upper_env, deg_upper_env);
+  }
 
   // Limit the lag to half a patch.
-  if (best_lag == 0 || std::abs(best_lag) > (double) ref_matrix.NumRows() / 2) {
+  if (best_lag == 0 || std::abs(best_lag) >
+          static_cast<double>(ref_matrix.NumRows() / 2)) {
     return std::make_tuple(deg_signal, 0);
   } else {
     // align degraded matrix
@@ -81,7 +98,8 @@ std::tuple<AudioSignal, double> Alignment::GloballyAlign(
     }
     AudioSignal new_deg_signal{std::move(new_deg_matrix),
                                deg_signal.sample_rate};
-    return std::make_tuple(new_deg_signal, best_lag / (double) deg_signal.sample_rate);
+    return std::make_tuple(new_deg_signal, best_lag /
+                           static_cast<double>(deg_signal.sample_rate));
   }
 }
 }  // namespace Visqol

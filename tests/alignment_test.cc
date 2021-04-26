@@ -53,7 +53,7 @@ TEST(Alignment, AlignSignalWithPositiveLag) {
   // Ensure there is an positive initial lag.
   ASSERT_EQ(kBestLagPositive2, initial_lag);
 
-  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal);
+  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal, false);
   deg_signal = std::get<0>(alignment_result);
 
   auto final_lag = XCorr::CalcBestLag(ref_signal.data_matrix,
@@ -77,10 +77,11 @@ TEST(Alignment, AlignSignalWithNegativeLag) {
   // Ensure there is an initial negative lag.
   ASSERT_EQ(kBestLagNegative2, initial_lag);
 
-  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal);
+  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal, false);
   deg_signal = std::get<0>(alignment_result);
 
-  auto final_lag = XCorr::CalcBestLag(ref_signal.data_matrix,                                        deg_signal.data_matrix);
+  auto final_lag = XCorr::CalcBestLag(ref_signal.data_matrix,
+                                      deg_signal.data_matrix);
   // Confirm the lag is gone.
   ASSERT_EQ(kZeroLag, final_lag);
 
@@ -101,7 +102,7 @@ TEST(Alignment, AlignSignalWithNoLag) {
   // Ensure there is no initial lag.
   ASSERT_EQ(kZeroLag, initial_lag);
 
-  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal);
+  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal, false);
   deg_signal = std::get<0>(alignment_result);
 
   auto final_lag = XCorr::CalcBestLag(ref_signal.data_matrix,
@@ -157,6 +158,78 @@ TEST(Alignment, AlignAndTruncateSignalWithPositiveLag) {
             deg_signal.GetDuration());
   ASSERT_EQ(original_ref_duration - kBestLagPositive2,
             ref_signal.GetDuration());
+}
+
+// Test the alignment of a degraded signal with a given reference signal.
+// Test case where the lag between the two signals has a positive value.
+TEST(Alignment, AlignSignalWithPositiveLagMmd) {
+  AudioSignal ref_signal{kRefSignal, 1};
+  AudioSignal deg_signal{kDegSignalLag2, 1};
+
+  auto initial_lag = XCorr::CalcBestLag(ref_signal.data_matrix,
+                                        deg_signal.data_matrix);
+  // Ensure there is an positive initial lag.
+  ASSERT_EQ(kBestLagPositive2, initial_lag);
+
+  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal, true);
+  deg_signal = std::get<0>(alignment_result);
+
+  auto final_lag = XCorr::CalcBestLag(ref_signal.data_matrix,
+                                      deg_signal.data_matrix);
+  // Confirm the lag is gone.
+  ASSERT_EQ(kZeroLag, final_lag);
+
+  // Confirm that the new degraded signal has been padded by the lag amount.
+  ASSERT_EQ(ref_signal.data_matrix.NumElements()+kBestLagPositive2,
+            deg_signal.data_matrix.NumElements());
+}
+
+// Test the alignment of a degraded signal with a given reference signal.
+// Test case where the lag between the two signals has a negative value.
+TEST(Alignment, AlignSignalWithNegativeLagMmd) {
+  AudioSignal ref_signal{kRefSignal, 1};
+  AudioSignal deg_signal{kDegSignalNegativeLag2, 1};
+
+  auto initial_lag = XCorr::CalcBestLag(ref_signal.data_matrix,
+                                        deg_signal.data_matrix);
+  // Ensure there is an initial negative lag.
+  ASSERT_EQ(kBestLagNegative2, initial_lag);
+
+  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal, true);
+  deg_signal = std::get<0>(alignment_result);
+
+  auto final_lag = XCorr::CalcBestLag(ref_signal.data_matrix, 
+                                      deg_signal.data_matrix);
+  // Confirm the lag is gone.
+  ASSERT_EQ(kZeroLag, final_lag);
+
+  // Confirm that the new degraded signal has been cut by the lag amount.
+  ASSERT_EQ(ref_signal.data_matrix.NumElements(),
+            deg_signal.data_matrix.NumElements()-kBestLagNegative2);
+}
+
+// Test the alignment of a degraded signal with a given reference signal.
+// Test case where there is no lag between the two signals.
+TEST(Alignment, AlignSignalWithNoLagMmd) {
+  AudioSignal ref_signal{kRefSignal, 1};
+  AudioSignal deg_signal{kRefSignal, 1};
+  const auto deg_signal_init_size = deg_signal.data_matrix.NumElements();
+
+  auto initial_lag = XCorr::CalcBestLag(ref_signal.data_matrix,
+                                        deg_signal.data_matrix);
+  // Ensure there is no initial lag.
+  ASSERT_EQ(kZeroLag, initial_lag);
+
+  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal, true);
+  deg_signal = std::get<0>(alignment_result);
+
+  auto final_lag = XCorr::CalcBestLag(ref_signal.data_matrix,
+                                      deg_signal.data_matrix);
+  // Confirm there is still no lag.
+  ASSERT_EQ(kZeroLag, final_lag);
+
+  // Confirm that the degraded signal is the same size.
+  ASSERT_EQ(deg_signal_init_size, deg_signal.data_matrix.NumElements());
 }
 
 }  // namespace

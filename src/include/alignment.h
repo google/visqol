@@ -17,6 +17,7 @@
 #ifndef VISQOL_INCLUDE_ALIGNMENT_H
 #define VISQOL_INCLUDE_ALIGNMENT_H
 
+#include <tuple>
 #include <utility>
 
 namespace Visqol {
@@ -34,10 +35,12 @@ class Alignment {
    *
    * @param ref_signal The reference signal.
    * @param def_signal The degraded signal to align.
+   * @param use_memory_mapping Controls whether to use memory mapping.
    * @return A tuple of the aligned degraded signal and its lag in seconds.
    */
   static std::tuple<AudioSignal, double> GloballyAlign(
-      const AudioSignal &ref_signal, const AudioSignal &deg_signal);
+      const AudioSignal &ref_signal, const AudioSignal &deg_signal,
+      const bool use_memory_mapping);
   /**
    * Aligns a degraded signal to the reference signal, truncating them to
    * be the same length.
