@@ -123,6 +123,38 @@ TEST(VisqolApi, happy_path_default_model) {
 }
 
 /**
+ *  Happy path test for the ViSQOL API with the default model file used.
+ *  Use memory mapping.
+ */
+TEST(VisqolApi, happy_path_default_model_memory_mapping) {
+  // Build reference and degraded Spans.
+  AudioSignal ref_signal = MiscAudio::LoadAsMono(FilePath(kContrabassoonRef));
+  AudioSignal deg_signal = MiscAudio::LoadAsMono(FilePath(kContrabassoonDeg));
+  auto ref_data = ref_signal.data_matrix.ToVector();
+  auto deg_data = deg_signal.data_matrix.ToVector();
+  auto ref_span = absl::Span<double>(ref_data);
+  auto deg_span = absl::Span<double>(deg_data);
+
+  // Now call the API without specifying the model file location.
+  VisqolConfig config;
+  config.mutable_audio()->set_sample_rate(kSampleRate);
+  config.mutable_options()->set_use_memory_mapping(true);
+
+  VisqolApi visqol;
+  auto create_status = visqol.Create(config);
+  ASSERT_TRUE(create_status.ok());
+  auto result = visqol.Measure(ref_span, deg_span);
+
+  ASSERT_TRUE(result.ok());
+  auto sim_result = result.value();
+  ASSERT_NEAR(kConformanceContrabassoon24aac, sim_result.moslqo(), kTolerance);
+  ASSERT_NEAR(kContrabassoonVnsim, sim_result.vnsim(), kTolerance);
+  for (int i = 0; i < sim_result.fvnsim_size(); i++) {
+    ASSERT_NEAR(kContrabassoonFvnsim[i], sim_result.fvnsim(i), kTolerance);
+  }
+}
+
+/**
  *  Test calling the ViSQOL API without sample rate data for the input signals.
  */
 

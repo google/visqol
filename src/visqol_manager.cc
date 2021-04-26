@@ -50,9 +50,11 @@ const double VisqolManager::kDurationMismatchTolerance = 1.0;
 absl::Status VisqolManager::Init(const FilePath sim_to_quality_mapper_model,
                                  const bool use_speech_mode,
                                  const bool use_unscaled_speech,
-                                 const int search_window) {
+                                 const int search_window, 
+                                 const bool use_memory_mapping) {
   use_speech_mode_ = use_speech_mode;
   use_unscaled_speech_mos_mapping_ = use_unscaled_speech;
+  use_memory_mapping_ = use_memory_mapping;
   search_window_ = search_window;
   InitPatchCreator();
   InitPatchSelector();
@@ -153,7 +155,7 @@ absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
   VISQOL_RETURN_IF_ERROR(ValidateInputAudio(ref_signal, deg_signal));
 
   // Adjust for codec initial padding.
-  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal);
+  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal, use_memory_mapping_);
   deg_signal = std::get<0>(alignment_result);
 
   const AnalysisWindow window{ref_signal.sample_rate, kOverlap};

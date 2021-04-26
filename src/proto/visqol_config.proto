@@ -57,6 +57,10 @@ message VisqolConfig {
     // algorithm will search to find the most optimal match for a given
     // reference frame.
     int32 search_window_radius = 7;
+
+    // Enabling memory mapping forces ViSQOL to use the filesystem, instead of RAM, 
+    // for some large data structures thereby greatly reducing memory consumption.
+    bool use_memory_mapping = 8;
   }
 
   VisqolAudioInfo audio = 1;

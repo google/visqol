@@ -49,7 +49,7 @@ TEST(RegressionTest, Mono) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -71,7 +71,52 @@ TEST(RegressionTest, Stereo) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
+  ASSERT_TRUE(status.ok());
+
+  auto status_or = visqol.Run(files_to_compare[0].reference,
+                              files_to_compare[0].degraded);
+  ASSERT_TRUE(status_or.ok());
+  EXPECT_NEAR(kConformanceGuitar64aac, status_or.value().moslqo(), kTolerance);
+}
+
+/**
+ *  Compare against the ground truth obtained from the KNOWN version
+ */
+TEST(RegressionTest, MonoMemoryMapped) {
+  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper
+      ("testdata/clean_speech/CA01_01.wav",
+       "testdata/clean_speech/transcoded_CA01_01.wav", "", false, false, 60, true);
+  Visqol::VisqolManager visqol;
+  auto files_to_compare = VisqolCommandLineParser::BuildFilePairPaths(cmd_args);
+
+  auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
+      cmd_args.use_speech_mode,
+      cmd_args.use_unscaled_speech_mos_mapping,
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
+  ASSERT_TRUE(status.ok());
+
+  auto status_or = visqol.Run(files_to_compare[0].reference,
+                              files_to_compare[0].degraded);
+  ASSERT_TRUE(status_or.ok());
+  EXPECT_NEAR(kMonoKnownMos, status_or.value().moslqo(), kTolerance);
+}
+
+/**
+ *  Compare against the ground truth obtained from the KNOWN version
+ */
+TEST(RegressionTest, StereoMemoryMapped) {
+  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper
+      ("testdata/conformance_testdata_subset/guitar48_stereo.wav",
+       "testdata/conformance_testdata_subset/guitar48_stereo_64kbps_aac.wav", "", 
+       false, false, 60, true);
+  Visqol::VisqolManager visqol;
+  auto files_to_compare = VisqolCommandLineParser::BuildFilePairPaths(cmd_args);
+
+  auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
+      cmd_args.use_speech_mode,
+      cmd_args.use_unscaled_speech_mos_mapping,
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -86,7 +131,7 @@ TEST(RegressionTest, Stereo) {
  */
 TEST(VisqolCommandLineTest, FailedInit) {
   Visqol::VisqolManager visqol;
-  auto status = visqol.Init(FilePath("non/existent/file.txt"), false, false, 60);
+  auto status = visqol.Init(FilePath("non/existent/file.txt"), false, false, 60, false);
   ASSERT_FALSE(status.ok());
   ASSERT_EQ(absl::StatusCode::kInvalidArgument,
       status.code());
@@ -135,7 +180,7 @@ TEST(VisqolCommandLineTest, FilteredFreqs) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -187,7 +232,7 @@ TEST(VisqolCommandLineTest, IdenticalStddevNsim) {
 
   auto status = visqol.Init(
       cmd_args.sim_to_quality_mapper_model, cmd_args.use_speech_mode,
-      cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius);
+      cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or =
@@ -216,7 +261,7 @@ TEST(VisqolCommandLineTest, MultipleInputPairs) {
   Visqol::VisqolManager visqol;
   auto status =
       visqol.Init(FilePath::currentWorkingDir() + kDefaultAudioModelFile,
-                  false, false, 60);
+                  false, false, 60, false);
   ASSERT_TRUE(status.ok());
 
   std::vector<ReferenceDegradedPathPair> path_pairs;
@@ -251,7 +296,7 @@ TEST(VisqolCommandLineTest, Non48kSampleRate) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -276,7 +321,7 @@ TEST(VisqolCommandLineTest, DifferentSampleRate) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -297,7 +342,7 @@ TEST(VisqolCommandLineTest, PatchTimestampsIdenticalFiles) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -341,7 +386,7 @@ TEST(VisqolCommandLineTest, PatchTimestampsMissing50ms) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -399,7 +444,7 @@ TEST(VisqolCommandLineTest, SpeechModeDisabled) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -423,7 +468,7 @@ TEST(VisqolCommandLineTest, ScaledSpeechMode) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,
@@ -446,7 +491,7 @@ TEST(VisqolCommandLineTest, UnscaledSpeechMode) {
   auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
       cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+      cmd_args.search_window_radius, cmd_args.use_memory_mapping);
   ASSERT_TRUE(status.ok());
 
   auto status_or = visqol.Run(files_to_compare[0].reference,

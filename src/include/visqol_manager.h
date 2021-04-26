@@ -90,12 +90,13 @@ class VisqolManager {
    * @param search_window The search_window parameter determines how far the
    *    comparison algorithm will search to discover the most optimal match for
    *    a given reference patch.
+   * @param use_memory_mapping Controls whether to use memory mapping.
    *
    * @return An 'OK' status if initialised successfully, else an error status.
    */
   absl::Status Init(const FilePath sim_to_quality_mapper_model,
                     const bool use_speech_mode, const bool use_unscaled_speech,
-                    const int search_window );
+                    const int search_window, const bool use_memory_mapping);
 
   /**
    * Perform comparisons on a number of reference/degraded audio file pairs.
@@ -153,6 +154,11 @@ class VisqolManager {
    * True if the object was successfully initialized, else false.
    */
   bool is_initialized_ = false;
+
+  /**
+   * True if memory mapping is to be used, else false.
+   */
+  bool use_memory_mapping_ = false;
 
   /**
   * This parameter is used to determine how far the algorithm will search in

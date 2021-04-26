@@ -110,6 +110,9 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 `--use_unscaled_speech_mos_mapping`
 - When used in conjunction with --use_speech_mode, this flag will prevent a perfect NSIM score of 1.0 being translated to a MOS score of 5.0. Perfect NSIM scores will instead result in MOS scores of ~4.x.
 
+`--use_memory_mapping`
+- Enabling memory mapping forces ViSQOL to use the filesystem, instead of RAM, for some large data structures thereby greatly reducing memory consumption.
+
 #### Example Command Line Usage
 
   To compare two files and output their similarity to the console:

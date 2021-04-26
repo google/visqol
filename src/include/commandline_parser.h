@@ -97,6 +97,12 @@ struct CommandLineArgs {
    * at 2*search_window_radius + 1 patches to find the most optimal match.
    */
   int search_window_radius;
+  
+  /**
+   * Enabling memory mapping forces ViSQOL to use the filesystem, instead of RAM, 
+   * for some large data structures thereby greatly reducing memory consumption.
+   */
+  bool use_memory_mapping;
 
   /**
    * Constructs the parsed command line args struct.
@@ -106,7 +112,7 @@ struct CommandLineArgs {
                      const FilePath &out_csv, const FilePath &batch_in,
                      const bool verbose_mode, const FilePath &debug_out,
                      const bool use_speech, const bool use_unscaled_speech,
-                     const int search_window )
+                     const int search_window, const bool use_memory_mapping)
       : reference_signal_path{ref_sig},
         degraded_signal_path{deg_sig},
         sim_to_quality_mapper_model{sim_to_qual_mapper},
@@ -116,7 +122,8 @@ struct CommandLineArgs {
         verbose{verbose_mode},
         use_speech_mode{use_speech},
         use_unscaled_speech_mos_mapping{use_unscaled_speech},
-        search_window_radius{search_window} {}
+        search_window_radius{search_window},
+        use_memory_mapping{use_memory_mapping} {}
 
   /**
    * Public no-args constructor needed for StatusOr.

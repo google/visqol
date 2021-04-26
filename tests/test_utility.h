@@ -26,7 +26,8 @@ namespace Visqol {
 Visqol::CommandLineArgs CommandLineArgsHelper(
     const std::string &ref_file, const std::string &deg_file,
     const std::string &batch_file = "", const bool speech_mode = false,
-    const bool unscaled_speech = false, const int search_window = 60) {
+    const bool unscaled_speech = false, const int search_window = 60,
+    const bool use_memory_mapping = false) {
   const std::string simToQualModel =
       FilePath::currentWorkingDir() + kDefaultAudioModelFile;
   const std::string emptyStr;
@@ -35,7 +36,8 @@ Visqol::CommandLineArgs CommandLineArgsHelper(
                          batch_file,  // batchIn
                          false,       // verbose
                          emptyStr,    // debugOutput
-                         speech_mode, unscaled_speech, search_window};
+                         speech_mode, unscaled_speech, search_window,
+                         use_memory_mapping};
 }
 
 // Perform basic matrix dimension comparison.

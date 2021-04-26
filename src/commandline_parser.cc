@@ -80,6 +80,11 @@ ABSL_FLAG(int, search_window_radius, 60,
           "search to discover patch matches. For a given reference frame, it "
           "will look at 2*search_window_radius + 1 patches to find the most "
           "optimal match.");
+ABSL_FLAG(bool, use_memory_mapping, false,
+          "Enabling memory mapping forces ViSQOL to use the filesystem, "
+          "instead of RAM, for some large data structures thereby greatly "
+          "reducing memory consumption."
+          );
 
 namespace Visqol {
 ABSL_CONST_INIT const char kDefaultAudioModelFile[] =
@@ -103,6 +108,7 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
   bool verbose = false;
   bool use_speech = false;
   bool use_unscaled_mapping = false;
+  bool use_memory_mapping = false;
   int search_window = 60;
 
   batch_input = absl::GetFlag(FLAGS_batch_input_csv);
@@ -126,6 +132,7 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
   use_speech = absl::GetFlag(FLAGS_use_speech_mode);
   verbose = absl::GetFlag(FLAGS_verbose);
   search_window = absl::GetFlag(FLAGS_search_window_radius);
+  use_memory_mapping = absl::GetFlag(FLAGS_use_memory_mapping);
   debug_output = absl::GetFlag(FLAGS_output_debug);
 
   if (errorFound) {
@@ -151,7 +158,7 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
       CommandLineArgs{ref_file,          deg_file,    sim_to_qual_model,
                       result_output_csv, batch_input, verbose,
                       debug_output,      use_speech,  use_unscaled_mapping,
-                      search_window};
+                      search_window, use_memory_mapping};
   return cmd_line_results;
 }
 

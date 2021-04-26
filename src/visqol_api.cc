@@ -55,6 +55,7 @@ absl::Status VisqolApi::Create(const VisqolConfig config) {
   bool speech_mode = false;
   bool unscaled_speech_map = false;
   bool allow_sr_override = false;
+  bool use_memory_mapping = false;
   int search_window = 60;
   std::string model_file =
       FilePath::currentWorkingDir() + kDefaultAudioModelFile;
@@ -63,6 +64,7 @@ absl::Status VisqolApi::Create(const VisqolConfig config) {
     speech_mode = config_options.use_speech_scoring();
     unscaled_speech_map = config_options.use_unscaled_speech_mos_mapping();
     allow_sr_override = config_options.allow_unsupported_sample_rates();
+    use_memory_mapping = config_options.use_memory_mapping();
     if (!config_options.svr_model_path().empty()) {
       model_file = config_options.svr_model_path();
     }
@@ -89,7 +91,7 @@ absl::Status VisqolApi::Create(const VisqolConfig config) {
 
   // Initialize ViSQOL with the model file.
   VISQOL_RETURN_IF_ERROR(visqol_.Init(model_file, speech_mode, unscaled_speech_map,
-                               search_window));
+                               search_window, use_memory_mapping));
 
   return absl::Status();
 }
