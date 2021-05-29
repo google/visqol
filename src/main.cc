@@ -43,14 +43,24 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  // Run ViSQOL.
-  auto sim_result_msgs = visqol.Run(files_to_compare);
-
-  // Write the results.
-  for (const auto& sim_result_msg : sim_result_msgs) {
-    Visqol::SimilarityResultsWriter::Write(
-        cmd_args.verbose, cmd_args.results_output_csv,
-        cmd_args.debug_output_path, sim_result_msg, cmd_args.use_speech_mode);
+  // Iterate over all signal pairs to compare.
+  for (const auto& signal_pair : files_to_compare) {
+    // Run comparison on a single signal pair.
+    auto status_or = visqol.Run(signal_pair.reference, signal_pair.degraded);
+    // If successful write value, else log an error.
+    if (status_or.ok()) {
+      Visqol::SimilarityResultsWriter::Write(
+          cmd_args.verbose, cmd_args.results_output_csv,
+          cmd_args.debug_output_path, status_or.value(), cmd_args.use_speech_mode);
+    } else {
+      ABSL_RAW_LOG(ERROR, "Error executing ViSQOL: %s.",
+                   status_or.status().ToString().c_str());
+      // A status of aborted gets thrown when visqol hasn't been init'd.
+      // So if that happens we want to quit processing.
+      if (status_or.status().code() == absl::StatusCode::kAborted) {
+        break;
+      }
+    }
   }
 
   return 0;

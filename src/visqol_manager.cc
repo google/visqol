@@ -104,29 +104,6 @@ absl::Status VisqolManager::InitSimilarityToQualityMapper(
   return sim_to_qual_->Init();
 }
 
-std::vector<SimilarityResultMsg> VisqolManager::Run(
-    const std::vector<ReferenceDegradedPathPair>& signals_to_compare) {
-  std::vector<SimilarityResultMsg> sim_results;
-  // Iterate over all signal pairs to compare.
-  for (const auto& signal_pair : signals_to_compare) {
-    // Run comparison on a single signal pair.
-    auto status_or = Run(signal_pair.reference, signal_pair.degraded);
-    // If successful save value, else log an error.
-    if (status_or.ok()) {
-      sim_results.push_back(status_or.value());
-    } else {
-      ABSL_RAW_LOG(ERROR, "Error executing ViSQOL: %s.",
-                   status_or.status().ToString().c_str());
-      // A status of aborted gets thrown when visqol hasn't been init'd.
-      // So if that happens we want to quit processing.
-      if (status_or.status().code() == absl::StatusCode::kAborted) {
-        break;
-      }
-    }
-  }
-  return sim_results;
-}
-
 absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
     const FilePath& ref_signal_path, const FilePath& deg_signal_path) {
   // Ensure the initialization succeeded.
