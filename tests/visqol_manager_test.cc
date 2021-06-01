@@ -210,34 +210,6 @@ TEST(VisqolCommandLineTest, IdenticalStddevNsim) {
 }
 
 /**
- * Ensure that multiple input pairs can be processed successfully.
- */
-TEST(VisqolCommandLineTest, MultipleInputPairs) {
-  Visqol::VisqolManager visqol;
-  auto status =
-      visqol.Init(FilePath::currentWorkingDir() + kDefaultAudioModelFile,
-                  false, false, 60);
-  ASSERT_TRUE(status.ok());
-
-  std::vector<ReferenceDegradedPathPair> path_pairs;
-  path_pairs.push_back(ReferenceDegradedPathPair{
-      FilePath("testdata/clean_speech/CA01_01.wav"),
-      FilePath("testdata/clean_speech/transcoded_CA01_01.wav")});
-  path_pairs.push_back(ReferenceDegradedPathPair{
-      FilePath(
-          "testdata/conformance_testdata_subset/guitar48_stereo.wav"),
-      FilePath(
-          "testdata/conformance_testdata_subset/guitar48_stereo_64kbps_aac.wav")
-          });
-
-  auto result_vec = visqol.Run(path_pairs);
-
-  ASSERT_EQ(kCountOfMultiplePairResults, result_vec.size());
-  EXPECT_NEAR(kMonoKnownMos, result_vec[0].moslqo(), kTolerance);
-  EXPECT_NEAR(kConformanceGuitar64aac, result_vec[1].moslqo(), kTolerance);
-}
-
-/**
  * Ensure that ViSQOL will complete successfully for input audio signals with
  * non-48k sample rates.
  */

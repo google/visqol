@@ -98,22 +98,6 @@ class VisqolManager {
                     const int search_window );
 
   /**
-   * Perform comparisons on a number of reference/degraded audio file pairs.
-   *
-   * If any of the comparisons fail, an error will be logged and the next
-   * comparison will be moved onto. Only comparisons that do not fail will have
-   * their results returned in the result vector.
-   *
-   * @param signals_to_compare A vector of reference/degraded signal pairs to
-   *    be compared to each other.
-   *
-   * @return A Vector of SimilarityResultMsgs for the comparisons that completed
-   *    successfully.
-   */
-  std::vector<SimilarityResultMsg> Run(
-      const std::vector<ReferenceDegradedPathPair>& signals_to_compare);
-
-  /**
    * Perform a comparison on a single reference/degraded audio file pair.
    *
    * @param ref_signal_path The path to the reference audio file.
