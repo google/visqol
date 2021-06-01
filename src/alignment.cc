@@ -88,6 +88,7 @@ std::tuple<AudioSignal, double> Alignment::GloballyAlign(
       myStaticVar = 1;
       cout << "Audio Delay: " << float(best_lag)/float(48000) << " at 48KHz\n";
       cout << "Audio Delay: " << float(best_lag)/float(44100) << " at 44.1KHz\n";
+      cout << "Audio Delay: " << float(best_lag)/float(16000) << " at 16KHz\n";
     }
     return std::make_tuple(new_deg_signal, best_lag / (double) deg_signal.sample_rate);
   }
