@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+#include <iostream>
+using namespace std;
 
 #include "alignment.h"
 
@@ -81,6 +83,12 @@ std::tuple<AudioSignal, double> Alignment::GloballyAlign(
     }
     AudioSignal new_deg_signal{std::move(new_deg_matrix),
                                deg_signal.sample_rate};
+    static int myStaticVar;
+    if (myStaticVar == 0) {
+      myStaticVar = 1;
+      cout << "Audio Delay: " << float(best_lag)/float(48000) << " at 48KHz\n";
+      cout << "Audio Delay: " << float(best_lag)/float(44100) << " at 44.1KHz\n";
+    }
     return std::make_tuple(new_deg_signal, best_lag / (double) deg_signal.sample_rate);
   }
 }
