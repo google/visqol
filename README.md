@@ -1,3 +1,9 @@
+# ViSQOL Modified
+
+This is a ViSQOL modified version that returns Audio Delay and its Sample Adjustments (In Seconds). To get a better understanding, ViQOL algorithm first aligns the two samples (reference and degraded) so they can be compared. First, it does a global alignment (Considered as the Audio Delay) which uses cross-correlation to find the best match, and then it does `Voice Activity Detection` to later do `Patch Alignment` (Considered as Audio Delay Sample Adjustment). The sample adjustement or patch alginment is important to understand how the audio behaves, not just the quality, but if there are speed up/slow down regions, this will translate into higher Sample Adjustments, and so the quality of the audio will be worse if these numbers are too high (This depends on the lenght of your audio file and the aims of the application to test - 7 second -> >~ 0.05)
+
+The original ViSQOL code is in [here](https://github.com/google/visqol)
+
 # ViSQOL
 
 ViSQOL (Virtual Speech Quality Objective Listener) is an objective, full-reference metric for perceived audio quality. It uses a spectro-temporal measure of similarity between a reference and a test speech signal to produce a MOS-LQO (Mean Opinion Score - Listening Quality Objective) score. MOS-LQO scores range from 1 (the worst) to 5 (the best).
