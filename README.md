@@ -59,6 +59,16 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 3. ##### Build ViSQOL:
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
+#### Running Automated Tests
+To build and execute the automated tests (excluding the conformance tests, SVR training tests, and edge case tests) run `bazel test all_unit_tests`
+
+##### Running Tests On Windows
+Due to [Bazel bug #8843](https://github.com/bazelbuild/bazel/issues/8843), some tests on Windows will fail with 'File Not Found' errors. To work around
+this problem, run the tests with `bazel test all_unit_tests --enable_runfiles`. This will instruct Bazel to create symlinks to the test data files in the 
+test directory.
+
+*Note: This relies on Windows Symlinks. To run this command, Windows 10 version 1703 or newer is required, and Developer Mode must be enabled.*
+
 ## Command Line Usage
 #### Note Regarding Usage
 - When run from the command line, input signals must be in WAV format.
