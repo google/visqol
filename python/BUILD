@@ -1,8 +1,17 @@
-load("//third_party/pybind11/:build_defs.bzl", "pybind_extension")
+load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
 licenses(["notice"])
 
 # Python Binding Extension
+pybind_extension(
+    name = "pyvisqol",
+    srcs = ["pyvisqol.cc"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:visqol_lib",
+    ],
+)
+
 pybind_extension(
     name = "visqol_lib_py",
     srcs = ["visqol_lib_py.cc"],

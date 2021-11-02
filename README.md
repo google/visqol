@@ -45,6 +45,9 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 - Tested with Bazel version `3.4.1`.
 2. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
+3. ##### Build ViSQOL python package
+- Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build //python:pyvisqol.so -c opt`
+- Update your PYTHONPATH to point to the built package folder or copy `./bazel-out/k8-opt/bin/python/pyvisqol.so` to the `venv/lib/`
 
 #### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2020 August)
 
@@ -271,6 +274,21 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+```
+#### Python Package usage
+```python
+import pyvisqol
+
+# Pass path to the desired model and other optional parameters
+manager = pyvisqol.ViSQOL(sim_to_quality_mapper_model='model/libsvm_nu_svr_model.txt', use_speech_mode=True)
+# Example 1. Load audio as a float32 numpy array with dims (num_channels, num_samples)
+reference, reference_sr = np.random.uniform(low=-1, high=1, size=(1, 16000)), 16000
+degraded, degraded_sr = np.random.uniform(low=-1, high=1, size=(1, 16000)), 16000
+manager.run(reference, reference_sr, degraded, degraded_sr)
+# array([1.56553776])
+# Example 2. Specify path to wav files (extracts channels as mono and compares)
+manager.run('path/to/stereo_reference.wav', 'path/to/stereo_degraded.wav')
+# array([1.58473027, 1.5365488 ])
 ```
 ## Dependencies
 
