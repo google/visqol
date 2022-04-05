@@ -18,19 +18,23 @@
 #define VISQOL_INCLUDE_COMMANDLINE_PARSER_H
 
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "absl/status/statusor.h"
-
 #include "file_path.h"
 
 namespace Visqol {
 
 /**
- * The relative location of the default model file.
+ * The relative location of the default SVR model file for audio.
  */
 extern const char kDefaultAudioModelFile[];
+
+/**
+ * The relative location of the default TFLite model file for speech.
+ */
+extern const char kDefaultSpeechModelFile[];
 
 /**
  * This struct is used for storing args provided at the command line.
@@ -52,7 +56,7 @@ struct CommandLineArgs {
    * The path to the similarity to quality mapper model file. If this is not
    * supplied, the default model file is used.
    */
-  FilePath sim_to_quality_mapper_model;
+  FilePath similarity_to_quality_mapper_model;
 
   /**
    * The path to a CSV file for storing similarity results. Optional.
@@ -75,13 +79,13 @@ struct CommandLineArgs {
    * If true, the reference and degraded signal paths and their similarity
    * score will be output to the console.
    */
-  bool verbose;
+  bool verbose = false;
 
   /**
    * If true, the input audio files will be compared using the ViSQOL speech
    * mode.
    */
-  bool use_speech_mode;
+  bool use_speech_mode = false;
 
   /**
    * When using the speech comparison mode, a value of true for this bool will
@@ -89,39 +93,19 @@ struct CommandLineArgs {
    * 5.0. It will instead be ~4.x. If the bool is false, a perfect NSIM score
    * will be mapped to a perfect MOS-LQO.
    */
-  bool use_unscaled_speech_mos_mapping;
+  bool use_unscaled_speech_mos_mapping = false;
 
   /**
    * The search_window_radius parameter determines how far the algorithm will
    * search to discover patch matches. For a given reference frame, it will look
    * at 2*search_window_radius + 1 patches to find the most optimal match.
    */
-  int search_window_radius;
+  int search_window_radius = 60;
 
   /**
-   * Constructs the parsed command line args struct.
+   * If true, use a lattice model to map similarity to MOS.
    */
-  CommandLineArgs(const FilePath &ref_sig, const FilePath &deg_sig,
-                     const FilePath &sim_to_qual_mapper,
-                     const FilePath &out_csv, const FilePath &batch_in,
-                     const bool verbose_mode, const FilePath &debug_out,
-                     const bool use_speech, const bool use_unscaled_speech,
-                     const int search_window )
-      : reference_signal_path{ref_sig},
-        degraded_signal_path{deg_sig},
-        sim_to_quality_mapper_model{sim_to_qual_mapper},
-        results_output_csv{out_csv},
-        batch_input_csv{batch_in},
-        debug_output_path{debug_out},
-        verbose{verbose_mode},
-        use_speech_mode{use_speech},
-        use_unscaled_speech_mos_mapping{use_unscaled_speech},
-        search_window_radius{search_window} {}
-
-  /**
-   * Public no-args constructor needed for StatusOr.
-   */
-  CommandLineArgs(){}
+  bool use_lattice_model = true;
 };
 
 /**
@@ -139,7 +123,7 @@ class VisqolCommandLineParser {
    * @return A struct which holds the parsed args, if parsing was successful.
    *    Else an error status.
    */
-  static absl::StatusOr<CommandLineArgs> Parse(int argc, char **argv);
+  static absl::StatusOr<CommandLineArgs> Parse(int argc, char** argv);
 
   /**
    * Takes the files to be compared (either individual or batch) that were
@@ -150,17 +134,17 @@ class VisqolCommandLineParser {
    * @return The vector of file path pairs for comparison.
    */
   static std::vector<ReferenceDegradedPathPair> BuildFilePairPaths(
-      const CommandLineArgs &cmd_res);
+      const CommandLineArgs& cmd_res);
 
  private:
   /**
    * For a given file path, check if the file exists.
    *
-   * @param path The file path to check for existence.
+   * @param path A FilePath to check for existence.
    *
    * @return True if the file exists, else false.
    */
-  static bool FileExists(const FilePath &path);
+  static bool FileExists(const FilePath& path);
 
   /**
    * Parses a batch CSV file to return a vector of file path pairs
@@ -171,7 +155,7 @@ class VisqolCommandLineParser {
    * @return A vector of file path pairs for comparison.
    */
   static std::vector<ReferenceDegradedPathPair> ReadFilesToCompare(
-      const FilePath &batch_input_path);
+      const FilePath& batch_input_path);
 };
 };  // namespace Visqol
 

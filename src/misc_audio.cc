@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"
-
 #include "wav_reader.h"
 
 namespace Visqol {
@@ -37,7 +36,7 @@ const double kNoiseFloorRelativeToPeakDb = 45.;
 const double kNoiseFloorAbsoluteDb = -45.;
 
 AudioSignal MiscAudio::ScaleToMatchSoundPressureLevel(
-    const AudioSignal &reference, const AudioSignal &degraded) {
+    const AudioSignal& reference, const AudioSignal& degraded) {
   const double ref_spl = MiscAudio::CalcSoundPressureLevel(reference);
   const double deg_spl = MiscAudio::CalcSoundPressureLevel(degraded);
   const double scale_factor = std::pow(10, (ref_spl - deg_spl) / 20);
@@ -46,21 +45,21 @@ AudioSignal MiscAudio::ScaleToMatchSoundPressureLevel(
   return scaled_sig;
 }
 
-double MiscAudio::CalcSoundPressureLevel(const AudioSignal &signal) {
-  const auto &data_matrix = signal.data_matrix;
+double MiscAudio::CalcSoundPressureLevel(const AudioSignal& signal) {
+  const AMatrix<double>& data_matrix = signal.data_matrix;
   double sum = 0;
   std::for_each(data_matrix.cbegin(), data_matrix.cend(),
-           [&](const double &datum) { sum += std::pow(datum, 2); });
+                [&](const double& datum) { sum += std::pow(datum, 2); });
   const double sound_pressure = std::sqrt(sum / data_matrix.NumElements());
   return 20 * std::log10(sound_pressure / kSplReferencePoint);
 }
 
 // Combines the data from all channels into a single channel.
-AMatrix<double> MiscAudio::ToMono(const AMatrix<double> &signal) {
+AMatrix<double> MiscAudio::ToMono(const AMatrix<double>& signal) {
   // If already Mono, nothing to do.
   if (signal.NumCols() > kNumChanMono) {
-    auto mono_mat = AMatrix<double>::Filled(signal.NumRows(), kNumChanMono,
-        kZeroSample);
+    auto mono_mat =
+        AMatrix<double>::Filled(signal.NumRows(), kNumChanMono, kZeroSample);
     for (size_t chan_i = 0; chan_i < signal.NumCols(); chan_i++) {
       for (size_t sample_i = 0; sample_i < signal.NumRows(); sample_i++) {
         mono_mat(sample_i, 0) += signal(sample_i, chan_i);
@@ -73,7 +72,7 @@ AMatrix<double> MiscAudio::ToMono(const AMatrix<double> &signal) {
 }
 
 // Combines the data from all channels into a single channel.
-AudioSignal MiscAudio::ToMono(const AudioSignal &signal) {
+AudioSignal MiscAudio::ToMono(const AudioSignal& signal) {
   // If already Mono, nothing to do.
   if (signal.data_matrix.NumCols() > kNumChanMono) {
     const AMatrix<double> sig_mid_mat(MiscAudio::ToMono(signal.data_matrix));
@@ -86,7 +85,7 @@ AudioSignal MiscAudio::ToMono(const AudioSignal &signal) {
   }
 }
 
-AudioSignal MiscAudio::LoadAsMono(const FilePath &path) {
+AudioSignal MiscAudio::LoadAsMono(const FilePath& path) {
   std::ifstream wav_file(path.Path().c_str(), std::ios::binary);
   if (wav_file) {
     std::stringstream wav_string_stream;
@@ -94,13 +93,12 @@ AudioSignal MiscAudio::LoadAsMono(const FilePath &path) {
     wav_file.close();
     return LoadAsMono(&wav_string_stream, path.Path());
   } else {
-    ABSL_RAW_LOG(ERROR,
-                 "Could not find file %s.", path.Path().c_str());
+    ABSL_RAW_LOG(ERROR, "Could not find file %s.", path.Path().c_str());
     return AudioSignal();
   }
 }
 
-AudioSignal MiscAudio::LoadAsMono(std::stringstream *string_stream,
+AudioSignal MiscAudio::LoadAsMono(std::stringstream* string_stream,
                                   absl::optional<std::string> filepath) {
   AudioSignal sig;
   WavReader wav_reader(string_stream);
@@ -150,13 +148,11 @@ AudioSignal MiscAudio::LoadAsMono(std::stringstream *string_stream,
 }
 
 std::vector<std::vector<double>> MiscAudio::ExtractMultiChannel(
-    const int num_channels,
-    const std::vector<double> &interleaved_vector) {
+    const int num_channels, const std::vector<double>& interleaved_vector) {
   assert(interleaved_vector.size() % num_channels == 0);
   const size_t sub_vector_size = interleaved_vector.size() / num_channels;
   std::vector<std::vector<double>> multi_channel_vec(
-      num_channels,
-      std::vector<double>(sub_vector_size));
+      num_channels, std::vector<double>(sub_vector_size));
 
   auto itr = interleaved_vector.cbegin();
   for (size_t sample = 0; sample < sub_vector_size; sample++) {
@@ -168,8 +164,8 @@ std::vector<std::vector<double>> MiscAudio::ExtractMultiChannel(
   return multi_channel_vec;
 }
 
-void MiscAudio::PrepareSpectrogramsForComparison(
-    Spectrogram &reference, Spectrogram &degraded) {
+void MiscAudio::PrepareSpectrogramsForComparison(Spectrogram& reference,
+                                                 Spectrogram& degraded) {
   reference.ConvertToDb();
   degraded.ConvertToDb();
 
@@ -179,8 +175,7 @@ void MiscAudio::PrepareSpectrogramsForComparison(
   // Apply a per-frame relative threshold.
   // Note that this is not an STFT spectrogram, the spectrogram bins
   // here are each the RMS of a band filter output on the time domain signal.
-  reference.RaiseFloorPerFrame(kNoiseFloorRelativeToPeakDb,
-                               degraded);
+  reference.RaiseFloorPerFrame(kNoiseFloorRelativeToPeakDb, degraded);
   // Normalize to a 0dB global floor (which is probably kNoiseFloorAbsoluteDb).
   double ref_floor = reference.Minimum();
   double deg_floor = degraded.Minimum();

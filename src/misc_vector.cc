@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "misc_vector.h"
+
 #include "amatrix.h"
 
 namespace Visqol {

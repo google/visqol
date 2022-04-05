@@ -18,7 +18,6 @@
 #define VISQOL_INCLUDE_SPECTROGRAMBUILDER_H
 
 #include "absl/status/statusor.h"
-
 #include "analysis_window.h"
 #include "audio_signal.h"
 #include "spectrogram.h"
@@ -50,9 +49,8 @@ class SpectrogramBuilder {
    *
    * @return The spectrogram representation of the input signal.
    */
-  virtual absl::StatusOr<Spectrogram> Build(
-      const AudioSignal &signal,
-      const AnalysisWindow &window) = 0;
+  virtual absl::StatusOr<Spectrogram> Build(const AudioSignal& signal,
+                                            const AnalysisWindow& window) = 0;
 };
 }  // namespace Visqol
 

@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gammatone_filterbank.h"
+#include "gammatone_spectrogram_builder.h"
 
-#include "gtest/gtest.h"
 #include "absl/memory/memory.h"
-
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "equivalent_rectangular_bandwidth.h"
-#include "gammatone_spectrogram_builder.h"
 #include "file_path.h"
+#include "gammatone_filterbank.h"
+#include "gtest/gtest.h"
 #include "misc_audio.h"
 #include "spectrogram.h"
 #include "spectrogram_builder.h"
@@ -44,9 +43,11 @@ const size_t kDegSpectroNumCols = 807;
 // issue (the filter bank is shared between them).
 TEST(BuildSpectrogramTest, basic_positive_flow) {
   FilePath stereo_file_ref{
-      "testdata/conformance_testdata_subset/contrabassoon48_stereo.wav"};
+      "testdata/conformance_testdata_subset/"
+      "contrabassoon48_stereo.wav"};
   FilePath stereo_file_deg{
-      "testdata/conformance_testdata_subset/contrabassoon48_stereo_24kbps_aac."
+      "testdata/conformance_testdata_subset/"
+      "contrabassoon48_stereo_24kbps_aac."
       "wav"};
 
   // Load the audio signals

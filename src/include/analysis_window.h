@@ -20,6 +20,7 @@
 #include <math.h>
 
 #include <cstddef>
+#include <valarray>
 
 namespace Visqol {
 /**
@@ -47,11 +48,11 @@ struct AnalysisWindow {
    * @param sample_rate The sample rate of the signal to be analyzed.
    * @param win_overlap The overlap of the window.
    */
- AnalysisWindow(const size_t sample_rate, const double win_overlap,
-                double window_duration=.08)
-     : window_duration(window_duration), overlap(win_overlap) {
-     size = static_cast<size_t>(round(sample_rate * window_duration));
-  }
+  AnalysisWindow(const size_t sample_rate, const double win_overlap,
+                 double window_duration = .08);
+
+  std::valarray<double> ApplyHannWindow(
+      const std::valarray<double>& signal) const;
 };
 }  // namespace Visqol
 

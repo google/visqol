@@ -60,7 +60,8 @@ class EquivalentRectangularBandwidth {
    * @return The resulting ERB center frequencies and filter coefficients.
    */
   static ErbFiltersResult MakeFilters(std::size_t sample_rate,
-      std::size_t num_channels, double low_freq, double high_freq);
+                                      std::size_t num_channels, double low_freq,
+                                      double high_freq);
 
  private:
   /**

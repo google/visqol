@@ -74,7 +74,7 @@ class GammatoneFilterBank {
    *
    * @param filter_coeffs The input filter coefficients.
    */
-  void SetFilterCoefficients(const AMatrix<double> &filter_coeffs);
+  void SetFilterCoefficients(const AMatrix<double>& filter_coeffs);
 
   /**
    * Reset the filter conditions to zero before filtering a signal. If the

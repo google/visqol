@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "absl/status/statusor.h"
-
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
@@ -31,7 +30,7 @@ namespace Visqol {
 const double VadPatchCreator::kFramesWithVAThreshold = 1.0;
 
 std::vector<double> VadPatchCreator::GetVoiceActivity(
-    const AudioSignal &signal, const size_t start_sample,
+    const AudioSignal& signal, const size_t start_sample,
     const size_t total_samples, const size_t frame_len) const {
   RmsVad rms_vad;
   auto sig = signal.data_matrix.GetColumn(0);
@@ -43,8 +42,8 @@ std::vector<double> VadPatchCreator::GetVoiceActivity(
   for (auto floatVal : patch) {
     // Check the bounds.
     floatVal = floatVal * (1 << 15);
-    floatVal = std::max(-1.0 * (1 << 15),
-                        std::min(1.0 * ((1 << 15) - 1), floatVal));
+    floatVal =
+        std::max(-1.0 * (1 << 15), std::min(1.0 * ((1 << 15) - 1), floatVal));
     frame.emplace_back(floatVal);
     if (frame.size() == frame_len) {
       rms_vad.ProcessChunk(frame);
@@ -56,8 +55,8 @@ std::vector<double> VadPatchCreator::GetVoiceActivity(
 }
 
 absl::StatusOr<std::vector<size_t>> VadPatchCreator::CreateRefPatchIndices(
-    const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
-    const AnalysisWindow &window) const {
+    const AMatrix<double>& spectrogram, const AudioSignal& ref_signal,
+    const AnalysisWindow& window) const {
   const auto norm_mat = MiscMath::Normalize(ref_signal.data_matrix);
   const AudioSignal norm_sig{norm_mat, ref_signal.sample_rate};
   const double frame_size = window.size * window.overlap;
@@ -72,7 +71,7 @@ absl::StatusOr<std::vector<size_t>> VadPatchCreator::CreateRefPatchIndices(
   // Pass the reference signal to the VAD to determine which frames have voice
   // activity.
   const auto vad_res = GetVoiceActivity(norm_sig, first_patch_idx,
-      total_sample_count, frame_size);
+                                        total_sample_count, frame_size);
 
   // Based on the frame VAD data, determine which reference patches to include
   // in the comparison.
@@ -85,8 +84,8 @@ absl::StatusOr<std::vector<size_t>> VadPatchCreator::CreateRefPatchIndices(
     std::vector<double> patch_vad(first, last);
 
     // Determine how many frames within this patch contain voice activity.
-    auto frames_with_va = std::accumulate(patch_vad.begin(), patch_vad.end(),
-        0.0);
+    auto frames_with_va =
+        std::accumulate(patch_vad.begin(), patch_vad.end(), 0.0);
 
     if (frames_with_va >= kFramesWithVAThreshold) {
       refPatchIndices.push_back(patch_idx);

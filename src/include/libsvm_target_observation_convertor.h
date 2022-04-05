@@ -20,9 +20,8 @@
 #include <cstddef>
 #include <vector>
 
-#include "svm.h"
-
 #include "machine_learning.h"
+#include "svm.h"
 
 namespace Visqol {
 /**
@@ -41,7 +40,7 @@ class LibSvmTargetObservationConvertor {
    * @return An array of pointers to LIBSVM nodes containing the observation
    * data.
    */
-  svm_node** ConvertObservations(const std::vector<MlObservation> &observations,
+  svm_node** ConvertObservations(const std::vector<MlObservation>& observations,
                                  size_t num_features) const;
 
   /**
@@ -51,7 +50,7 @@ class LibSvmTargetObservationConvertor {
    *
    * @return A pointer to a LIBSVM node containing the observation data.
    */
-  svm_node* ConvertObservation(const MlObservation &observation) const;
+  svm_node* ConvertObservation(const MlObservation& observation) const;
 };
 }  // namespace Visqol
 

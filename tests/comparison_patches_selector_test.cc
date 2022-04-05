@@ -20,10 +20,10 @@
 #include <random>
 #include <vector>
 
-#include "neurogram_similiarity_index_measure.h"
-#include "gtest/gtest.h"
 #include "absl/status/statusor.h"
+#include "gtest/gtest.h"
 #include "image_patch_creator.h"
+#include "neurogram_similiarity_index_measure.h"
 #include "patch_similarity_comparator.h"
 
 namespace Visqol {
@@ -45,8 +45,7 @@ class ComparisonPatchesSelectorPeer {
   absl::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
       const std::vector<ImagePatch>& ref_patches,
       const std::vector<size_t>& ref_patch_indices,
-      const AMatrix<double>& spectrogram_data,
-      const double frame_duration,
+      const AMatrix<double>& spectrogram_data, const double frame_duration,
       const int search_window) const {
     return cps_->FindMostOptimalDegPatches(ref_patches, ref_patch_indices,
                                            spectrogram_data, frame_duration,
@@ -125,12 +124,12 @@ TEST_F(ComparisonPatchesSelectorTest, OptimalPatches) {
 
   // Defining the degraded audio matrix
   auto deg_matrix = AMatrix<double>::Filled(3, 30, 0.0);
-  std::vector<double> top_deg_row{0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 2, 2, 3
-                                  , 2, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<double> med_deg_row{0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 2, 1, 2
-                                  , 3, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<double> bot_deg_row{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 1, 2
-                                  , 3, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> top_deg_row{0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 2, 2,
+                                  3, 2, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> med_deg_row{0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 2, 1,
+                                  2, 3, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> bot_deg_row{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 1,
+                                  2, 3, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
   deg_matrix.SetRow(0, top_deg_row);
   deg_matrix.SetRow(1, med_deg_row);
   deg_matrix.SetRow(2, bot_deg_row);
@@ -138,9 +137,8 @@ TEST_F(ComparisonPatchesSelectorTest, OptimalPatches) {
   // Check if the output of the algorithm is consistent with the logic
   double frame_duration = 1.0;
   const int search_window = 8;
-  auto res = selectorPeer.FindMostOptimalDegPatches(ref_patches, patch_indices,
-                                                    deg_matrix, frame_duration,
-                                                    search_window);
+  auto res = selectorPeer.FindMostOptimalDegPatches(
+      ref_patches, patch_indices, deg_matrix, frame_duration, search_window);
   ASSERT_TRUE(res.ok());
   auto best_patches = res.value();
   EXPECT_DOUBLE_EQ(best_patches[3].deg_patch_start_time, 0);
@@ -156,7 +154,7 @@ TEST_F(ComparisonPatchesSelectorTest, OutOfOrderMatches) {
   // Defining the reference audio matrix
   auto ref_matrix = AMatrix<double>::Filled(3, 4, 0.0);
   std::vector<double> top_row{1, 100, 3, 4};
-  std::vector<double> med_row{0,   0, 0, 0};
+  std::vector<double> med_row{0, 0, 0, 0};
   std::vector<double> bot_row{1, 100, 3, 4};
   ref_matrix.SetRow(0, top_row);
   ref_matrix.SetRow(1, med_row);
@@ -172,7 +170,7 @@ TEST_F(ComparisonPatchesSelectorTest, OutOfOrderMatches) {
   // Defining the degraded audio matrix
   auto deg_matrix = AMatrix<double>::Filled(3, 4, 0.0);
   std::vector<double> top_deg_row{100, 1, 3, 4};
-  std::vector<double> med_deg_row{  0, 0, 0, 0};
+  std::vector<double> med_deg_row{0, 0, 0, 0};
   std::vector<double> bot_deg_row{100, 1, 3, 4};
   deg_matrix.SetRow(0, top_deg_row);
   deg_matrix.SetRow(1, med_deg_row);
@@ -181,9 +179,8 @@ TEST_F(ComparisonPatchesSelectorTest, OutOfOrderMatches) {
   // Check if the output of the algorithm is consistent with the logic
   double frame_duration = 1.0;
   const int search_window = 60;
-  auto res = selectorPeer.FindMostOptimalDegPatches(ref_patches, patch_indices,
-                                                    deg_matrix, frame_duration,
-                                                    search_window);
+  auto res = selectorPeer.FindMostOptimalDegPatches(
+      ref_patches, patch_indices, deg_matrix, frame_duration, search_window);
   ASSERT_TRUE(res.ok());
   auto best_patches = res.value();
   EXPECT_DOUBLE_EQ(best_patches[0].deg_patch_start_time, 1);
@@ -215,12 +212,12 @@ TEST_F(ComparisonPatchesSelectorTest, DifferentResults) {
 
   // Defining the degraded audio matrix
   auto deg_matrix = AMatrix<double>::Filled(3, 17, 0.0);
-  std::vector<double>
-    top_deg_row{0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<double>
-    med_deg_row{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<double>
-    bot_deg_row{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> top_deg_row{0, 0, 0, 0, 0, 0, 1, 0, 0,
+                                  3, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> med_deg_row{0, 0, 0, 0, 0, 0, 1, 0, 0,
+                                  0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> bot_deg_row{0, 0, 0, 0, 0, 0, 0, 1, 0,
+                                  0, 0, 0, 0, 0, 0, 0, 0};
   deg_matrix.SetRow(0, top_deg_row);
   deg_matrix.SetRow(1, med_deg_row);
   deg_matrix.SetRow(2, bot_deg_row);
@@ -228,9 +225,8 @@ TEST_F(ComparisonPatchesSelectorTest, DifferentResults) {
   // Check if the output of the algorithm is consistent with the logic
   double frame_duration = 1.0;
   const int search_window = 60;
-  auto res = selectorPeer.FindMostOptimalDegPatches(ref_patches, patch_indices,
-                                                    deg_matrix, frame_duration,
-                                                    search_window);
+  auto res = selectorPeer.FindMostOptimalDegPatches(
+      ref_patches, patch_indices, deg_matrix, frame_duration, search_window);
   ASSERT_TRUE(res.ok());
   auto best_patches = res.value();
   EXPECT_DOUBLE_EQ(best_patches[0].deg_patch_start_time, 6);
@@ -243,12 +239,12 @@ TEST_F(ComparisonPatchesSelectorTest, BigExample) {
 
   // Defining the reference audio matrix
   auto ref_matrix = AMatrix<double>::Filled(3, 31, 0.0);
-  std::vector<double> top_row{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 0,
-                              0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<double> med_row{0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 1, 2, 3, 0,
-                              0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<double> bot_row{0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 1, 2, 3, 0,
-                              0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> top_row{0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2,
+                              0, 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> med_row{0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 1, 2, 3,
+                              0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> bot_row{0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 1, 2, 3,
+                              0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
   ref_matrix.SetRow(0, top_row);
   ref_matrix.SetRow(1, med_row);
   ref_matrix.SetRow(2, bot_row);
@@ -262,12 +258,15 @@ TEST_F(ComparisonPatchesSelectorTest, BigExample) {
 
   // Defining the degraded audio matrix
   auto deg_matrix = AMatrix<double>::Filled(3, 31, 0.0);
-  std::vector<double> top_deg_row{0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0, 0, 0, 2, 1, 2
-      , 3, 2, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<double> med_deg_row{0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 2, 0, 1
-      , 2, 3, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
-  std::vector<double> bot_deg_row{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 1
-      , 2, 3, 0, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> top_deg_row{0, 0, 0, 0, 0, 0, 1, 2, 1, 0, 0,
+                                  0, 0, 2, 1, 2, 3, 2, 0, 0, 0, 0,
+                                  3, 3, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> med_deg_row{0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0,
+                                  0, 0, 2, 0, 1, 2, 3, 0, 0, 0, 0,
+                                  1, 2, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<double> bot_deg_row{0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                                  0, 0, 2, 0, 1, 2, 3, 0, 0, 0, 0,
+                                  1, 2, 0, 0, 0, 0, 0, 0, 0};
   deg_matrix.SetRow(0, top_deg_row);
   deg_matrix.SetRow(1, med_deg_row);
   deg_matrix.SetRow(2, bot_deg_row);
@@ -275,9 +274,8 @@ TEST_F(ComparisonPatchesSelectorTest, BigExample) {
   // Check if the output of the algorithm is consistent with the logic
   double frame_duration = 1.0;
   const int search_window = 60;
-  auto res = selectorPeer.FindMostOptimalDegPatches(ref_patches, patch_indices,
-                                                    deg_matrix, frame_duration,
-                                                    search_window);
+  auto res = selectorPeer.FindMostOptimalDegPatches(
+      ref_patches, patch_indices, deg_matrix, frame_duration, search_window);
   ASSERT_TRUE(res.ok());
   auto best_patches = res.value();
   EXPECT_DOUBLE_EQ(best_patches[0].deg_patch_start_time, 6);

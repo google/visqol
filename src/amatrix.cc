@@ -67,7 +67,7 @@ inline AMatrix<T>::AMatrix(size_t rows, size_t cols, std::vector<T>&& data) {
 
 template <typename T>
 inline AMatrix<T>::AMatrix(size_t rows, size_t cols,
-    const std::vector<T>& data) {
+                           const std::vector<T>& data) {
   matrix_ = arma::Mat<T>(&data[0], (arma::uword)rows, (arma::uword)cols);
 }
 
@@ -180,8 +180,8 @@ template <typename T>
 inline std::vector<T> AMatrix<T>::RowSubset(size_t rowIndex,
                                             size_t startColumnIndex,
                                             size_t endColumnIndex) const {
-  std::vector<T> vec(arma::conv_to<std::vector<T>>::from(matrix_.row(
-    rowIndex).subvec(startColumnIndex, endColumnIndex)));
+  std::vector<T> vec(arma::conv_to<std::vector<T>>::from(
+      matrix_.row(rowIndex).subvec(startColumnIndex, endColumnIndex)));
   return vec;
 }
 
@@ -232,7 +232,7 @@ inline AMatrix<T> AMatrix<T>::GetColumns(size_t colStart, size_t colEnd) const {
 
 template <typename T>
 inline void AMatrix<T>::SetRow(size_t rowIndex, const std::vector<T>& row) {
-  matrix_.row(rowIndex) = std::move(arma::Row<T>(row));;
+  matrix_.row(rowIndex) = std::move(arma::Row<T>(row));
 }
 
 template <typename T>
@@ -358,7 +358,7 @@ inline std::valarray<T> AMatrix<T>::ToValArray() const {
 
 template <>
 inline std::vector<std::complex<double>>
-    AMatrix<std::complex<double>>::ToVector() const {
+AMatrix<std::complex<double>>::ToVector() const {
   return arma::conv_to<std::vector<std::complex<double>>>::from(matrix_.col(0));
 }
 

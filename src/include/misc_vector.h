@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/string_view.h"
 #include "amatrix.h"
 
 namespace Visqol {
@@ -38,19 +39,6 @@ class MiscVector {
       targets_vec.push_back(mat[i][0]);
     }
     return targets_vec;
-  }
-
-  static std::vector<double> ReadVectorFromTxtFile(const std::string& path,
-                                                   size_t num_samples) {
-    std::fstream vec_file(path, std::ios_base::in);
-    std::vector<double> v;
-    v.reserve(num_samples);
-    double d;
-    while (vec_file >> d) {
-      v.push_back(d);
-    }
-    vec_file.close();
-    return v;
   }
 };
 }  // namespace Visqol

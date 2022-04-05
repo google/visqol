@@ -21,15 +21,15 @@
 #include <utility>
 #include <vector>
 
+#include "absl/base/internal/raw_logging.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "alignment.h"
 #include "amatrix.h"
 #include "audio_signal.h"
 #include "image_patch_creator.h"
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
-#include "absl/base/internal/raw_logging.h"
-#include "absl/status/statusor.h"
-#include "absl/status/status.h"
 
 namespace Visqol {
 ComparisonPatchesSelector::ComparisonPatchesSelector(
@@ -121,8 +121,9 @@ size_t ComparisonPatchesSelector::CalcMaxNumPatches(
 
   if (num_patches) {
     // The last patch can start up to half a patch away.
-    while (ref_patch_indices[num_patches - 1] - floor(num_frames_per_patch / 2)
-                > num_frames_in_deg_spectro) {
+    while (ref_patch_indices[num_patches - 1] -
+               floor(num_frames_per_patch / 2) >
+           num_frames_in_deg_spectro) {
       num_patches--;
     }
   }
@@ -252,8 +253,8 @@ ImagePatch ComparisonPatchesSelector::BuildDegradedPatch(
   // This is an inclusive end, so subtract 1.
   int last_real_frame = std::min(window_end, spectrogram_data.NumCols() - 1);
   for (size_t rowIndex = 0; rowIndex < spectrogram_data.NumRows(); rowIndex++) {
-    row = spectrogram_data.RowSubset(rowIndex, first_real_frame,
-                                     last_real_frame);
+    row =
+        spectrogram_data.RowSubset(rowIndex, first_real_frame, last_real_frame);
 
     // Insert silence at front for negative indices.
     if (window_beginning < 0) {
@@ -269,9 +270,9 @@ ImagePatch ComparisonPatchesSelector::BuildDegradedPatch(
   return deg_patch;
 }
 
-AudioSignal ComparisonPatchesSelector::Slice(
-    const AudioSignal &in_signal, double start_time, double end_time)
-{
+AudioSignal ComparisonPatchesSelector::Slice(const AudioSignal& in_signal,
+                                             double start_time,
+                                             double end_time) {
   int start_index = std::max(0, (int)(start_time * in_signal.sample_rate));
   // The end_index is inclusive for GetRows().
   int end_index = std::min((int)(in_signal.data_matrix.NumRows() - 1),
@@ -279,8 +280,8 @@ AudioSignal ComparisonPatchesSelector::Slice(
 
   // Note that the underlying armadillo rows() uses an unconventional inclusive
   // end index.
-  auto sliced_matrix = in_signal.data_matrix.GetRows(
-       start_index, end_index - 1);
+  auto sliced_matrix =
+      in_signal.data_matrix.GetRows(start_index, end_index - 1);
   // Adds silence at the end of degraded patch, if required for alignment.
   auto end_time_diff =
       end_time * in_signal.sample_rate - in_signal.data_matrix.NumRows();
@@ -289,9 +290,8 @@ AudioSignal ComparisonPatchesSelector::Slice(
     sliced_matrix = postsilence_matrix.JoinVertically(sliced_matrix);
   }
   if (start_time < 0) {
-    auto presilence_matrix = AMatrix<double>::Filled(-1 * start_time *
-                                                     in_signal.sample_rate,
-                                                     1, 0.0);
+    auto presilence_matrix = AMatrix<double>::Filled(
+        -1 * start_time * in_signal.sample_rate, 1, 0.0);
     sliced_matrix = presilence_matrix.JoinVertically(sliced_matrix);
   }
   AudioSignal sliced_signal{sliced_matrix, in_signal.sample_rate};
@@ -322,8 +322,8 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
                                  sim_result.deg_patch_end_time);
     // 2. For any pair, we want to shift the degraded signal to be maximally
     // aligned.
-    auto aligned_result = Alignment::AlignAndTruncate(ref_patch_audio,
-                                                      deg_patch_audio);
+    auto aligned_result =
+        Alignment::AlignAndTruncate(ref_patch_audio, deg_patch_audio);
     AudioSignal ref_audio_aligned = std::get<0>(aligned_result);
     AudioSignal deg_audio_aligned = std::get<1>(aligned_result);
     double lag = std::get<2>(aligned_result);
@@ -331,8 +331,8 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
     double new_ref_duration = ref_audio_aligned.GetDuration();
     double new_deg_duration = deg_audio_aligned.GetDuration();
     // 3. Compute a new spectrogram for the degraded audio.
-    const auto ref_spectro_result = spect_builder->Build(ref_audio_aligned,
-                                                         window);
+    const auto ref_spectro_result =
+        spect_builder->Build(ref_audio_aligned, window);
     if (!ref_spectro_result.ok()) {
       ABSL_RAW_LOG(ERROR, "Error building ref spectrogram: %s",
                    ref_spectro_result.status().ToString().c_str());
@@ -340,8 +340,8 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
     }
     Spectrogram ref_spectrogram = ref_spectro_result.value();
 
-    const auto deg_spectro_result = spect_builder->Build(deg_audio_aligned,
-                                                         window);
+    const auto deg_spectro_result =
+        spect_builder->Build(deg_audio_aligned, window);
     if (!deg_spectro_result.ok()) {
       ABSL_RAW_LOG(ERROR, "Error building degraded spectrogram: %s",
                    deg_spectro_result.status().ToString().c_str());
@@ -356,25 +356,25 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
 
     auto new_deg_patch = deg_spectrogram.Data();
     // 5. Update the similarity result with the new patch.
-    auto new_sim_result = sim_comparator_->MeasurePatchSimilarity(
-        new_ref_patch, new_deg_patch);
+    auto new_sim_result =
+        sim_comparator_->MeasurePatchSimilarity(new_ref_patch, new_deg_patch);
     // Compare to the old result and take the max.
     if (new_sim_result.similarity < sim_result.similarity) {
       realigned_results[i] = sim_result;
     } else {
       if (lag > 0.) {
-        new_sim_result.ref_patch_start_time = sim_result.ref_patch_start_time
-                                              + lag;
+        new_sim_result.ref_patch_start_time =
+            sim_result.ref_patch_start_time + lag;
         new_sim_result.deg_patch_start_time = sim_result.deg_patch_start_time;
       } else {
         new_sim_result.ref_patch_start_time = sim_result.ref_patch_start_time;
-        new_sim_result.deg_patch_start_time = sim_result.deg_patch_start_time
-                                              - lag;
+        new_sim_result.deg_patch_start_time =
+            sim_result.deg_patch_start_time - lag;
       }
-      new_sim_result.ref_patch_end_time = new_sim_result.ref_patch_start_time
-                                          + new_ref_duration;
-      new_sim_result.deg_patch_end_time = new_sim_result.deg_patch_start_time
-                                          + new_deg_duration;
+      new_sim_result.ref_patch_end_time =
+          new_sim_result.ref_patch_start_time + new_ref_duration;
+      new_sim_result.deg_patch_end_time =
+          new_sim_result.deg_patch_start_time + new_deg_duration;
       realigned_results[i] = new_sim_result;
     }
   }

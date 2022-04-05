@@ -41,8 +41,8 @@ class MiscMath {
   static AMatrix<double> Normalize(const AMatrix<double>& mat);
   static AMatrix<double> Sum(const AMatrix<double>& mat);
   static AMatrix<double> Mean(const AMatrix<double>& mat);
-  static std::vector<double> NormalizeInt16ToDouble(std::vector<int16_t>
-    &input_vec);
+  static std::vector<double> NormalizeInt16ToDouble(
+      std::vector<int16_t>& input_vec);
   /**
    * Evaluates an exponential function given learned parameters.
    *

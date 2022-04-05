@@ -22,8 +22,7 @@ namespace Visqol {
 
 template <class T>
 AMatrix<T> Convolution2D<T>::Valid2DConvWithBoundary(
-    const AMatrix<T> &fir_filter, AMatrix<T> input_matrix) {
-
+    const AMatrix<T>& fir_filter, AMatrix<T> input_matrix) {
   input_matrix = AddMatrixBoundary(std::move(input_matrix));
 
   int i_r_c = input_matrix.NumRows();  // input row count
@@ -39,12 +38,12 @@ AMatrix<T> Convolution2D<T>::Valid2DConvWithBoundary(
 
   AMatrix<T> out_matrix(o_r_c, o_c_c);
 
-  for (int o_row = 0; o_row < o_r_c; o_row++) {         // output rows
-    for (int o_col = 0; o_col < o_c_c; o_col++) {       // output cols
+  for (int o_row = 0; o_row < o_r_c; o_row++) {    // output rows
+    for (int o_col = 0; o_col < o_c_c; o_col++) {  // output cols
       T sum = 0;
       size_t filter_index = filter_size - 1;
-      for (int f_col = 0; f_col < f_c_c ; f_col++) {    // filter cols
-        for (int f_row = 0; f_row < f_r_c ; f_row++) {  // filter rows
+      for (int f_col = 0; f_col < f_c_c; f_col++) {    // filter cols
+        for (int f_row = 0; f_row < f_r_c; f_row++) {  // filter rows
           const size_t idx = ((f_col + o_col) * i_r_c) + f_row + o_row;
           sum += input_matrix(idx) * fir_filter(filter_index--);
         }
@@ -71,7 +70,7 @@ AMatrix<T> Convolution2D<T>::AddMatrixBoundary(AMatrix<T>&& input_matrix) {
 
 template <class T>
 AMatrix<T> Convolution2D<T>::CopyMatrixWithinPadding(
-    const AMatrix<T> &input_matrix, const size_t row_prepad_amt,
+    const AMatrix<T>& input_matrix, const size_t row_prepad_amt,
     const size_t row_postpad_amt, const size_t col_prepad_amt,
     const size_t col_postpad_amt) {
   AMatrix<T> output_matrix(

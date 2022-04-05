@@ -19,10 +19,10 @@
 
 #include <vector>
 
-#include "file_path.h"
-#include "machine_learning.h"
 #include "absl/status/status.h"
 #include "absl/synchronization/mutex.h"
+#include "file_path.h"
+#include "machine_learning.h"
 #include "svm.h"
 
 namespace Visqol {
@@ -50,7 +50,7 @@ class SupportVectorRegressionModel {
    * @return An OK status if the model was successfully initialized with the
    * model file. Else, an error status is returned.
    */
-  absl::Status Init(const FilePath &model_path);
+  absl::Status Init(const FilePath& model_path);
 
   /**
    * Initialize the SVR model using vectors of observations and targets. These
@@ -59,8 +59,8 @@ class SupportVectorRegressionModel {
    * @param observations A vector of observations.
    * @param targets A vector of targets.
    */
-  void Init(const std::vector<MlObservation> &observations,
-            const std::vector<MlTarget> &targets);
+  void Init(const std::vector<MlObservation>& observations,
+            const std::vector<MlTarget>& targets);
 
   /**
    * Using the SVR model, predict a quality value for the given observation.
@@ -69,13 +69,13 @@ class SupportVectorRegressionModel {
    *
    * @return The predicted value from the observation.
    */
-  double Predict(const MlObservation &observation) const;
+  double Predict(const MlObservation& observation) const;
 
  private:
   /**
    * The svm model provided by the LIBSVM library.
    */
-  svm_model *model_;
+  svm_model* model_;
 
   /**
    * Accessing the LibSVM external libraries for loading the model must be
@@ -88,13 +88,12 @@ class SupportVectorRegressionModel {
    * Pointer to an array of pointers used by the model for training.
    * As per the docs, this memory can't be freed while the model is used.
    */
-  svm_node **observations_ptr_;
+  svm_node** observations_ptr_;
 
   /**
    * Number of observations in the training data.
    */
   size_t num_observations_;
-
 };
 }  // namespace Visqol
 

@@ -19,21 +19,21 @@
 
 #include "absl/base/internal/raw_logging.h"
 #include "absl/status/statusor.h"
-
+#include "absl/strings/str_cat.h"
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
 
 namespace Visqol {
 absl::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
-    const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
-    const AnalysisWindow &window) const {
+    const AMatrix<double>& spectrogram, const AudioSignal& ref_signal,
+    const AnalysisWindow& window) const {
   return CreateRefPatchIndices(spectrogram);
 }
 
 std::vector<ImagePatch> ImagePatchCreator::CreatePatchesFromIndices(
-    const AMatrix<double> &spectrogram,
-    const std::vector<size_t> &patch_indices) const {
+    const AMatrix<double>& spectrogram,
+    const std::vector<size_t>& patch_indices) const {
   size_t start_col, end_col;
   size_t num_patches = patch_indices.size();
   std::vector<ImagePatch> patches;
@@ -48,25 +48,24 @@ std::vector<ImagePatch> ImagePatchCreator::CreatePatchesFromIndices(
 }
 
 absl::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
-    const AMatrix<double> &spectrogram) const {
+    const AMatrix<double>& spectrogram) const {
   std::vector<size_t> refPatchIndices;
   auto spectrum_length = spectrogram.NumCols();
   auto init_patch_index = patch_size_ / 2;
   // Ensure that the spectrum is at least as big as a single patch
   if (spectrum_length < patch_size_ + init_patch_index) {
-    return absl::Status(
-      absl::StatusCode::kInvalidArgument, "Reference spectrum "
-      "size (" + std::to_string(spectrum_length) + ") smaller than minimum "
-      "patch size (" + std::to_string(patch_size_ + init_patch_index) + ").");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Reference spectrum size (", spectrum_length,
+                     ") smaller than minimum patch size (",
+                     patch_size_ + init_patch_index, ")."));
   }
   refPatchIndices.reserve(spectrum_length / patch_size_);
   // If we get to this point, the spectrogram can support at least a single
   // patch, so allow for at least one patch to be created.
   auto max_index = (init_patch_index < (spectrum_length - patch_size_))
-    ? spectrum_length - patch_size_ : init_patch_index + 1;
-  for (size_t i = init_patch_index;
-        i < max_index;
-        i += patch_size_) {
+                       ? spectrum_length - patch_size_
+                       : init_patch_index + 1;
+  for (size_t i = init_patch_index; i < max_index; i += patch_size_) {
     refPatchIndices.push_back(i - 1);
   }
   return refPatchIndices;

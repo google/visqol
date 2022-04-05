@@ -24,12 +24,12 @@ namespace {
 
 const double kTolerance = 0.0001;
 
-struct RmsTestData{
+struct RmsTestData {
   const std::vector<int16_t> signal;
   const std::vector<double> vad_res;
 
-  RmsTestData(const std::vector<int16_t> &in_signal,
-              const std::vector<double> &in_vad_res)
+  RmsTestData(const std::vector<int16_t>& in_signal,
+              const std::vector<double>& in_vad_res)
       : signal{in_signal}, vad_res{in_vad_res} {}
 };
 
@@ -37,8 +37,8 @@ struct RmsTestData{
 class RmsVadTest : public ::testing::TestWithParam<RmsTestData> {};
 
 // Sample data pulled from test signal.
-const std::vector<int16_t> kChunk{186, 236, 44, -152, -155, -2, 66, 5, -108,
-    -107, 14, 141, 151, 31, -90};
+const std::vector<int16_t> kChunk{186,  236,  44, -152, -155, -2, 66, 5,
+                                  -108, -107, 14, 141,  151,  31, -90};
 
 // RMS value calculated with Matlab.
 const double kChunkRms = 120.7736;
@@ -47,28 +47,20 @@ const double kChunkRms = 120.7736;
 const size_t kSignalChunkSize = 5;
 
 // Signal with varying quantities of sequential chunks with low activity.
-const std::vector<int16_t> kSignal{10000, 10000, 10000, 10000, 10000,
-                                   10, 10, 10, 10, 10,
-                                   10000, 10000, 10000, 10000, 10000,
-                                   10000, 10000, 10000, 10000, 10000,
-                                   10000, 10000, 10000, 10000, 10000,
-                                   10, 10, 10, 10, 10,
-                                   10, 10, 10, 10, 10,
-                                   10000, 10000, 10000, 10000, 10000,
-                                   10000, 10000, 10000, 10000, 10000,
-                                   10, 10, 10, 10, 10,
-                                   10, 10, 10, 10, 10,
-                                   10, 10, 10, 10, 10,
-                                   10000, 10000, 10000, 10000, 10000,
-                                   10, 10, 10, 10, 10,
-                                   10, 10, 10, 10, 10,
-                                   10, 10, 10, 10, 10,
-                                   10, 10, 10, 10, 10,
-                                   10000, 10000, 10000, 10000, 10000};
+const std::vector<int16_t> kSignal{
+    10000, 10000, 10000, 10000, 10000, 10,    10,    10,    10,    10,
+    10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000,
+    10000, 10000, 10000, 10000, 10000, 10,    10,    10,    10,    10,
+    10,    10,    10,    10,    10,    10000, 10000, 10000, 10000, 10000,
+    10000, 10000, 10000, 10000, 10000, 10,    10,    10,    10,    10,
+    10,    10,    10,    10,    10,    10,    10,    10,    10,    10,
+    10000, 10000, 10000, 10000, 10000, 10,    10,    10,    10,    10,
+    10,    10,    10,    10,    10,    10,    10,    10,    10,    10,
+    10,    10,    10,    10,    10,    10000, 10000, 10000, 10000, 10000};
 
 // The vad results for kSignal.
-const std::vector<double> kSignalVadRes{
-      1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1};
+const std::vector<double> kSignalVadRes{1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                        1, 1, 0, 1, 1, 1, 0, 0, 1};
 
 /**
  * Ensure that we correctly handle signals that start with low RMS values. The
@@ -80,11 +72,9 @@ const std::vector<double> kSignalVadRes{
  * more interested in avoiding false negatives (and therefore compare patches
  * with no voice activity) than allowing false positives.
  */
-const std::vector<int16_t> kSignalLowStart{10, 10, 10, 10, 10,
-                                           10, 10, 10, 10, 10,
-                                           10, 10, 10, 10, 10,
-                                           10, 10, 10, 10, 10,
-                                           10000, 10000, 10000, 10000, 10000};
+const std::vector<int16_t> kSignalLowStart{
+    10, 10, 10, 10, 10, 10, 10, 10,    10,    10,    10,    10,   10,
+    10, 10, 10, 10, 10, 10, 10, 10000, 10000, 10000, 10000, 10000};
 
 // The vad results for kSignal.
 const std::vector<double> kSignalVadResLowStart{1, 1, 0, 0, 1};
@@ -98,7 +88,7 @@ TEST_P(RmsVadTest, GetVadResultsTests) {
   std::vector<int16_t> chunk;
   for (auto sample : GetParam().signal) {
     chunk.emplace_back(sample);
-    if (counter == kSignalChunkSize -1) {
+    if (counter == kSignalChunkSize - 1) {
       vad.ProcessChunk(chunk);
       chunk.clear();
       counter = 0;
@@ -110,10 +100,10 @@ TEST_P(RmsVadTest, GetVadResultsTests) {
 }
 
 // Initialise the input paramaters for GetVadResultsTests.
-INSTANTIATE_TEST_CASE_P(
-  TestParams, RmsVadTest, testing::Values(
-      RmsTestData(kSignal, kSignalVadRes),
-      RmsTestData(kSignalLowStart, kSignalVadResLowStart)));
+INSTANTIATE_TEST_CASE_P(TestParams, RmsVadTest,
+                        testing::Values(RmsTestData(kSignal, kSignalVadRes),
+                                        RmsTestData(kSignalLowStart,
+                                                    kSignalVadResLowStart)));
 
 /**
  * Assert that the ProcessChunk function calculates the correct RMS value for a

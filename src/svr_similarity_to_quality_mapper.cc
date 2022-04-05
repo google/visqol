@@ -17,12 +17,11 @@
 #include <vector>
 
 #include "absl/status/status.h"
-
 #include "file_path.h"
 
 namespace Visqol {
 SvrSimilarityToQualityMapper::SvrSimilarityToQualityMapper(
-    const FilePath &support_vector_model)
+    const FilePath& support_vector_model)
     : model_path_{support_vector_model} {}
 
 absl::Status SvrSimilarityToQualityMapper::Init() {
@@ -30,7 +29,10 @@ absl::Status SvrSimilarityToQualityMapper::Init() {
 }
 
 double SvrSimilarityToQualityMapper::PredictQuality(
-    const std::vector<double> &similarity_vector) const {
-  return std::max(1.0, std::min(5.0, model_.Predict(similarity_vector)));
+    const std::vector<double>& fvnsim_vector,
+    const std::vector<double>& fvnsim10_vector,
+    const std::vector<double>& fstdnsim_vector,
+    const std::vector<double>& fvdegenergy_vector) const {
+  return std::max(1.0, std::min(5.0, model_.Predict(fvnsim_vector)));
 }
 }  // namespace Visqol

@@ -35,8 +35,8 @@ class Convolution2D {
    *
    * @return The resulting 'valid' 2d convolution.
    */
-  static AMatrix<T> Valid2DConvWithBoundary(const AMatrix<T> &fir_filter,
-      AMatrix<T> input_matrix);
+  static AMatrix<T> Valid2DConvWithBoundary(const AMatrix<T>& fir_filter,
+                                            AMatrix<T> input_matrix);
 
  private:
   /**
@@ -46,7 +46,7 @@ class Convolution2D {
    *
    * @return The padded matrix.
    */
-  static AMatrix<T> AddMatrixBoundary(AMatrix<T> &&input_matrix);
+  static AMatrix<T> AddMatrixBoundary(AMatrix<T>&& input_matrix);
 
   /**
    * Copies a matrix into another matrix, adding the specified amounts of empty
@@ -65,9 +65,11 @@ class Convolution2D {
    * @return A matrix with the data copied into it from the input matrix, with
    *    the specified amounts of padding around that input data.
    */
-  static AMatrix<T> CopyMatrixWithinPadding(const AMatrix<T> &input_matrix,
-      const size_t row_prepad_amt, const size_t row_postpad_amt,
-      const size_t col_prepad_amt, const size_t col_postpad_amt);
+  static AMatrix<T> CopyMatrixWithinPadding(const AMatrix<T>& input_matrix,
+                                            const size_t row_prepad_amt,
+                                            const size_t row_postpad_amt,
+                                            const size_t col_prepad_amt,
+                                            const size_t col_postpad_amt);
 };
 }  // namespace Visqol
 

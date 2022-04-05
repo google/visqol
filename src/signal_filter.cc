@@ -19,12 +19,11 @@
 
 namespace Visqol {
 
-
-FilterResults SignalFilter::Filter(const std::valarray<double> &numer_coeffs,
-                                   const std::valarray<double> &denom_coeffs,
-                                   const std::valarray<double> &signal,
-                                   const std::valarray<double> &init_conditions)
-                                   {
+FilterResults SignalFilter::Filter(
+    const std::valarray<double>& numer_coeffs,
+    const std::valarray<double>& denom_coeffs,
+    const std::valarray<double>& signal,
+    const std::valarray<double>& init_conditions) {
   std::valarray<double> fltred_signal(signal.size());
   // Pad final_conditions
   std::valarray<double> final_conditions(denom_coeffs.size());
@@ -36,11 +35,12 @@ FilterResults SignalFilter::Filter(const std::valarray<double> &numer_coeffs,
     fltred_signal[m] = numer_coeffs[0] * signal[m] + final_conditions[0];
     for (i = 1; i < n; i++) {
       final_conditions[i - 1] = numer_coeffs[i] * signal[m] +
-        final_conditions[i] - denom_coeffs[i] * fltred_signal[m];
+                                final_conditions[i] -
+                                denom_coeffs[i] * fltred_signal[m];
     }
   }
-  std::valarray<double> final_conditions_out = final_conditions[
-      std::slice(0, final_conditions.size() - 1, 1)];
+  std::valarray<double> final_conditions_out =
+      final_conditions[std::slice(0, final_conditions.size() - 1, 1)];
   FilterResults r;
   r.filteredSignal = std::move(fltred_signal);
   r.finalConditions = std::move(final_conditions_out);

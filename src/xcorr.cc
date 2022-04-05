@@ -18,29 +18,32 @@
 
 #include <algorithm>
 #include <complex>
+#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
-#include <iostream>
-#include "absl/memory/memory.h"
 
+#include "absl/memory/memory.h"
 #include "amatrix.h"
 #include "fast_fourier_transform.h"
 
 namespace Visqol {
 
 // Assumes inputs are column vectors
-int64_t XCorr::CalcBestLag(const AMatrix<double>& signal_1,
-                           const AMatrix<double>& signal_2) {
-  const int64_t max_lag = std::max(static_cast<int64_t>(signal_1.NumRows()),
-      static_cast<int64_t>(signal_2.NumRows())) - 1;
+int64_t XCorr::FindLowestLagIndex(const AMatrix<double>& signal_1,
+                                  const AMatrix<double>& signal_2) {
+  int64_t max_lag = std::max(static_cast<int64_t>(signal_1.NumRows()),
+                             static_cast<int64_t>(signal_2.NumRows())) -
+                    1;
 
-  auto pwise_fft_vec = CalcInverseFFTPwiseProd(signal_1, signal_2);
+  const std::vector<double> pointwise_fft_vec =
+      InverseFFTPointwiseProduct(signal_1, signal_2);
   // Build negatives corrs.
-  std::vector<double> corrs{pwise_fft_vec.end() - max_lag, pwise_fft_vec.end()};
+  std::vector<double> corrs{pointwise_fft_vec.end() - max_lag,
+                            pointwise_fft_vec.end()};
   // Build positive corrs.
-  std::vector<double> positives{pwise_fft_vec.begin(),
-                                pwise_fft_vec.begin() + max_lag + 1};
+  const std::vector<double> positives{pointwise_fft_vec.begin(),
+                                      pointwise_fft_vec.begin() + max_lag + 1};
   // Build total corrs.
   corrs.insert(corrs.end(), positives.begin(), positives.end());
   // Find best corr and from that the best lag.
@@ -48,7 +51,7 @@ int64_t XCorr::CalcBestLag(const AMatrix<double>& signal_1,
   return std::distance(corrs.cbegin(), best_corr) - max_lag;
 }
 
-std::vector<double> XCorr::CalcInverseFFTPwiseProd(
+std::vector<double> XCorr::InverseFFTPointwiseProduct(
     const AMatrix<double>& signal_1, const AMatrix<double>& signal_2) {
   std::vector<double> signal_1_vec = signal_1.ToVector();
   std::vector<double> signal_2_vec = signal_2.ToVector();
@@ -56,8 +59,9 @@ std::vector<double> XCorr::CalcInverseFFTPwiseProd(
   // Add zeros until they're both the same length.
   // Reserve then resize to prevent extraneous memory being allocated.
   // Resize by itself can double the vector capacity.
-  const size_t biggest_vec = signal_1.NumRows() > signal_2.NumRows() ?
-      signal_1.NumRows() : signal_2.NumRows();
+  const size_t biggest_vec = signal_1.NumRows() > signal_2.NumRows()
+                                 ? signal_1.NumRows()
+                                 : signal_2.NumRows();
   if (signal_1.NumRows() > signal_2.NumRows()) {
     signal_2_vec.reserve(biggest_vec);
     signal_2_vec.resize(biggest_vec, 0.0);
@@ -67,29 +71,26 @@ std::vector<double> XCorr::CalcInverseFFTPwiseProd(
   }
 
   // Calculate how many points in FFT (next ^2 elements)
-  int expon;
-  frexp(std::abs((int64_t)signal_1_vec.size() * 2 - 1), &expon);
-  const size_t fft_points = pow(2, expon);
+  int exponent;
+  frexp(std::abs((int64_t)signal_1_vec.size() * 2 - 1), &exponent);
+  const size_t fft_points = pow(2, exponent);
 
   // Calculate the pointwise product of the forward fft of both signals.
   auto fft_manager = absl::make_unique<FftManager>(fft_points);
-  auto pwise_prod = CalcFFTPwiseProd(signal_1_vec, signal_2_vec, fft_manager,
-      fft_points);
+  const AMatrix<std::complex<double>> pointwise_product =
+      FFTPointwiseProduct(signal_1_vec, signal_2_vec, fft_manager, fft_points);
 
-  return FastFourierTransform::Inverse1dConjSym(fft_manager, pwise_prod)
+  return FastFourierTransform::Inverse1dConjSym(fft_manager, pointwise_product)
       .ToVector();
 }
 
-AMatrix<std::complex<double>> XCorr::CalcFFTPwiseProd(
-    const std::vector<double> &signal_1, const std::vector<double> &signal_2,
+AMatrix<std::complex<double>> XCorr::FFTPointwiseProduct(
+    const std::vector<double>& signal_1, const std::vector<double>& signal_2,
     const std::unique_ptr<FftManager>& fft_manager, const size_t fft_points) {
-
-  auto fftsignal_2 = FastFourierTransform::Forward1d(fft_manager,
-                                                     signal_2,
-                                                     fft_points);
-  std::transform(fftsignal_2.begin(), fftsignal_2.end(),
-                 fftsignal_2.begin(), [](decltype(*fftsignal_2.begin())& s)
-                 { return conj(s); });
+  AMatrix<std::complex<double>> fftsignal_2 =
+      FastFourierTransform::Forward1d(fft_manager, signal_2, fft_points);
+  std::transform(fftsignal_2.begin(), fftsignal_2.end(), fftsignal_2.begin(),
+                 [](decltype(*fftsignal_2.begin())& s) { return conj(s); });
 
   return FastFourierTransform::Forward1d(fft_manager, signal_1, fft_points)
       .PointWiseProduct(fftsignal_2);
