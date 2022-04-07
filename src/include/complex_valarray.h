@@ -18,12 +18,13 @@
 #define VISQOL_INCLUDE_COMPLEXVALARRAY_H
 
 #include <algorithm>
-#include <valarray>
 #include <complex>
-#include <vector>
 #include <cstdio>
+#include <valarray>
+#include <vector>
 
 namespace Visqol {
+
 class ComplexValArray {
  private:
   std::valarray<std::complex<double>> va_;
@@ -31,14 +32,14 @@ class ComplexValArray {
  public:
   explicit ComplexValArray(size_t size) : va_(size) {}
 
-  explicit ComplexValArray(const std::vector<double> &v) {
+  explicit ComplexValArray(const std::vector<double>& v) {
     va_.resize(v.size());
     for (size_t i = 0; i < va_.size(); i++) {
       va_[i].real(v[i]);
     }
   }
 
-  explicit ComplexValArray(const std::valarray<double> &v) {
+  explicit ComplexValArray(const std::valarray<double>& v) {
     va_.resize(v.size());
     for (size_t i = 0; i < va_.size(); i++) {
       va_[i].real(v[i]);
@@ -55,7 +56,7 @@ class ComplexValArray {
     return out;
   }
 
-  ComplexValArray operator+(const ComplexValArray &v) const {
+  ComplexValArray operator+(const ComplexValArray& v) const {
     auto out = ComplexValArray{va_.size()};
     for (size_t i = 0; i < va_.size(); i++) {
       out[i] = va_[i] + v.va_[i];
@@ -79,7 +80,7 @@ class ComplexValArray {
     return out;
   }
 
-  ComplexValArray operator-(const ComplexValArray &v) const {
+  ComplexValArray operator-(const ComplexValArray& v) const {
     auto out = ComplexValArray{va_.size()};
     for (size_t i = 0; i < va_.size(); i++) {
       out[i] = va_[i] - v.va_[i];
@@ -95,7 +96,7 @@ class ComplexValArray {
     return out;
   }
 
-  ComplexValArray operator*(const std::complex<double> &c) const {
+  ComplexValArray operator*(const std::complex<double>& c) const {
     auto out = ComplexValArray{va_.size()};
     for (size_t i = 0; i < va_.size(); i++) {
       out[i] = va_[i] * c;
@@ -103,7 +104,7 @@ class ComplexValArray {
     return out;
   }
 
-  ComplexValArray operator*(const ComplexValArray &v) const {
+  ComplexValArray operator*(const ComplexValArray& v) const {
     auto out = ComplexValArray{va_.size()};
     for (size_t i = 0; i < va_.size(); i++) {
       out[i] = va_[i] * v.va_[i];
@@ -119,7 +120,7 @@ class ComplexValArray {
     return out;
   }
 
-  ComplexValArray operator/(const ComplexValArray &v) const {
+  ComplexValArray operator/(const ComplexValArray& v) const {
     auto out = ComplexValArray{va_.size()};
     for (size_t i = 0; i < va_.size(); i++) {
       out[i] = va_[i] / v.va_[i];
@@ -127,7 +128,7 @@ class ComplexValArray {
     return out;
   }
 
-  ComplexValArray operator/(const std::valarray<double> &v) const {
+  ComplexValArray operator/(const std::valarray<double>& v) const {
     auto out = ComplexValArray{va_.size()};
     for (size_t i = 0; i < va_.size(); i++) {
       out[i] = va_[i] / v[i];
@@ -143,7 +144,7 @@ class ComplexValArray {
     return out;
   }
 
-  std::complex<double> &operator[](size_t index) { return va_[index]; }
+  std::complex<double>& operator[](size_t index) { return va_[index]; }
 
   std::complex<double> at(size_t index) const { return va_[index]; }
 
@@ -187,7 +188,7 @@ class ComplexValArray {
     return out;
   }
 
-  void PrintSummary(const char *c) const {
+  void PrintSummary(const char* c) const {
     // printf("%s\n", c);
     size_t outMatSize = va_.size();
     printf("first five\n");
@@ -208,21 +209,10 @@ class ComplexValArray {
   }
 };
 
-ComplexValArray operator*(double x, const ComplexValArray &v) { return v * x; }
-
-ComplexValArray operator+(double x, const ComplexValArray &v) { return v + x; }
-
-ComplexValArray operator*(std::complex<double> x, const ComplexValArray &v) {
-  return v * x;
-}
-
-ComplexValArray operator/(double d, const ComplexValArray &v) {
-  auto out = ComplexValArray{v.size()};
-  for (size_t i = 0; i < v.size(); i++) {
-    out[i] = d / v.at(i);
-  }
-  return out;
-}
+ComplexValArray operator*(double x, const ComplexValArray& v);
+ComplexValArray operator+(double x, const ComplexValArray& v);
+ComplexValArray operator*(std::complex<double> x, const ComplexValArray& v);
+ComplexValArray operator/(double d, const ComplexValArray& v);
 }  // namespace Visqol
 
 #endif  // VISQOL_INCLUDE_COMPLEXVALARRAY_H

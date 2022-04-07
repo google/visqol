@@ -17,28 +17,29 @@
 #ifndef VISQOL_INCLUDE_FILEPATH_H
 #define VISQOL_INCLUDE_FILEPATH_H
 
+#include <filesystem>
 #include <fstream>
 #include <string>
 
-#include "boost/filesystem.hpp"
+#include "absl/strings/string_view.h"
 
 namespace Visqol {
 class FilePath {
  public:
   FilePath() {}
 
-  FilePath(const FilePath &other) { path_ = other.path_; }
+  FilePath(const FilePath& other) { path_ = other.path_; }
 
-  FilePath(const std::string &path) {
-    path_ = ::boost::filesystem::path(path).string();
+  FilePath(absl::string_view path) {
+    path_ = std::filesystem::path(std::string(path)).string();
   }
 
   const std::string Path() const { return path_; }
 
-  bool Exists() const { return ::boost::filesystem::exists(path_); }
+  bool Exists() const { return std::filesystem::exists(path_); }
 
   static std::string currentWorkingDir() {
-    return ::boost::filesystem::current_path().string();
+    return std::filesystem::current_path().string();
   }
 
  private:

@@ -39,12 +39,12 @@ size_t MiscMath::NextPowTwo(const uint32_t input) {
 }
 
 const float kScalar16bit = 32768.0;
-static double abs_scale(int16_t x) { return (x/kScalar16bit);}
+static double abs_scale(int16_t x) { return (x / kScalar16bit); }
 std::vector<double> MiscMath::NormalizeInt16ToDouble(
-    std::vector<int16_t> &input_vec) {
+    std::vector<int16_t>& input_vec) {
   std::vector<double> output_vector(input_vec.size());
-  std::transform(input_vec.begin(), input_vec.end(),
-                 output_vector.begin(), abs_scale);
+  std::transform(input_vec.begin(), input_vec.end(), output_vector.begin(),
+                 abs_scale);
   return output_vector;
 }
 

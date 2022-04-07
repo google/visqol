@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "absl/status/status.h"
-
 #include "similarity_to_quality_mapper.h"
 #include "support_vector_regression_model.h"
 
@@ -43,8 +42,11 @@ class SpeechSimilarityToQualityMapper : public SimilarityToQualityMapper {
   explicit SpeechSimilarityToQualityMapper(bool scale_to_max_mos);
 
   // Docs inherited from parent.
-  double PredictQuality(const std::vector<double> &similarity_vector)
-      const override;
+  double PredictQuality(
+      const std::vector<double>& fvnsim_vector,
+      const std::vector<double>& fvnsim10_vector,
+      const std::vector<double>& fstdnsim_vector,
+      const std::vector<double>& fvdegenergy_vector) const override;
 
   // Docs inherited from parent.
   absl::Status Init() override;

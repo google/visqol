@@ -31,9 +31,8 @@ typedef float32x4_t SimdVector;
 #define SIMD_LOAD_ONE_FLOAT(p) vld1q_dup_f32(&(p))
 #endif
 
-#include "pffft.h"
-
 #include "audio_channel.h"
+#include "pffft.h"
 
 namespace Visqol {
 
@@ -83,7 +82,7 @@ class FftManager {
    *    canonically.
    */
   void FreqFromTimeDomain(const AudioChannel& time_channel,
-      AudioChannel* freq_channel);
+                          AudioChannel* freq_channel);
 
   /**
    * For a given input AudioChannel in the frequency domain, canonically
@@ -94,7 +93,7 @@ class FftManager {
    * @param time_channel The output time domain channel.
    */
   void TimeFromFreqDomain(const AudioChannel& freq_channel,
-      AudioChannel* time_channel);
+                          AudioChannel* time_channel);
 
   /**
    * Apply a 1/fft_size_ scaling to the time domain output.
@@ -113,7 +112,7 @@ class FftManager {
    *    with the pffft ordering.
    */
   void GetPffftFormatFreqBuffer(const AudioChannel& input,
-      AudioChannel* output);
+                                AudioChannel* output);
 
   /**
    * Get the FFT size associated with this manager. The fft size will be a
@@ -121,24 +120,23 @@ class FftManager {
    *
    * @return The fft size.
    */
-  size_t GetFftSize() const { return fft_size_;}
+  size_t GetFftSize() const { return fft_size_; }
 
   /**
    * Get the number of samples in the input time domain channel that this
    * manager was created to work with.
    */
-  size_t GetSamplesPerChannel() const { return samples_per_channel_;}
+  size_t GetSamplesPerChannel() const { return samples_per_channel_; }
 
   /**
    * Get a reference to the time channel.
    */
-  AudioChannel& GetTimeChannel() { return time_channel_;}
+  AudioChannel& GetTimeChannel() { return time_channel_; }
 
   /**
    * Get a reference to the freq channel.
    */
-  AudioChannel& GetFreqChannel() { return freq_channel_;}
-
+  AudioChannel& GetFreqChannel() { return freq_channel_; }
 
  private:
   /**
@@ -150,9 +148,11 @@ class FftManager {
    * @param output A float pointer to the first element in the output buffer.
    */
   void SimdScalarMultiply(size_t length, float gain, const float* input,
-      float* output);
-  inline size_t GetNumChunks(size_t length) {return length / SIMD_LENGTH;}
-  inline size_t GetLeftoverSamples(size_t length) {return length % SIMD_LENGTH;}
+                          float* output);
+  inline size_t GetNumChunks(size_t length) { return length / SIMD_LENGTH; }
+  inline size_t GetLeftoverSamples(size_t length) {
+    return length % SIMD_LENGTH;
+  }
 
   /**
    * The FFT size used during this manager's ops. Will be a power of 2.

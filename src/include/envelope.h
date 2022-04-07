@@ -35,7 +35,8 @@ class Envelope {
    * @param signal The input single dimensional matrix representing the signal.
    * @return The upper envelope for the input signal.
    */
-  static AMatrix<double> CalcUpperEnv(const AMatrix<double> &signal);
+  static AMatrix<double> CalcUpperEnv(const AMatrix<double>& signal);
+
  private:
   /**
    * Perform a Hilbert Transform on a given single dimensional input signal.
@@ -46,7 +47,7 @@ class Envelope {
    * @return The matrix of complex doubles containing the result of the Hilbert
    *         Transform.
    */
-  static AMatrix<std::complex<double>> Hilbert(const AMatrix<double> &signal);
+  static AMatrix<std::complex<double>> Hilbert(const AMatrix<double>& signal);
 };
 }  // namespace Visqol
 

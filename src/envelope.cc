@@ -20,12 +20,11 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
-
 #include "fast_fourier_transform.h"
 #include "misc_vector.h"
 
 namespace Visqol {
-AMatrix<double> Envelope::CalcUpperEnv(const AMatrix<double> &signal) {
+AMatrix<double> Envelope::CalcUpperEnv(const AMatrix<double>& signal) {
   double mean = MiscVector::Mean(signal);
   const auto signal_centered = signal - mean;
   AMatrix<std::complex<double>> hilbert = Hilbert(signal_centered);
@@ -38,7 +37,7 @@ AMatrix<double> Envelope::CalcUpperEnv(const AMatrix<double> &signal) {
   return hilbert_amp + mean;
 }
 
-AMatrix<std::complex<double>> Envelope::Hilbert(const AMatrix<double> &signal) {
+AMatrix<std::complex<double>> Envelope::Hilbert(const AMatrix<double>& signal) {
   auto fft_manager = absl::make_unique<FftManager>(signal.NumElements());
   AMatrix<std::complex<double>> freq_domain_signal =
       FastFourierTransform::Forward1d(fft_manager, signal);
@@ -55,20 +54,19 @@ AMatrix<std::complex<double>> Envelope::Hilbert(const AMatrix<double> &signal) {
   } else if (is_odd && is_non_empty) {
     hilbert_scaling[signal.NumRows() / 2] = 2.0;
   }
-  const size_t n = (is_odd) ? (freq_domain_signal.NumRows() + 1) / 2 :
-                         ((freq_domain_signal.NumRows()) / 2);
+  const size_t n = (is_odd) ? (freq_domain_signal.NumRows() + 1) / 2
+                            : ((freq_domain_signal.NumRows()) / 2);
   for (size_t row_index = 1; row_index < n; row_index++) {
     hilbert_scaling[row_index] = 2.0;
   }
 
   AMatrix<std::complex<double>> element_wise_prod(
-      freq_domain_signal.NumElements(),
-      1);
+      freq_domain_signal.NumElements(), 1);
   for (size_t i = 0; i < freq_domain_signal.NumRows(); i++) {
     element_wise_prod(i) = freq_domain_signal(i) * hilbert_scaling[i];
   }
-  auto hilbert = FastFourierTransform::Inverse1d(fft_manager,
-                                                 element_wise_prod);
+  auto hilbert =
+      FastFourierTransform::Inverse1d(fft_manager, element_wise_prod);
   return hilbert;
 }
 }  // namespace Visqol

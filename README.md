@@ -59,16 +59,6 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 3. ##### Build ViSQOL:
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
-#### Running Automated Tests
-To build and execute the automated tests (excluding the conformance tests, SVR training tests, and edge case tests) run `bazel test all_unit_tests`
-
-##### Running Tests On Windows
-Due to [Bazel bug #8843](https://github.com/bazelbuild/bazel/issues/8843), some tests on Windows will fail with 'File Not Found' errors. To work around
-this problem, run the tests with `bazel test all_unit_tests --enable_runfiles`. This will instruct Bazel to create symlinks to the test data files in the 
-test directory.
-
-*Note: This relies on Windows Symlinks. To run this command, Windows 10 version 1703 or newer is required, and Developer Mode must be enabled.*
-
 ## Command Line Usage
 #### Note Regarding Usage
 - When run from the command line, input signals must be in WAV format.
@@ -194,7 +184,7 @@ int main(int argc, char **argv) {
 
   // Optionally, set the location of the model file to use.
   // If not set, the default model file will be used.
-  config.mutable_options()->set_svr_model_path("visqol/model/libsvm_nu_svr_model.txt");
+  config.mutable_options()->set_model_path("visqol/model/libsvm_nu_svr_model.txt");
 
   // ViSQOL will run in audio mode comparison by default.
   // If speech mode comparison is desired, set to true.
@@ -206,8 +196,7 @@ int main(int argc, char **argv) {
   // NSIM score will instead be mapped to a MOS-LQO of ~4.x.
   config.mutable_options()->set_use_unscaled_speech_mos_mapping(false);
 
-  // Create an instance of the ViSQOL API. A new instance
-  // is required for each signal pair to be compared.
+  // Create an instance of the ViSQOL API.
   Visqol::VisqolApi visqol;
   absl::Status status = visqol.Create(config);
 

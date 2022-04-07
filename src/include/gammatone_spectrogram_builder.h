@@ -17,9 +17,9 @@
 #ifndef VISQOL_INCLUDE_GAMMATONESPECTROGRAMBUILDER_H
 #define VISQOL_INCLUDE_GAMMATONESPECTROGRAMBUILDER_H
 
+#include "absl/status/statusor.h"
 #include "gammatone_filterbank.h"
 #include "spectrogram_builder.h"
-#include "absl/status/statusor.h"
 
 namespace Visqol {
 
@@ -29,7 +29,8 @@ namespace Visqol {
  * match with experimental observations of how mammalian cochlea process
  * auditory signals.
  *
- * Based on Dan Ellis Matlab implementation: https://uk.mathworks.com/matlabcentral/fileexchange/23053-gammatone-based--auditory--spectrograms/content/gammatonegram/gammatonegram.m
+ * Based on Dan Ellis Matlab implementation:
+ * https://uk.mathworks.com/matlabcentral/fileexchange/23053-gammatone-based--auditory--spectrograms/content/gammatonegram/gammatonegram.m
  */
 class GammatoneSpectrogramBuilder : public SpectrogramBuilder {
  public:
@@ -44,13 +45,12 @@ class GammatoneSpectrogramBuilder : public SpectrogramBuilder {
    *
    * @param filter_bank The gamatone filter bank to apply to the signal.
    */
-  explicit GammatoneSpectrogramBuilder(const GammatoneFilterBank &filter_bank,
-      const bool use_speech_mode);
+  explicit GammatoneSpectrogramBuilder(const GammatoneFilterBank& filter_bank,
+                                       const bool use_speech_mode);
 
   // Docs inherited from parent.
-  absl::StatusOr<Spectrogram> Build(
-      const AudioSignal &signal,
-      const AnalysisWindow &window) override;
+  absl::StatusOr<Spectrogram> Build(const AudioSignal& signal,
+                                    const AnalysisWindow& window) override;
 
  private:
   /**

@@ -43,8 +43,8 @@ class XCorr {
    *
    * @return The best lag value resulting from the cross correlation.
    */
-  static int64_t CalcBestLag(const AMatrix<double> &signal_1,
-                             const AMatrix<double> &signal_2);
+  static int64_t FindLowestLagIndex(const AMatrix<double>& signal_1,
+                                    const AMatrix<double>& signal_2);
 
  private:
   /**
@@ -60,7 +60,7 @@ class XCorr {
    * @return The inverse fft of the pointwise product of the two signal's
    *    forward fft.
    */
-  static std::vector<double> CalcInverseFFTPwiseProd(
+  static std::vector<double> InverseFFTPointwiseProduct(
       const AMatrix<double>& signal_1, const AMatrix<double>& signal_2);
 
   /**
@@ -75,8 +75,8 @@ class XCorr {
    *
    * @return The pointwise product of the two signal's forward fft.
    */
-  static AMatrix<std::complex<double>> CalcFFTPwiseProd(
-      const std::vector<double> &signal_1, const std::vector<double> &signal_2,
+  static AMatrix<std::complex<double>> FFTPointwiseProduct(
+      const std::vector<double>& signal_1, const std::vector<double>& signal_2,
       const std::unique_ptr<FftManager>& fft_manager, const size_t fft_points);
 };
 }  // namespace Visqol

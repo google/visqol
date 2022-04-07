@@ -16,17 +16,18 @@
 
 #include "gtest/gtest.h"
 #include "similarity_result.h"
-#include "visqol_manager.h"
 #include "test_utility.h"
+#include "visqol_manager.h"
 
 namespace Visqol {
 namespace {
 
 const double kMinMoslqo = 1.0;
-const double kConformanceGuitarX2MisMatch = 4.7280547464172038;
-const double kConformanceGuitar2secMisMatch = 4.7262192026045007;
-const double kConformanceGuitar50msMisMatch = 4.6672912779523177;
-const double kTolerance = 0.0001;
+const double kMOSGuitarX2MisMatch = 4.7;
+const double kMOSGuitar2secMisMatch = 4.7;
+const double kMOSGuitar50msMisMatch = 4.6;
+// These are not conformance tests, so use a wide tolerance
+const double kTolerance = 1.0;
 
 // Test that when the degraded file is shorter than the reference (by more than
 // 1 second) visqol will still run to completion without failure.
@@ -40,19 +41,18 @@ TEST(MismatchedLengths, deg_too_short) {
 
   // Init ViSQOL.
   Visqol::VisqolManager visqol;
-  auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
-      cmd_args.use_speech_mode,
-      cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+  auto status = visqol.Init(
+      cmd_args.similarity_to_quality_mapper_model, cmd_args.use_speech_mode,
+      cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius,
+      cmd_args.use_lattice_model);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.
-  auto status_or = visqol.Run(files_to_compare[0].reference,
-                              files_to_compare[0].degraded);
+  auto status_or =
+      visqol.Run(files_to_compare[0].reference, files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
   ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
-  EXPECT_NEAR(kConformanceGuitarX2MisMatch, status_or.value().moslqo(),
-              kTolerance);
+  EXPECT_NEAR(kMOSGuitarX2MisMatch, status_or.value().moslqo(), kTolerance);
 }
 
 // Test that when the degraded file is longer than the reference (by more than
@@ -68,19 +68,18 @@ TEST(MismatchedLengths, deg_too_long) {
 
   // Init ViSQOL.
   Visqol::VisqolManager visqol;
-  auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
-      cmd_args.use_speech_mode,
-      cmd_args.use_unscaled_speech_mos_mapping,
-      cmd_args.search_window_radius);
+  auto status = visqol.Init(
+      cmd_args.similarity_to_quality_mapper_model, cmd_args.use_speech_mode,
+      cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius,
+      cmd_args.use_lattice_model);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.
-  auto status_or = visqol.Run(files_to_compare[0].reference,
-                              files_to_compare[0].degraded);
+  auto status_or =
+      visqol.Run(files_to_compare[0].reference, files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
   ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
-  EXPECT_NEAR(kConformanceGuitar2secMisMatch, status_or.value().moslqo(),
-              kTolerance);
+  EXPECT_NEAR(kMOSGuitar2secMisMatch, status_or.value().moslqo(), kTolerance);
 }
 
 // Test that when the degraded file is longer than the reference (by about 50 ms
@@ -96,10 +95,10 @@ TEST(MismatchedLengths, deg_long) {
 
   // Init ViSQOL.
   Visqol::VisqolManager visqol;
-  auto status = visqol.Init(cmd_args.sim_to_quality_mapper_model,
-                            cmd_args.use_speech_mode,
-                            cmd_args.use_unscaled_speech_mos_mapping,
-                            cmd_args.search_window_radius);
+  auto status = visqol.Init(
+      cmd_args.similarity_to_quality_mapper_model, cmd_args.use_speech_mode,
+      cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius,
+      cmd_args.use_lattice_model);
   ASSERT_TRUE(status.ok());
 
   // Run ViSQOL.
@@ -107,8 +106,7 @@ TEST(MismatchedLengths, deg_long) {
       visqol.Run(files_to_compare[0].reference, files_to_compare[0].degraded);
   ASSERT_TRUE(status_or.ok());
   ASSERT_TRUE(status_or.value().moslqo() > kMinMoslqo);
-  EXPECT_NEAR(kConformanceGuitar50msMisMatch, status_or.value().moslqo(),
-              kTolerance);
+  EXPECT_NEAR(kMOSGuitar50msMisMatch, status_or.value().moslqo(), kTolerance);
 }
 
 }  // namespace

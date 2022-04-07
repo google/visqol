@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "absl/status/statusor.h"
-
 #include "analysis_window.h"
 #include "audio_signal.h"
 #include "image_patch_creator.h"
@@ -45,13 +44,12 @@ class VadPatchCreator : public ImagePatchCreator {
   static const double kFramesWithVAThreshold;
 
   // Docs inherited from parent.
-  explicit VadPatchCreator(size_t patch_size)
-      : ImagePatchCreator(patch_size) {}
+  explicit VadPatchCreator(size_t patch_size) : ImagePatchCreator(patch_size) {}
 
   // Docs inherited from parent.
   absl::StatusOr<std::vector<size_t>> CreateRefPatchIndices(
-    const AMatrix<double> &spectrogram, const AudioSignal &ref_signal,
-    const AnalysisWindow &window) const override;
+      const AMatrix<double>& spectrogram, const AudioSignal& ref_signal,
+      const AnalysisWindow& window) const override;
 
   /**
    * For a given input signal and sample bounds, break the signal up into
@@ -71,9 +69,10 @@ class VadPatchCreator : public ImagePatchCreator {
    *    activity, a value of 1.0 will be stored at that index in the vector.
    *    Else a value of 0.0 is stored.
    */
-  std::vector<double> GetVoiceActivity(
-      const AudioSignal &signal, const size_t start_sample,
-      const size_t total_samples, const size_t frame_len) const;
+  std::vector<double> GetVoiceActivity(const AudioSignal& signal,
+                                       const size_t start_sample,
+                                       const size_t total_samples,
+                                       const size_t frame_len) const;
 };
 
 }  // namespace Visqol

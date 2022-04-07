@@ -107,7 +107,7 @@ class PatchSimilarityComparator {
    * @return The patch comparison similarity result.
    */
   virtual PatchSimilarityResult MeasurePatchSimilarity(
-      const ImagePatch &ref_patch, const ImagePatch &deg_patch) const = 0;
+      const ImagePatch& ref_patch, const ImagePatch& deg_patch) const = 0;
 };
 }  // namespace Visqol
 

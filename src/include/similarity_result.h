@@ -22,7 +22,6 @@
 #include "file_path.h"
 #include "patch_similarity_comparator.h"
 
-
 namespace Visqol {
 /**
  * Struct used for storing debug information related to a specific
@@ -60,6 +59,15 @@ struct SimilarityResult {
   std::vector<double> fvnsim;
 
   /**
+   * Represents the similarity between the two signals for each frequency band
+   * that is compared for the 10 percentile (0.1 quantile).
+   * The size of this vector will therefore equal the number of frequency bands
+   * compared. Values are ordered from the lowest frequency band at index 0,
+   * running up to the highest.
+   */
+  std::vector<double> fvnsim10;
+
+  /**
    * Standard deviation in similarity for each frequency.
    */
   std::vector<double> fstdnsim;
@@ -92,6 +100,12 @@ struct SimilarityResult {
    * path to this file.
    */
   FilePath degraded;
+
+  /**
+   * If the degraded audio was additionally aligned, this will store the value
+   * received from alignment.cc
+   */
+  double alignment_lag_s;
 };
 }  // namespace Visqol
 

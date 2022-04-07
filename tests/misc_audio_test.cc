@@ -14,9 +14,8 @@
 
 #include "misc_audio.h"
 
-#include "gtest/gtest.h"
-
 #include "file_path.h"
+#include "gtest/gtest.h"
 
 namespace Visqol {
 namespace {
@@ -46,8 +45,7 @@ TEST(LoadAsMono, Mono) {
 }
 
 TEST(LoadAsMono, MonoFromStream) {
-  std::ifstream wav_file("testdata/clean_speech/CA01_01.wav",
-                         std::ios::binary);
+  std::ifstream wav_file("testdata/clean_speech/CA01_01.wav", std::ios::binary);
   std::stringstream wav_string_stream;
   wav_string_stream << wav_file.rdbuf();
   wav_file.close();
@@ -69,7 +67,8 @@ TEST(LoadAsMono, MonoFromEmptyStream) {
 
 TEST(LoadAsMono, Stereo) {
   FilePath stereo_file{
-      "testdata/conformance_testdata_subset/guitar48_stereo.wav"};
+      "testdata/conformance_testdata_subset/"
+      "guitar48_stereo.wav"};
 
   auto wavreader_audio = Visqol::MiscAudio::LoadAsMono(stereo_file);
   ASSERT_EQ(kStereoTestsample_rate, wavreader_audio.sample_rate);

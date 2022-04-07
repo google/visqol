@@ -14,10 +14,9 @@
 
 #include "gammatone_filterbank.h"
 
-#include "gtest/gtest.h"
-
 #include "amatrix.h"
 #include "equivalent_rectangular_bandwidth.h"
+#include "gtest/gtest.h"
 
 namespace Visqol {
 namespace {
@@ -27,21 +26,20 @@ const size_t kNumBands = 32;
 const double kMinFreq = 50;
 
 // The contents of this input signal are random figures.
-const AMatrix<double> k10Samples{std::valarray<double>{0.2, 0.4, 0.6, 0.8, 0.9,
-    0.1, 0.3, 0.5, 0.7, 0.9}};
+const AMatrix<double> k10Samples{
+    std::valarray<double>{0.2, 0.4, 0.6, 0.8, 0.9, 0.1, 0.3, 0.5, 0.7, 0.9}};
 
 // Ensure that the output matrix from the signal filter has the correct
 // dimensions.
 TEST(ApplyFilterTest, basic_positive_flow) {
   auto filter_bank = GammatoneFilterBank{kNumBands, kMinFreq};
-  auto erb = EquivalentRectangularBandwidth::MakeFilters(kSampleRate,
-                                                         kNumBands, kMinFreq,
-                                                         kSampleRate / 2);
+  auto erb = EquivalentRectangularBandwidth::MakeFilters(
+      kSampleRate, kNumBands, kMinFreq, kSampleRate / 2);
   AMatrix<double> filter_coeffs = AMatrix<double>(erb.filterCoeffs);
   filter_coeffs = filter_coeffs.FlipUpDown();
   filter_bank.SetFilterCoefficients(filter_coeffs);
-  auto filtered_signal = filter_bank.ApplyFilter(
-      k10Samples.GetColumn(0).ToValArray());
+  auto filtered_signal =
+      filter_bank.ApplyFilter(k10Samples.GetColumn(0).ToValArray());
 
   ASSERT_EQ(k10Samples.NumElements(), filtered_signal.NumCols());
   ASSERT_EQ(kNumBands, filtered_signal.NumRows());

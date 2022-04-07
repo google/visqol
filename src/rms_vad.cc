@@ -33,7 +33,7 @@ RmsVad::RmsVad() {
   }
 }
 
-double RmsVad::ProcessChunk(const std::vector<int16_t> &chunk) {
+double RmsVad::ProcessChunk(const std::vector<int16_t>& chunk) {
   const double rms = CalcRootMeanSquare(chunk);
   if (rms < kRmsThreshold) {
     each_chunk_result_.push_back(kVoiceActivityAbsent);
@@ -44,8 +44,7 @@ double RmsVad::ProcessChunk(const std::vector<int16_t> &chunk) {
 }
 
 std::vector<double> RmsVad::GetVadResults() {
-  for (std::size_t i = kSilentChunkCount - 1;
-       i < each_chunk_result_.size();
+  for (std::size_t i = kSilentChunkCount - 1; i < each_chunk_result_.size();
        i++) {
     // If this chunk is below the RMS threshold and the previous
     // kSilentChunkCount chunks are also below threshold, then mark this chunk
@@ -59,14 +58,14 @@ std::vector<double> RmsVad::GetVadResults() {
   return vad_results_;
 }
 
-double RmsVad::CalcRootMeanSquare(const std::vector<int16_t> &chunk) {
-    double square = 0.0;
-    double mean = 0.0;
-    for (std::size_t i = 0; i < chunk.size(); i++) {
-        square += std::pow(chunk[i], 2);
-    }
-    mean = square / static_cast<double>(chunk.size());
-    return std::sqrt(mean);
+double RmsVad::CalcRootMeanSquare(const std::vector<int16_t>& chunk) {
+  double square = 0.0;
+  double mean = 0.0;
+  for (std::size_t i = 0; i < chunk.size(); i++) {
+    square += std::pow(chunk[i], 2);
+  }
+  mean = square / static_cast<double>(chunk.size());
+  return std::sqrt(mean);
 }
 
 bool RmsVad::CheckPreviousChunksForSilence(const std::size_t idx) {

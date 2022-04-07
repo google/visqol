@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "absl/status/statusor.h"
-
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
@@ -55,10 +54,9 @@ class ImagePatchCreator {
    * @param If successful, the vector of patch indices is returned. Else, an
    *    error status.
    */
-  virtual absl::StatusOr<std::vector<size_t>>
-      CreateRefPatchIndices(const AMatrix<double> &spectrogram,
-                            const AudioSignal &ref_signal,
-                            const AnalysisWindow &window) const;
+  virtual absl::StatusOr<std::vector<size_t>> CreateRefPatchIndices(
+      const AMatrix<double>& spectrogram, const AudioSignal& ref_signal,
+      const AnalysisWindow& window) const;
 
   /**
    * For a given spectrogram and vector of patch indices, create a vector of
@@ -72,8 +70,8 @@ class ImagePatchCreator {
    * @return The vector of patches.
    */
   std::vector<ImagePatch> CreatePatchesFromIndices(
-      const AMatrix<double> &spectrogram,
-      const std::vector<size_t> &patch_indices) const;
+      const AMatrix<double>& spectrogram,
+      const std::vector<size_t>& patch_indices) const;
 
  protected:
   /**
@@ -94,7 +92,7 @@ class ImagePatchCreator {
    *    error status.
    */
   absl::StatusOr<std::vector<size_t>> CreateRefPatchIndices(
-      const AMatrix<double> &spectrogram) const;
+      const AMatrix<double>& spectrogram) const;
 };
 }  // namespace Visqol
 

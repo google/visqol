@@ -36,7 +36,7 @@ class Spectrogram {
   /**
    * Constructs a spectrogram object using the input matrix.
    */
-  explicit Spectrogram(AMatrix<double> &&data);
+  explicit Spectrogram(AMatrix<double>&& data);
 
   /**
    * Return the smallest value in the spectrogram's matrix.
@@ -44,7 +44,6 @@ class Spectrogram {
    * @return The smallest value in the spectrogram's matrix.
    */
   double Minimum() const;
-
 
   /**
    * Raises the floor at each frame to noise_threshold below the maximum value
@@ -55,7 +54,6 @@ class Spectrogram {
    * @param other A spectrogram to compare against.
    */
   void RaiseFloorPerFrame(double noise_threshold, Spectrogram& other);
-
 
   /**
    * For each element in the spectrogram's matrix, subtract the provided floor
@@ -89,7 +87,7 @@ class Spectrogram {
    *    create this spectrogram. These center frequency bands must be ordered
    *    running from the lowest frequency band to the highest.
    */
-  void SetCenterFreqBands(const std::vector<double> &center_freq_bands);
+  void SetCenterFreqBands(const std::vector<double>& center_freq_bands);
 
   /**
    * Get the center frequency bands that were used to create this spectrogram.

@@ -15,7 +15,6 @@
 #include "spectrogram.h"
 
 #include "gtest/gtest.h"
-
 #include "test_utility.h"
 
 namespace Visqol {
@@ -30,18 +29,19 @@ const double kMinElem = -53.2;
 const double kFloor = 0.1;
 
 // The test matrix. Elements randomly choosen, but with at least one zero value.
-const AMatrix<double> k10ElemMat{std::valarray<double>{10.21, -4.63, 0.54,
-      87.98, 0.065, 0, kMinElem, 8.7, 0, -2.76}};
+const AMatrix<double> k10ElemMat{std::valarray<double>{
+    10.21, -4.63, 0.54, 87.98, 0.065, 0, kMinElem, 8.7, 0, -2.76}};
 
 // The test matrix converted to DB.
-const AMatrix<double> k10ElemMatToDB{std::valarray<double>{10.0903, 6.6558,
-    -2.6761, 19.4438, -11.8709, -156.5356, 17.2591, 9.3952, -156.5356, 4.4091}};
+const AMatrix<double> k10ElemMatToDB{
+    std::valarray<double>{10.0903, 6.6558, -2.6761, 19.4438, -11.8709,
+                          -156.5356, 17.2591, 9.3952, -156.5356, 4.4091}};
 
 // The test matrix with the floor subtracted from each element.
-const AMatrix<double> k10ElemMatSubFloor{std::valarray<double>{10.21 - kFloor,
-    -4.63 - kFloor, 0.54 - kFloor, 87.98 - kFloor, 0.065 - kFloor, 0 - kFloor,
-    kMinElem - kFloor, 8.7 - kFloor, 0 - kFloor, -2.76 - kFloor}};
-
+const AMatrix<double> k10ElemMatSubFloor{std::valarray<double>{
+    10.21 - kFloor, -4.63 - kFloor, 0.54 - kFloor, 87.98 - kFloor,
+    0.065 - kFloor, 0 - kFloor, kMinElem - kFloor, 8.7 - kFloor, 0 - kFloor,
+    -2.76 - kFloor}};
 
 // Ensure the a matrix with at least one element of value 0 can be successfully
 // converted to DB.
@@ -51,9 +51,9 @@ TEST(SpectrogramTest, ConvertToDbTest) {
   spectro.ConvertToDb();
 
   std::string fail_msg;
-  ASSERT_TRUE(CompareDoubleMatrix(k10ElemMatToDB,
-                                  spectro.Data(),
-                                  kTolerance, &fail_msg)) << fail_msg;
+  ASSERT_TRUE(CompareDoubleMatrix(k10ElemMatToDB, spectro.Data(), kTolerance,
+                                  &fail_msg))
+      << fail_msg;
 }
 
 // Ensure that the Spectrogram can successfully return the lowest value element.
@@ -71,9 +71,9 @@ TEST(SpectrogramTest, SubtractFloorTest) {
   spectro.SubtractFloor(kFloor);
 
   std::string fail_msg;
-  ASSERT_TRUE(CompareDoubleMatrix(k10ElemMatSubFloor,
-                                  spectro.Data(),
-                                  kTolerance, &fail_msg)) << fail_msg;
+  ASSERT_TRUE(CompareDoubleMatrix(k10ElemMatSubFloor, spectro.Data(),
+                                  kTolerance, &fail_msg))
+      << fail_msg;
 }
 
 }  // namespace

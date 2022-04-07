@@ -27,47 +27,53 @@
 // As of 300, the first digit is the major version and last two digits are the
 // minor version.
 // Major version change history:
-// Feb 2020: v300 - polynomial fitting for speech mode, SVR for audio mode.
+// Feb 2022: v333 - retrained lattice and exponential speech model for Hann
+//                  window fix and quantile-based NSIM.
+// Aug 2021: v320 - lattice model for speech mode, (audio mode unchanged).
 // Oct 2020: v310 - exponential fitting for speech mode, (audio mode unchanged).
-#define kVisqolConformanceNumber (310)
+// Feb 2020: v300 - polynomial fitting for speech mode, SVR for audio mode.
+
+#define kVisqolConformanceNumber (333)
 
 // If the scores for these known files changes, tests/conformance_test will fail
 // Whenever these constants need to be updated, kVisqolConformanceNumber should
 // be incremented.
-#define kConformanceSpeechCA01Transcoded (2.3691150188221259)
+#define kConformanceSpeechCA01TranscodedLattice (3.3129234313964844)
+#define kConformanceSpeechCA01TranscodedExponential (3.374505555111911)
 
-#define kConformanceStraussLp35 (1.9905729378864558)
+#define kConformanceStraussLp35 (1.3888791489130758)
 
-#define kConformanceSteelyLp7 (2.4019387463496034)
+#define kConformanceSteelyLp7 (2.2501683734385183)
 
-#define kConformanceSopr256aac (4.7265073131023394)
+#define kConformanceSopr256aac (4.68228969737946)
 
-#define kConformanceRavel128opus (4.6393500094950069)
+#define kConformanceRavel128opus (4.465141897255348)
 
-#define kConformanceMoonlight128aac (4.6902760241035715)
+#define kConformanceMoonlight128aac (4.684292801646114)
 
-#define kConformanceHarpsichord96mp3 (4.2902957875132159)
+#define kConformanceHarpsichord96mp3 (4.22374532766003)
 
-#define kConformanceGuitar64aac (4.5123244380958774)
+#define kConformanceGuitar64aac (4.349722308064298)
 
-#define kConformanceGuitarShortDegradedPatch (4.4056028414814765)
+#define kConformanceGuitarShortDegradedPatch (4.314508583690198)
 
-#define kConformanceGuitarShortReferencePatch (4.6761039922498471)
+#define kConformanceGuitarShortReferencePatch (4.550791119387646)
 
-#define kConformanceDifferentAudios (1.5093694203696959)
+#define kConformanceDifferentAudiosLattice (1.4982070922851562)
+#define kConformanceDifferentAudiosExponential (1.269675546824064)
 
-#define kConformanceGlock48aac (4.333169489109431)
+#define kConformanceGlock48aac (4.332452943882108)
 
-#define kConformanceContrabassoon24aac (4.0500790740957617)
+#define kConformanceContrabassoon24aac (2.346868205375293)
 
-#define kConformanceCastanetsIdentity (4.7321012530423481)
+#define kConformanceCastanetsIdentity (4.732101253042348)
 
-#define kConformanceBadDegraded (1.5260486187764308)
+#define kConformanceBadDegradedLattice (1.19293212890625)
+#define kConformanceBadDegradedExponential (1.357521678867611)
 
-#define kConformanceGuitarLongDuration (4.5177618344298294)
+#define kConformanceCA01PerfectScoreLattice (4.505550384521484)
+#define kConformanceUnscaledPerfectScoreExponential (4.015861169223797)
 
-#define kCA01_01UnscaledPerfectScore (4.1557613014690995)
+#define kCA01_01AsAudio (1.7658378752958486)
 
-#define kCA01_01AsAudio (2.0003927800390828)
-
-#endif // VISQOL_INCLUDE_CONFORMANCE_H
+#endif  // VISQOL_INCLUDE_CONFORMANCE_H

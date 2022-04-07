@@ -31,8 +31,8 @@ const size_t FftManager::kMinFftSize = 32;
 const size_t FftManager::kPffftMaxStackSize = 16384;
 
 FftManager::FftManager(size_t samples_per_channel)
-    : fft_size_(std::max(MiscMath::NextPowTwo(samples_per_channel),
-                kMinFftSize)),
+    : fft_size_(
+          std::max(MiscMath::NextPowTwo(samples_per_channel), kMinFftSize)),
       samples_per_channel_(samples_per_channel),
       inverse_fft_scale_(1.0f / static_cast<float>(fft_size_)) {
   if (fft_size_ > kPffftMaxStackSize) {
@@ -56,58 +56,57 @@ FftManager::~FftManager() {
 }
 
 void FftManager::FreqFromTimeDomain(const AudioChannel& time_channel,
-    AudioChannel* freq_channel) {
-
+                                    AudioChannel* freq_channel) {
   assert(freq_channel->size() == fft_size_);
   assert(time_channel.size() <= fft_size_);
 
   // Perform forward FFT transform.
   if (time_channel.size() == fft_size_) {
     pffft_transform_ordered(fft_, time_channel.begin(), freq_channel->begin(),
-        pffft_workspace_, PFFFT_FORWARD);
+                            pffft_workspace_, PFFFT_FORWARD);
   } else {
     AudioChannel temp_zeropad_buffer_;
     temp_zeropad_buffer_.Init(fft_size_);
     temp_zeropad_buffer_.Clear();
     std::copy_n(time_channel.begin(), samples_per_channel_,
-        temp_zeropad_buffer_.begin());
+                temp_zeropad_buffer_.begin());
     pffft_transform_ordered(fft_, temp_zeropad_buffer_.begin(),
-        freq_channel->begin(), pffft_workspace_, PFFFT_FORWARD);
+                            freq_channel->begin(), pffft_workspace_,
+                            PFFFT_FORWARD);
   }
 }
 
 void FftManager::TimeFromFreqDomain(const AudioChannel& freq_channel,
-    AudioChannel* time_channel) {
-
+                                    AudioChannel* time_channel) {
   assert(freq_channel.size() == fft_size_);
 
   // Perform reverse FFT transform.
   const size_t time_channel_size = time_channel->size();
   if (time_channel_size == fft_size_) {
     pffft_transform(fft_, freq_channel.begin(), time_channel->begin(),
-        pffft_workspace_, PFFFT_BACKWARD);
+                    pffft_workspace_, PFFFT_BACKWARD);
   } else {
     AudioChannel temp_freq_buffer_;
     temp_freq_buffer_.Init(fft_size_);
     temp_freq_buffer_.Clear();
     auto& temp_channel = temp_freq_buffer_;
     pffft_transform(fft_, freq_channel.begin(), temp_channel.begin(),
-        pffft_workspace_, PFFFT_BACKWARD);
+                    pffft_workspace_, PFFFT_BACKWARD);
     std::copy_n(temp_channel.begin(), samples_per_channel_,
-        time_channel->begin());
+                time_channel->begin());
   }
 }
 
 void FftManager::ApplyReverseFftScaling(AudioChannel* time_channel) {
   assert(time_channel->size() == samples_per_channel_ ||
-      time_channel->size() == fft_size_);
+         time_channel->size() == fft_size_);
 
   SimdScalarMultiply(time_channel->size(), inverse_fft_scale_,
-      time_channel->begin(), time_channel->begin());
+                     time_channel->begin(), time_channel->begin());
 }
 
 void FftManager::GetPffftFormatFreqBuffer(const AudioChannel& input,
-  AudioChannel* output) {
+                                          AudioChannel* output) {
   assert(input.size() == fft_size_);
   assert(output->size() == fft_size_);
 
@@ -115,8 +114,7 @@ void FftManager::GetPffftFormatFreqBuffer(const AudioChannel& input,
 }
 
 void FftManager::SimdScalarMultiply(size_t length, float gain,
-    const float* input, float* output) {
-
+                                    const float* input, float* output) {
   const SimdVector* input_vector = reinterpret_cast<const SimdVector*>(input);
   SimdVector* output_vector = reinterpret_cast<SimdVector*>(output);
   const SimdVector gain_vector = SIMD_LOAD_ONE_FLOAT(gain);

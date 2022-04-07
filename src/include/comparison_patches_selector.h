@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "absl/status/statusor.h"
-
 #include "amatrix.h"
 #include "image_patch_creator.h"
 #include "patch_similarity_comparator.h"
@@ -67,10 +66,9 @@ class ComparisonPatchesSelector {
    *    its corresponding patch in the degraded spectrogram.
    */
   absl::StatusOr<std::vector<PatchSimilarityResult>> FindMostOptimalDegPatches(
-      const std::vector<ImagePatch> &ref_patches,
-      const std::vector<size_t> &ref_patch_indices,
-      const AMatrix<double> &spectrogram_data,
-      const double frame_duration,
+      const std::vector<ImagePatch>& ref_patches,
+      const std::vector<size_t>& ref_patch_indices,
+      const AMatrix<double>& spectrogram_data, const double frame_duration,
       const int search_window_radius) const;
 
   /**
@@ -89,12 +87,10 @@ class ComparisonPatchesSelector {
    *    PatchSimilarityResults.
    */
   absl::StatusOr<std::vector<PatchSimilarityResult>>
-      FinelyAlignAndRecreatePatches(
-          const std::vector<PatchSimilarityResult>& sim_results,
-          const AudioSignal &ref_signal,
-          const AudioSignal &deg_signal,
-          SpectrogramBuilder *spect_builder,
-          const AnalysisWindow &window) const;
+  FinelyAlignAndRecreatePatches(
+      const std::vector<PatchSimilarityResult>& sim_results,
+      const AudioSignal& ref_signal, const AudioSignal& deg_signal,
+      SpectrogramBuilder* spect_builder, const AnalysisWindow& window) const;
 
  private:
   /**
@@ -106,7 +102,7 @@ class ComparisonPatchesSelector {
    *
    * @return A new AudioSignal containing the subregion.
    */
-  static AudioSignal Slice(const AudioSignal &in_signal, double start_time,
+  static AudioSignal Slice(const AudioSignal& in_signal, double start_time,
                            double end_time);
 
   /**
@@ -124,10 +120,10 @@ class ComparisonPatchesSelector {
    *
    * @return The patch built from the degraded spectrogram.
    */
-  ImagePatch BuildDegradedPatch(const AMatrix<double> &spectrogram_data,
+  ImagePatch BuildDegradedPatch(const AMatrix<double>& spectrogram_data,
                                 int window_beginning, size_t window_end,
-                                size_t window_height, size_t window_width)
-                                const;
+                                size_t window_height,
+                                size_t window_width) const;
 
   /**
    * For a given patch from the reference spectrogram, find the most optimal
@@ -164,11 +160,11 @@ class ComparisonPatchesSelector {
    *    cumulative_similarity_dp and backtrace vectors.
    */
   void FindMostOptimalDegPatch(
-      const AMatrix<double> &spectrogram_data, const ImagePatch &ref_patch,
-      std::vector<ImagePatch> &deg_patches,
-      std::vector<std::vector<double>> &cumulative_similarity_dp,
-      std::vector<std::vector<int>> &backtrace,
-      const std::vector<size_t> &ref_patch_indices, int patch_index,
+      const AMatrix<double>& spectrogram_data, const ImagePatch& ref_patch,
+      std::vector<ImagePatch>& deg_patches,
+      std::vector<std::vector<double>>& cumulative_similarity_dp,
+      std::vector<std::vector<int>>& backtrace,
+      const std::vector<size_t>& ref_patch_indices, int patch_index,
       const int search_window) const;
 
   /**
@@ -185,7 +181,7 @@ class ComparisonPatchesSelector {
    * @return The maximum number of patches that the degraded spectrogram can
    *    support.
    */
-  size_t CalcMaxNumPatches(const std::vector<size_t> &ref_patch_indices,
+  size_t CalcMaxNumPatches(const std::vector<size_t>& ref_patch_indices,
                            size_t num_frames_in_deg_spectro,
                            size_t num_frames_per_patch) const;
 

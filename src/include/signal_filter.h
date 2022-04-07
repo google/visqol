@@ -52,10 +52,10 @@ class SignalFilter {
    *
    * @return The resulting filtered signal and conditions.
    */
-  static FilterResults Filter(const std::valarray<double> &numer_coeffs,
-                              const std::valarray<double> &denom_coeffs,
-                              const std::valarray<double> &signal,
-                              const std::valarray<double> &init_conditions);
+  static FilterResults Filter(const std::valarray<double>& numer_coeffs,
+                              const std::valarray<double>& denom_coeffs,
+                              const std::valarray<double>& signal,
+                              const std::valarray<double>& init_conditions);
 };
 }  // namespace Visqol
 
