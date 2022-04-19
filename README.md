@@ -41,8 +41,10 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 
 #### Linux/Mac Build Instructions
 1. ##### Install Bazel
-- Bazel can be installed following the instructions for [Linux](https://docs.bazel.build/versions/master/install-ubuntu.html) or [Mac](https://docs.bazel.build/versions/master/install-os-x.html).
-- Tested with Bazel version `3.4.1`.
+- Bazel can be installed following the instructions for [Linux](https://bazel.build/install/ubuntu) or [Mac](https://bazel.build/install/os-x).
+- Tested with Bazel version `5.1.0`.
+2. ##### Install Numpy
+- Can be installed with `pip install numpy`
 2. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
