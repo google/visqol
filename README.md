@@ -48,7 +48,7 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 2. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
-#### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2020 August)
+#### Windows Build Instructions (Experimental, last tested on Windows 10 x64, 2020 August)
 
 1. ##### Install Bazel
 - Bazel can be installed for Windows from [here](https://bazel.build/install/windows).
@@ -58,7 +58,7 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 - `git` for Windows can be obtained from the [official git website](https://git-scm.com/downloads).
 - When installing, select the option that allows `git` to be accessed from the system shells.
 
-3. ##### Instal Tensorflow dependencies
+3. ##### Install Tensorflow dependencies
 - Follow the instructions detailed [here](https://www.tensorflow.org/install/source_windows) to install `tensorflow` build dependencies for windows.
 
 4. ##### Build ViSQOL:
