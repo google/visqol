@@ -72,9 +72,9 @@ class TrainingDataFileReader {
    * @return A vector of vector, where each child vector corresponds to a row
    *    in the training data file.
    */
-  static std::vector<std::vector<double>> Read(const FilePath &data_filepath,
+  static std::vector<std::vector<double>> Read(const FilePath& data_filepath,
                                                const char delimiter);
 };
 }  // namespace Visqol
 
-#endif //VISQOL_INCLUDE_MATLABMATRIXFILEREADER_H
+#endif  // VISQOL_INCLUDE_MATLABMATRIXFILEREADER_H

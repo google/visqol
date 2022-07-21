@@ -18,17 +18,15 @@
 #include <random>
 
 #include "absl/memory/memory.h"
-#include "gtest/gtest.h"
-
 #include "analysis_window.h"
 #include "file_path.h"
 #include "gammatone_spectrogram_builder.h"
+#include "gtest/gtest.h"
 #include "misc_audio.h"
 
 namespace Visqol {
 
 const std::vector<size_t> kCA01_01Patches{9, 29, 49, 69, 89};
-const double kOverlap = 0.5;
 const double kMinimumFreq = 50;
 const size_t kPatchSize = 20;
 const size_t kNumBands = 21;
@@ -49,7 +47,8 @@ TEST(VadPatchCreatorTest, CleanSpeechVAD) {
   AudioSignal ref_signal = MiscAudio::LoadAsMono(FilePath(ref_file));
   VadPatchCreator vad(kPatchSize);
   ASSERT_EQ(kCA01_01VadResCount, vad.GetVoiceActivity(ref_signal, kStartSample,
-      kTotalSample, kFrameLen).size());
+                                                      kTotalSample, kFrameLen)
+                                     .size());
 }
 
 /**
@@ -73,14 +72,11 @@ TEST(VadPatchCreatorTest, PatchIndices) {
 
   // Create the reference signal patch indices.
   VadPatchCreator vad(kPatchSize);
-  const auto patches_result = vad.CreateRefPatchIndices(spectro.Data(),
-                                                        ref_signal,
-                                                        window);
+  const auto patches_result =
+      vad.CreateRefPatchIndices(spectro.Data(), ref_signal, window);
   ASSERT_TRUE(patches_result.ok());
   const auto patches = patches_result.value();
   ASSERT_TRUE(kCA01_01Patches == patches);
 }
-
-
 
 }  // namespace Visqol

@@ -19,13 +19,12 @@
 
 #include <vector>
 
+#include "absl/types/optional.h"
 #include "amatrix.h"
 #include "audio_signal.h"
 #include "file_path.h"
 #include "misc_math.h"
 #include "spectrogram.h"
-
-#include "absl/types/optional.h"
 
 namespace Visqol {
 
@@ -59,7 +58,7 @@ class MiscAudio {
    *    that of the input reference signal.
    */
   static AudioSignal ScaleToMatchSoundPressureLevel(
-      const AudioSignal &reference, const AudioSignal &degraded);
+      const AudioSignal& reference, const AudioSignal& degraded);
 
   /**
    * For a given audio file, load it in mono. Files with more than 1 channel
@@ -71,7 +70,7 @@ class MiscAudio {
    *
    * @return The mono audio signal.
    */
-  static AudioSignal LoadAsMono(const FilePath &path);
+  static AudioSignal LoadAsMono(const FilePath& path);
 
   /**
    * For a given audio stream, load it in mono. Audio with more than 1 channel
@@ -86,7 +85,7 @@ class MiscAudio {
    * @return The mono audio signal.
    */
   static AudioSignal LoadAsMono(
-      std::stringstream *string_stream,
+      std::stringstream* string_stream,
       absl::optional<std::string> filepath = absl::nullopt);
 
   /**
@@ -96,8 +95,8 @@ class MiscAudio {
    * @param reference The reference spectrogram.
    * @param degraded The degraded spectrogram.
    */
-  static void PrepareSpectrogramsForComparison(Spectrogram &reference,
-                                               Spectrogram &degraded);
+  static void PrepareSpectrogramsForComparison(Spectrogram& reference,
+                                               Spectrogram& degraded);
 
  private:
   /**
@@ -111,7 +110,7 @@ class MiscAudio {
    *
    * @return The downmixed mono audio signal.
    */
-  static AudioSignal ToMono(const AudioSignal &signal);
+  static AudioSignal ToMono(const AudioSignal& signal);
 
   /**
    * For a given data matrix, downmix it to mono. If already mono, no work is
@@ -124,7 +123,7 @@ class MiscAudio {
    *
    * @return The downmixed mono data matrix.
    */
-  static AMatrix<double> ToMono(const AMatrix<double> &signal);
+  static AMatrix<double> ToMono(const AMatrix<double>& signal);
 
   /**
    * For a given audio signal, calculate (in dB) the sound pressure level.
@@ -137,7 +136,7 @@ class MiscAudio {
    *
    * @return The signal's sound pressure level in dB.
    */
-  static double CalcSoundPressureLevel(const AudioSignal &signal);
+  static double CalcSoundPressureLevel(const AudioSignal& signal);
 
   /**
    * Takes a vector that contains samples from multiple channels that have been
@@ -155,8 +154,7 @@ class MiscAudio {
    * @return The extracted channels stored in individual vectors.
    */
   static std::vector<std::vector<double>> ExtractMultiChannel(
-      const int num_channels,
-      const std::vector<double> &interleaved_vector);
+      const int num_channels, const std::vector<double>& interleaved_vector);
 };
 }  // namespace Visqol
 

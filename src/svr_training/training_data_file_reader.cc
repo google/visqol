@@ -17,20 +17,28 @@
 #include <fstream>
 #include <sstream>
 
+#include "absl/base/internal/raw_logging.h"
+#include "absl/strings/numbers.h"
 #include "file_path.h"
 
 namespace Visqol {
 std::vector<std::vector<double>> TrainingDataFileReader::Read(
-    const FilePath &data_filepath, const char delimiter) {
+    const FilePath& data_filepath, const char delimiter) {
   std::vector<std::vector<double>> values;
   std::vector<double> value_line;
   std::ifstream fin(data_filepath.Path());
   std::string item, line;
+  double parsed_double;
   while (getline(fin, line)) {
     std::istringstream in(line);
 
     while (getline(in, item, delimiter)) {
-      value_line.push_back(atof(item.c_str()));
+      if (absl::SimpleAtod(item, &parsed_double)) {
+        value_line.push_back(parsed_double);
+      } else {
+        ABSL_RAW_LOG(ERROR, "Error parsing SVR training data for item: '%s'",
+                     item.c_str());
+      }
     }
 
     values.push_back(value_line);

@@ -50,6 +50,9 @@ message SimilarityResultMsg {
   // The order of the elements is lowest to highest in frequency bands.
   repeated double fvnsim = 3;
 
+  // Mean of 10th percentile frequency band similarity across all patches.
+  repeated double fvnsim10 = 11;
+
   // Stddev of per patch mean frequency band similarity across all patches.
   // The order of the elements is lowest to highest in frequency bands.
   repeated double fstdnsim = 8;
@@ -72,4 +75,11 @@ message SimilarityResultMsg {
   // If ViSQOl was used at the command line to process a reference and degraded
   // filepath pair for comparison, this will hold the degraded filepath.
   string degraded_filepath = 7;
+
+  // If the degraded audio was additionally aligned, this will store the value
+  // applied, in seconds. If it is positive, then the degraded audio was later
+  // than the reference, if it is negative then the reference audio was later
+  // than the degraded. To align audio, apply the lag to the audio file that was
+  // later by prepending 0 or moving indices.
+  double alignment_lag_s = 10;
 }

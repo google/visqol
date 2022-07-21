@@ -17,7 +17,6 @@ syntax = "proto3";
 package Visqol;
 
 message VisqolConfig {
-
   // Contains info related to the input signals.
   message VisqolAudioInfo {
     // The sample rate of the input signals. Both signals must
@@ -57,6 +56,12 @@ message VisqolConfig {
     // algorithm will search to find the most optimal match for a given
     // reference frame.
     int32 search_window_radius = 7;
+
+    // If true, use a deep lattice model to map similarity to MOS.
+    // This generally provides more accurate results than the default polynomial
+    // or SVR. This is recommended unless comparing to historic conformance
+    // scores. The binary default for this is `true`.
+    bool use_lattice_model = 8;
   }
 
   VisqolAudioInfo audio = 1;

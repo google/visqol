@@ -17,24 +17,21 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "test_utility.h"
 
 namespace Visqol {
 namespace {
 
 const size_t kCountOfBatchFilePairs = 2;
-const std::string kRefFile1 = "ref_1.wav";
-const std::string kDegFile1 = "deg_1.wav";
-const std::string kRefFile2 = "ref_2.wav";
-const std::string kDegFile2 = "deg_2.wav";
+const char kRefFile1[] = "ref_1.wav";
+const char kDegFile1[] = "deg_1.wav";
+const char kRefFile2[] = "ref_2.wav";
+const char kDegFile2[] = "deg_2.wav";
 
 // Test to ensure that a csv batch file can be successfully parsed.
 TEST(BuildFilePairPaths, BatchFile) {
-  const Visqol::CommandLineArgs cmd_args = CommandLineArgsHelper(
-      "",
-      "",
-      "testdata/example_batch/batch_input.csv");
+  const Visqol::CommandLineArgs cmd_args =
+      CommandLineArgsHelper("", "", "testdata/example_batch/batch_input.csv");
   std::vector<ReferenceDegradedPathPair> file_pairs =
       VisqolCommandLineParser::BuildFilePairPaths(cmd_args);
   ASSERT_EQ(file_pairs.size(), kCountOfBatchFilePairs);
@@ -43,7 +40,6 @@ TEST(BuildFilePairPaths, BatchFile) {
   ASSERT_EQ(file_pairs[1].reference.Path(), kRefFile2);
   ASSERT_EQ(file_pairs[1].degraded.Path(), kDegFile2);
 }
-
 
 }  // namespace
 }  // namespace Visqol

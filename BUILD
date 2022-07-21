@@ -1,3 +1,5 @@
+load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
+
 package(
     default_visibility = ["//visibility:private"],
 )
@@ -33,6 +35,51 @@ cc_proto_library(
     deps = [":visqol_config"],
 )
 
+py_proto_library(
+    name = "similarity_result_py_pb2",
+    visibility = ["//visibility:public"],
+    deps = [":similarity_result"],
+)
+
+py_proto_library(
+    name = "visqol_config_py_pb2",
+    visibility = ["//visibility:public"],
+    deps = [":visqol_config"],
+)
+
+cc_library(
+    name = "tflite_quality_mapper",
+    srcs = ["src/tflite_quality_mapper.cc"],
+    hdrs = ["src/include/tflite_quality_mapper.h"],
+    includes = ["src/include"],
+    deps = [
+        ":file_path",
+        ":similarity_to_quality_mapper",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@org_tensorflow//tensorflow/lite:framework",
+        "@org_tensorflow//tensorflow/lite/c:c_api_types",
+        "@org_tensorflow//tensorflow/lite/delegates/xnnpack:xnnpack_delegate",
+        "@org_tensorflow//tensorflow/lite/kernels:builtin_ops",
+    ],
+)
+
+cc_library(
+    name = "similarity_to_quality_mapper",
+    hdrs = ["src/include/similarity_to_quality_mapper.h"],
+    deps = [
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_library(
+    name = "file_path",
+    hdrs = ["src/include/file_path.h"],
+    deps = [
+        "@com_google_absl//absl/strings",
+    ],
+)
+
 cc_library(
     name = "visqol_lib",
     srcs = glob(
@@ -44,9 +91,19 @@ cc_library(
             "src/svr_training/*.h",
             "src/include/*.h",
         ],
-        exclude = ["**/main.cc"],
+        exclude = [
+            "**/main.cc",
+            "src/tflite_quality_mapper.cc",
+            "src/include/tflite_quality_mapper.h",
+        ],
     ),
-    hdrs = glob(["src/include/*.h"]),
+    hdrs = glob(
+        ["src/include/*.h"],
+        exclude = [
+            "src/include/tflite_quality_mapper.h",
+            "src/include/similarity_to_quality_mapper.h",
+        ],
+    ),
     copts = select({
         "@bazel_tools//src/conditions:windows": [
             # Windows Compile Opts
@@ -56,6 +113,10 @@ cc_library(
             # Mac/Linux Compile Opts
         ],
     }),
+    data = [
+        "//model:libsvm_nu_svr_model.txt",
+        "//model:tflite_speech_lattice_default_model",
+    ],
     includes = [
         "src/include",
         "src/proto",
@@ -63,24 +124,25 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":file_path",
         ":similarity_result_cc_proto",
+        ":similarity_to_quality_mapper",
+        ":tflite_quality_mapper",
         ":visqol_config_cc_proto",
-        "@com_google_absl//absl/base",
+        "@armadillo_headers//:armadillo_header",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/flags:usage",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
-        "@armadillo_headers//:armadillo_header",
-        "@svm_lib//:libsvm",
-        "@pffft_lib//:pffft_lib",
-        "@boost//:filesystem",
-        "@boost//:system",
         "@com_google_protobuf//:protobuf_lite",
+        "@pffft_lib",
+        "@svm_lib//:libsvm",
     ],
 )
 
@@ -90,8 +152,8 @@ cc_binary(
     name = "visqol",
     srcs = ["src/main.cc"],
     data = [
+        "//model:lattice_tcditugenmeetpackhref_ls2_nl60_lr12_bs2048_learn.005_ep2400_train1_7_raw.tflite",
         "//model:libsvm_nu_svr_model.txt",
-        "//model:tcdvoip_nu.568_c5.31474325639_g3.17773760038_model.txt",
     ],
     visibility = ["//visibility:public"],
     deps = [
@@ -146,9 +208,11 @@ cc_library(
     testonly = True,
     hdrs = ["tests/test_utility.h"],
     deps = [
+        ":file_path",
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -173,8 +237,8 @@ cc_test(
     deps = [
         ":test_utility",
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -186,8 +250,17 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "visqol_test",
+    srcs = ["tests/visqol_test.cc"],
+    deps = [
+        ":visqol_lib",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -208,9 +281,9 @@ cc_test(
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -253,8 +326,8 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -263,8 +336,8 @@ cc_test(
     srcs = ["tests/comparison_patches_selector_test.cc"],
     deps = [
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/status:statusor",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -306,6 +379,7 @@ cc_test(
     deps = [
         ":test_utility",
         ":visqol_lib",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -322,8 +396,8 @@ cc_test(
     deps = [
         ":test_utility",
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -442,8 +516,8 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/memory",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -485,8 +559,8 @@ cc_test(
     deps = [
         ":test_utility",
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -527,7 +601,18 @@ cc_test(
     deps = [
         ":test_utility",
         ":visqol_lib",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "tflite_quality_mapper_test",
+    srcs = ["tests/tflite_quality_mapper_test.cc"],
+    data = ["//model:tflite_speech_lattice_default_model"],
+    deps = [
+        ":tflite_quality_mapper",
+        "@com_google_googletest//:gtest_main",
     ],
 )

@@ -22,7 +22,7 @@
 
 namespace Visqol {
 PatchSimilarityResult NeurogramSimiliarityIndexMeasure::MeasurePatchSimilarity(
-    const ImagePatch &ref_patch, const ImagePatch &deg_patch) const {
+    const ImagePatch& ref_patch, const ImagePatch& deg_patch) const {
   const std::vector<double> w = {
       0.0113033910173052, 0.0838251475442633, 0.0113033910173052,
       0.0838251475442633, 0.619485845753726,  0.0838251475442633,
@@ -59,7 +59,7 @@ PatchSimilarityResult NeurogramSimiliarityIndexMeasure::MeasurePatchSimilarity(
   auto structure_denom = sigma_r_sq.PointWiseProduct(sigma_d_sq);
   std::transform(structure_denom.begin(), structure_denom.end(),
                  structure_denom.begin(),
-                 [&](decltype(*structure_denom.begin()) &d) {
+                 [&](decltype(*structure_denom.begin())& d) {
                    // Avoid a nan is when stddev is negative.
                    // This occasionally happens with silent patches,
                    // which generate an epison negative value.
@@ -75,8 +75,9 @@ PatchSimilarityResult NeurogramSimiliarityIndexMeasure::MeasurePatchSimilarity(
   auto freq_band_stddevs = sim_map.StdDev(kDimension::ROW);
 
   double freq_band_sim_sum = 0;
-  std::for_each(freq_band_means.begin(), freq_band_means.end(),
-      [&](decltype(*freq_band_means.begin()) &d) {freq_band_sim_sum += d;});
+  std::for_each(
+      freq_band_means.begin(), freq_band_means.end(),
+      [&](decltype(*freq_band_means.begin())& d) { freq_band_sim_sum += d; });
   auto mean_freq_band_means =
       freq_band_sim_sum / freq_band_means.NumRows();  // A.K.A. NSIM
 

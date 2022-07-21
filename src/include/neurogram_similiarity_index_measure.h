@@ -34,9 +34,9 @@ namespace Visqol {
 class NeurogramSimiliarityIndexMeasure : public PatchSimilarityComparator {
  public:
   // Docs inherited from parent.
-  PatchSimilarityResult MeasurePatchSimilarity(const ImagePatch &ref_patch,
-                                               const ImagePatch &deg_patch)
-                                               const override;
+  PatchSimilarityResult MeasurePatchSimilarity(
+      const ImagePatch& ref_patch, const ImagePatch& deg_patch) const override;
+
  private:
   /**
    * The intensity range used during NSIM calculations.

@@ -47,22 +47,27 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 
 #### Linux/Mac Build Instructions
 1. ##### Install Bazel
-- Bazel can be installed following the instructions for [Linux](https://docs.bazel.build/versions/master/install-ubuntu.html) or [Mac](https://docs.bazel.build/versions/master/install-os-x.html).
-- Tested with Bazel version `3.4.1`.
+- Bazel can be installed following the instructions for [Linux](https://bazel.build/install/ubuntu) or [Mac](https://bazel.build/install/os-x).
+- Tested with Bazel version `5.1.0`.
+2. ##### Install Numpy
+- Can be installed with `pip install numpy`
 2. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
-#### Windows Build Instructions (Experimental, last Tested on Windows 10 x64, 2020 August)
+#### Windows Build Instructions (Experimental, last tested on Windows 10 x64, 2020 August)
 
 1. ##### Install Bazel
-- Bazel can be installed for Windows from [here](https://docs.bazel.build/versions/master/windows.html).
-- Tested with Bazel version `3.5.0`.
+- Bazel can be installed for Windows from [here](https://bazel.build/install/windows).
+- Tested with Bazel version `5.1.0`.
 
 2. ##### Install git
 - `git` for Windows can be obtained from the [official git website](https://git-scm.com/downloads).
 - When installing, select the option that allows `git` to be accessed from the system shells.
 
-3. ##### Build ViSQOL:
+3. ##### Install Tensorflow dependencies
+- Follow the instructions detailed [here](https://www.tensorflow.org/install/source_windows) to install `tensorflow` build dependencies for windows.
+
+4. ##### Build ViSQOL:
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
 ## Command Line Usage
@@ -190,7 +195,7 @@ int main(int argc, char **argv) {
 
   // Optionally, set the location of the model file to use.
   // If not set, the default model file will be used.
-  config.mutable_options()->set_svr_model_path("visqol/model/libsvm_nu_svr_model.txt");
+  config.mutable_options()->set_model_path("visqol/model/libsvm_nu_svr_model.txt");
 
   // ViSQOL will run in audio mode comparison by default.
   // If speech mode comparison is desired, set to true.
@@ -202,8 +207,7 @@ int main(int argc, char **argv) {
   // NSIM score will instead be mapped to a MOS-LQO of ~4.x.
   config.mutable_options()->set_use_unscaled_speech_mos_mapping(false);
 
-  // Create an instance of the ViSQOL API. A new instance
-  // is required for each signal pair to be compared.
+  // Create an instance of the ViSQOL API.
   Visqol::VisqolApi visqol;
   absl::Status status = visqol.Create(config);
 

@@ -16,23 +16,19 @@
 
 #include <vector>
 
-#include "absl/synchronization/mutex.h"
 #include "absl/status/status.h"
-#include "svm.h"
-
+#include "absl/strings/str_cat.h"
+#include "absl/synchronization/mutex.h"
 #include "file_path.h"
 #include "libsvm_target_observation_convertor.h"
+#include "svm.h"
 
 namespace Visqol {
 
 absl::Mutex SupportVectorRegressionModel::load_model_mutex_{};
 
-SupportVectorRegressionModel::SupportVectorRegressionModel():
-    observations_ptr_{nullptr},
-    num_observations_{0}
-{
-}
-
+SupportVectorRegressionModel::SupportVectorRegressionModel()
+    : observations_ptr_{nullptr}, num_observations_{0} {}
 
 SupportVectorRegressionModel::~SupportVectorRegressionModel() {
   if (model_) {
@@ -47,16 +43,15 @@ SupportVectorRegressionModel::~SupportVectorRegressionModel() {
 }
 
 void SupportVectorRegressionModel::Init(
-    const std::vector<MlObservation> &observations,
-    const std::vector<MlTarget> &targets) {
+    const std::vector<MlObservation>& observations,
+    const std::vector<MlTarget>& targets) {
   // Assumes all observations have same number of features
   size_t num_features = observations[0].size();
 
-  double *targets_ptr = const_cast<double *>(&targets[0]);
+  double* targets_ptr = const_cast<double*>(&targets[0]);
 
   const LibSvmTargetObservationConvertor conv;
-  observations_ptr_ =
-      conv.ConvertObservations(observations, num_features);
+  observations_ptr_ = conv.ConvertObservations(observations, num_features);
   num_observations_ = observations.size();
 
   // Setup the SVM problem.
@@ -67,10 +62,10 @@ void SupportVectorRegressionModel::Init(
 
   // Setup the SVM parameters.
   svm_parameter param;
-  param.C = 0.4;          // cost
-  param.svm_type = NU_SVR;     // SVR
+  param.C = 0.4;            // cost
+  param.svm_type = NU_SVR;  // SVR
   param.kernel_type = RBF;  // radial
-  param.nu = 0.6;         // SVR nu
+  param.nu = 0.6;           // SVR nu
 
   // These values are the defaults used in the Matlab version
   // as found in svm_model_matlab.c
@@ -92,24 +87,22 @@ void SupportVectorRegressionModel::Init(
 }
 
 double SupportVectorRegressionModel::Predict(
-    const std::vector<double> &observation) const {
+    const std::vector<double>& observation) const {
   const LibSvmTargetObservationConvertor conv;
-  svm_node *obs_node = conv.ConvertObservation(observation);
+  svm_node* obs_node = conv.ConvertObservation(observation);
   const double prediction = svm_predict(model_, obs_node);
   free(obs_node);
 
   return prediction;
 }
 
-absl::Status SupportVectorRegressionModel::Init(
-    const FilePath &model_path) {
+absl::Status SupportVectorRegressionModel::Init(const FilePath& model_path) {
   absl::MutexLock lock(&load_model_mutex_);
   model_ = svm_load_model(model_path.Path().c_str());
 
   if (model_ == nullptr) {
-    return absl::Status(
-        absl::StatusCode::kInvalidArgument,
-        "Failed to load the SVR model file: " + model_path.Path());
+    return absl::InvalidArgumentError(
+        absl::StrCat("Failed to load the SVR model file: ", model_path.Path()));
   }
 
   return absl::Status();

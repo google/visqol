@@ -24,8 +24,8 @@
 namespace Visqol {
 
 AMatrix<std::complex<double>> FastFourierTransform::Forward1d(
-    const std::unique_ptr<FftManager> &fft_manager,
-    const AMatrix<double> &in_matrix) {
+    const std::unique_ptr<FftManager>& fft_manager,
+    const AMatrix<double>& in_matrix) {
   // Populate the time channel.
   auto input_itr = in_matrix.cbegin();
   fft_manager->GetTimeChannel().Clear();
@@ -37,15 +37,15 @@ AMatrix<std::complex<double>> FastFourierTransform::Forward1d(
   // Convert time to freq domain, ordered canonically.
   fft_manager->GetFreqChannel().Clear();
   fft_manager->FreqFromTimeDomain(fft_manager->GetTimeChannel(),
-                                 &fft_manager->GetFreqChannel());
+                                  &fft_manager->GetFreqChannel());
 
   // Convert freq domain to complex vector.
   std::vector<std::complex<double>> freq_cplx_vector;
   freq_cplx_vector.reserve(fft_manager->GetFftSize());
   for (size_t i = 0; i < fft_manager->GetFftSize(); i += 2) {
     const auto real_num = static_cast<double>(fft_manager->GetFreqChannel()[i]);
-    const auto imag_num = static_cast<double>(
-        fft_manager->GetFreqChannel()[i + 1]);
+    const auto imag_num =
+        static_cast<double>(fft_manager->GetFreqChannel()[i + 1]);
     freq_cplx_vector.push_back(std::complex<double>{real_num, imag_num});
   }
 
@@ -58,20 +58,19 @@ AMatrix<std::complex<double>> FastFourierTransform::Forward1d(
   // Mirror the freq domain complex vector. Do not add the 0hz or
   // Nyquist bins to the mirror.
   for (int i = freq_cplx_vector.size() - 2; i > 0; i--) {
-    freq_cplx_vector.push_back(std::complex<double>{freq_cplx_vector[i].real(),
-        freq_cplx_vector[i].imag() * -1});
+    freq_cplx_vector.push_back(std::complex<double>{
+        freq_cplx_vector[i].real(), freq_cplx_vector[i].imag() * -1});
   }
 
   // Create a Matrix to return with the mirrored freq domain.
-  AMatrix<std::complex<double>> out_matrix(freq_cplx_vector.size(),
-      in_matrix.NumCols(), freq_cplx_vector);
+  AMatrix<std::complex<double>> out_matrix(
+      freq_cplx_vector.size(), in_matrix.NumCols(), freq_cplx_vector);
   return out_matrix;
 }
 
 AMatrix<std::complex<double>> FastFourierTransform::Forward1d(
-    const std::unique_ptr<FftManager> &fft_manager,
-    const AMatrix<double> &in_matrix,
-    const size_t points) {
+    const std::unique_ptr<FftManager>& fft_manager,
+    const AMatrix<double>& in_matrix, const size_t points) {
   // append zeros to matrix until it's the same size as points
   AMatrix<double> signal = in_matrix;
   signal.Resize(points, signal.NumCols());
@@ -83,8 +82,8 @@ AMatrix<std::complex<double>> FastFourierTransform::Forward1d(
 }
 
 AMatrix<std::complex<double>> FastFourierTransform::Inverse1d(
-    const std::unique_ptr<FftManager> &fft_manager,
-    const AMatrix<std::complex<double>> &in_matrix) {
+    const std::unique_ptr<FftManager>& fft_manager,
+    const AMatrix<std::complex<double>>& in_matrix) {
   // Populate the freq channel. Increment i twice per iteration to remove mirror
   auto input_itr = in_matrix.cbegin();
   fft_manager->GetFreqChannel().Clear();
@@ -103,32 +102,31 @@ AMatrix<std::complex<double>> FastFourierTransform::Inverse1d(
   pffft_channel.Init(fft_manager->GetFftSize());
   pffft_channel.Clear();
   fft_manager->GetPffftFormatFreqBuffer(fft_manager->GetFreqChannel(),
-                                       &pffft_channel);
+                                        &pffft_channel);
 
   // Convert the pffft ordered freq domain to time domain.
   fft_manager->GetTimeChannel().Clear();
   fft_manager->TimeFromFreqDomain(pffft_channel,
-                                 &fft_manager->GetTimeChannel());
+                                  &fft_manager->GetTimeChannel());
   fft_manager->ApplyReverseFftScaling(&fft_manager->GetTimeChannel());
 
   // Populate a vector of complex doubles for populating output matrix.
   std::vector<std::complex<double>> out_cmplx_vector;
   out_cmplx_vector.reserve(fft_manager->GetSamplesPerChannel());
-  for (size_t i=0; i < fft_manager->GetSamplesPerChannel(); i++) {
+  for (size_t i = 0; i < fft_manager->GetSamplesPerChannel(); i++) {
     auto cplx_num = std::complex<double>{
-        static_cast<double>(fft_manager->GetTimeChannel()[i]),
-        0.0};
+        static_cast<double>(fft_manager->GetTimeChannel()[i]), 0.0};
     out_cmplx_vector.push_back(cplx_num);
   }
 
-  AMatrix<std::complex<double>> out_matrix(out_cmplx_vector.size(),
-    in_matrix.NumCols(), out_cmplx_vector);
+  AMatrix<std::complex<double>> out_matrix(
+      out_cmplx_vector.size(), in_matrix.NumCols(), out_cmplx_vector);
   return out_matrix;
 }
 
 AMatrix<double> FastFourierTransform::Inverse1dConjSym(
-    const std::unique_ptr<FftManager> &fft_manager,
-    const AMatrix<std::complex<double>> &in_matrix) {
+    const std::unique_ptr<FftManager>& fft_manager,
+    const AMatrix<std::complex<double>>& in_matrix) {
   auto cmplx_inv = Inverse1d(fft_manager, in_matrix);
 
   // Populate a vector of doubles with the 'real' part of the ifft for return.
@@ -138,8 +136,8 @@ AMatrix<double> FastFourierTransform::Inverse1dConjSym(
     out_double_vector.push_back(itr->real());
   }
 
-  AMatrix<double> out_matrix(out_double_vector.size(),
-    in_matrix.NumCols(), out_double_vector);
+  AMatrix<double> out_matrix(out_double_vector.size(), in_matrix.NumCols(),
+                             out_double_vector);
   return out_matrix;
 }
 }  // namespace Visqol

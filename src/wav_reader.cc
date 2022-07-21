@@ -21,7 +21,6 @@
 #include <utility>
 
 #include "absl/base/internal/raw_logging.h"
-
 #include "misc_math.h"
 
 namespace Visqol {
@@ -125,7 +124,8 @@ bool WavReader::ParseHeader() {
     int16_t extension_size;
     if (ReadBinaryDataFromStream(&extension_size, sizeof(extension_size)) !=
         sizeof(extension_size)) {
-      ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Error reading extension"
+      ABSL_RAW_LOG(ERROR,
+                   "Error parsing WAV Header - Error reading extension"
                    " size");
       return false;
     }
@@ -134,7 +134,8 @@ bool WavReader::ParseHeader() {
     for (size_t i = 0; i < static_cast<size_t>(extension_size); ++i) {
       if (ReadBinaryDataFromStream(&extension_data, sizeof(extension_data)) !=
           sizeof(extension_data)) {
-        ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Error reading extension"
+        ABSL_RAW_LOG(ERROR,
+                     "Error parsing WAV Header - Error reading extension"
                      " data");
         return false;
       }
@@ -145,12 +146,14 @@ bool WavReader::ParseHeader() {
     ChunkHeader fact_header;
     if (ReadBinaryDataFromStream(&fact_header, sizeof(fact_header)) !=
         sizeof(fact_header)) {
-      ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Error reading 'fact'"
+      ABSL_RAW_LOG(ERROR,
+                   "Error parsing WAV Header - Error reading 'fact'"
                    " header");
       return false;
     }
     if (std::string(fact_header.id, 4) != "fact") {
-      ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Incorrect 'fact' header"
+      ABSL_RAW_LOG(ERROR,
+                   "Error parsing WAV Header - Incorrect 'fact' header"
                    " id");
       return false;
     }
@@ -158,7 +161,8 @@ bool WavReader::ParseHeader() {
     for (size_t i = 0; i < static_cast<size_t>(fact_header.size); ++i) {
       if (ReadBinaryDataFromStream(&fact_data, sizeof(fact_data)) !=
           sizeof(fact_data)) {
-        ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Error reading 'fact'"
+        ABSL_RAW_LOG(ERROR,
+                     "Error parsing WAV Header - Error reading 'fact'"
                      " data");
         return false;
       }
@@ -170,33 +174,35 @@ bool WavReader::ParseHeader() {
 
   bytes_per_sample_ = header.format.bits_per_sample / 8;
   if (bytes_per_sample_ == 0 || bytes_per_sample_ != sizeof(int16_t)) {
-    ABSL_RAW_LOG(ERROR,
-                 "Error parsing WAV Header - Expected 16bit samples.");
+    ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Expected 16bit samples.");
     return false;
   }
 
   // Read chunks until we find the 'data' chunk
   if (ReadBinaryDataFromStream(&header.data, sizeof(header.data)) !=
       sizeof(header.data)) {
-    ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Could not find data chunk"
-      " in WAV file header.");
+    ABSL_RAW_LOG(ERROR,
+                 "Error parsing WAV Header - Could not find data chunk"
+                 " in WAV file header.");
     return false;
   }
   while (std::string(header.data.header.id, 4) != "data") {
     if (!binary_stream_->good() ||
         (static_cast<int64_t>(binary_stream_->tellg()) +
-            static_cast<int64_t>(header.data.header.size)) > bytes_in_stream_) {
-      ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Could not find data chunk"
-        " in WAV file header.");
+         static_cast<int64_t>(header.data.header.size)) > bytes_in_stream_) {
+      ABSL_RAW_LOG(ERROR,
+                   "Error parsing WAV Header - Could not find data chunk"
+                   " in WAV file header.");
       return false;
     }
 
     binary_stream_->seekg(header.data.header.size, std::ios::cur);
 
     if (ReadBinaryDataFromStream(&header.data, sizeof(header.data)) !=
-                                 sizeof(header.data)) {
-      ABSL_RAW_LOG(ERROR, "Error parsing WAV Header - Could not find data chunk"
-        " in WAV file header.");
+        sizeof(header.data)) {
+      ABSL_RAW_LOG(ERROR,
+                   "Error parsing WAV Header - Could not find data chunk"
+                   " in WAV file header.");
       return false;
     }
   }
@@ -248,8 +254,9 @@ int WavReader::GetSampleRateHz() const { return sample_rate_hz_; }
 
 bool WavReader::IsHeaderValid() const { return init_; }
 
-double WavReader::GetDuration() const { return (
-  (num_total_samples_ / num_channels_) / static_cast<double>(sample_rate_hz_));
+double WavReader::GetDuration() const {
+  return ((num_total_samples_ / num_channels_) /
+          static_cast<double>(sample_rate_hz_));
 }
 
 }  // namespace Visqol

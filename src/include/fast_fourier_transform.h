@@ -40,8 +40,8 @@ class FastFourierTransform {
    * @return The resulting 1D matrix of complex doubles.
    */
   static AMatrix<std::complex<double>> Forward1d(
-      const std::unique_ptr<FftManager> &fft_manager,
-      const AMatrix<double> &in_matrix);
+      const std::unique_ptr<FftManager>& fft_manager,
+      const AMatrix<double>& in_matrix);
 
   /**
    * For a given input matrix of doubles, perform a Fast Fourier Transform on
@@ -56,9 +56,8 @@ class FastFourierTransform {
    * @return The resulting 1D matrix of complex doubles.
    */
   static AMatrix<std::complex<double>> Forward1d(
-      const std::unique_ptr<FftManager> &fft_manager,
-      const AMatrix<double> &in_matrix,
-      const size_t points);
+      const std::unique_ptr<FftManager>& fft_manager,
+      const AMatrix<double>& in_matrix, const size_t points);
 
   /**
    * For a given input 1D matrix of complex doubles, perform the Inverse Fast
@@ -70,8 +69,8 @@ class FastFourierTransform {
    * @return the resulting 1D matrix of complex doubles.
    */
   static AMatrix<std::complex<double>> Inverse1d(
-      const std::unique_ptr<FftManager> &fft_manager,
-      const AMatrix<std::complex<double>> &in_matrix);
+      const std::unique_ptr<FftManager>& fft_manager,
+      const AMatrix<std::complex<double>>& in_matrix);
 
   /**
    * For a given input 1D matrix of complex doubles, perform the Inverse Fast
@@ -83,8 +82,8 @@ class FastFourierTransform {
    * @return the resulting 1D matrix of doubles.
    */
   static AMatrix<double> Inverse1dConjSym(
-      const std::unique_ptr<FftManager> &fft_manager,
-      const AMatrix<std::complex<double>> &in_matrix);
+      const std::unique_ptr<FftManager>& fft_manager,
+      const AMatrix<std::complex<double>>& in_matrix);
 };
 }  // namespace Visqol
 

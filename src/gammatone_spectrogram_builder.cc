@@ -18,70 +18,74 @@
 #include <utility>
 #include <vector>
 
+#include "absl/status/statusor.h"
+#include "absl/strings/str_cat.h"
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
 #include "equivalent_rectangular_bandwidth.h"
 #include "signal_filter.h"
 #include "spectrogram.h"
-#include "absl/status/statusor.h"
 
 namespace Visqol {
 
 const double GammatoneSpectrogramBuilder::kSpeechModeMaxFreq = 8000.0;
 
 GammatoneSpectrogramBuilder::GammatoneSpectrogramBuilder(
-    const GammatoneFilterBank &filter_bank, const bool use_speech_mode) :
-    filter_bank_(filter_bank), speech_mode_(use_speech_mode) {}
+    const GammatoneFilterBank& filter_bank, const bool use_speech_mode)
+    : filter_bank_(filter_bank), speech_mode_(use_speech_mode) {}
 
 absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
-    const AudioSignal &signal, const AnalysisWindow &window) {
-  const auto &sig = signal.data_matrix;
+    const AudioSignal& signal, const AnalysisWindow& window) {
+  const AMatrix<double>& sig = signal.data_matrix;
   size_t sample_rate = signal.sample_rate;
   double max_freq = speech_mode_ ? kSpeechModeMaxFreq : sample_rate / 2.0;
 
-  // get gammatone coeffients
+  // Get gammatone coeffients.
   ErbFiltersResult erb_rslt = EquivalentRectangularBandwidth::MakeFilters(
       sample_rate, filter_bank_.GetNumBands(), filter_bank_.GetMinFreq(),
       max_freq);
   AMatrix<double> filter_coeffs = AMatrix<double>(erb_rslt.filterCoeffs);
   filter_coeffs = filter_coeffs.FlipUpDown();
 
-  // set the filter coefficients and init the filter conditions to 0.
+  // Set the filter coefficients and init the filter conditions to 0.
   filter_bank_.SetFilterCoefficients(filter_coeffs);
   filter_bank_.ResetFilterConditions();
 
-  // set up the windowing
+  // Set up the windowing.
   size_t hop_size = window.size * window.overlap;
 
-  // ensure that the signal is large enough.
+  // Ensure that the signal is large enough.
   if (sig.NumRows() <= window.size) {
-    return absl::Status(
-        absl::StatusCode::kInvalidArgument,
-        "Too few samples (" + std::to_string(sig.NumRows()) + ") in signal to "
-        "build spectrogram (" + std::to_string(window.size) +
-        " required minimum).");
+    return absl::InvalidArgumentError(
+        absl::StrCat("Too few samples (", sig.NumRows(),
+                     ") in signal to  build spectrogram (", window.size,
+                     " required minimum)."));
   }
   size_t num_cols = 1 + floor((sig.NumRows() - window.size) / hop_size);
   AMatrix<double> out_matrix(filter_bank_.GetNumBands(), num_cols);
 
-  // run the windowing
   auto sig_val_arr = sig.GetColumn(0).ToValArray();
   for (size_t i = 0; i < out_matrix.NumCols(); i++) {
     const size_t start_col = i * hop_size;
-    // select the next frame from the input signal to filter.
-    const auto frame = sig_val_arr[std::slice(start_col, window.size, 1)];
-    // apply the filter
+    // Select the next frame from the input signal to filter.
+    const std::slice_array<double> frame =
+        sig_val_arr[std::slice(start_col, window.size, 1)];
+
+    // Apply a Hann window to reduce artifacts.
+    const std::valarray<double> windowed_frame = window.ApplyHannWindow(frame);
+
+    // Apply the filter.
     filter_bank_.ResetFilterConditions();
-    auto filtered_signal = filter_bank_.ApplyFilter(frame);
-    // calculate the mean of each row
+    auto filtered_signal = filter_bank_.ApplyFilter(windowed_frame);
+    // Calculate the mean of each row.
     std::transform(filtered_signal.begin(), filtered_signal.end(),
                    filtered_signal.begin(),
-                   [](decltype(*filtered_signal.begin()) &d) { return d * d; });
+                   [](decltype(*filtered_signal.begin())& d) { return d * d; });
     AMatrix<double> row_means = filtered_signal.Mean(kDimension::ROW);
     std::transform(row_means.begin(), row_means.end(), row_means.begin(),
-                   [](decltype(*row_means.begin()) &d) { return sqrt(d); });
-    // set this filtered frame as a column in the spectrogram
+                   [](decltype(*row_means.begin())& d) { return sqrt(d); });
+    // Set this filtered frame as a column in the spectrogram.
     out_matrix.SetColumn(i, std::move(row_means));
   }
 
@@ -89,8 +93,7 @@ absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
   std::vector<double> ordered_cfb;
   ordered_cfb.reserve(erb_rslt.centerFreqs.size());
   for (auto itr = erb_rslt.centerFreqs.rbegin();
-       itr != erb_rslt.centerFreqs.rend();
-       ++itr) {
+       itr != erb_rslt.centerFreqs.rend(); ++itr) {
     ordered_cfb.push_back(*itr);
   }
 

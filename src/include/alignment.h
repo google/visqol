@@ -32,24 +32,24 @@ class Alignment {
    * For a given reference signal, align a second degraded signal with it,
    * returning a new aligned degraded signal.
    *
-   * @param ref_signal The reference signal.
-   * @param def_signal The degraded signal to align.
+   * @param reference_signal The reference signal.
+   * @param degraded_signal The degraded signal to align.
    * @return A tuple of the aligned degraded signal and its lag in seconds.
    */
   static std::tuple<AudioSignal, double> GloballyAlign(
-      const AudioSignal &ref_signal, const AudioSignal &deg_signal);
+      const AudioSignal& reference_signal, const AudioSignal& degraded_signal);
   /**
    * Aligns a degraded signal to the reference signal, truncating them to
    * be the same length.
    *
-   * @param ref_signal The reference signal.
-   * @param deg_signal The degraded signal.
+   * @param reference_signal The reference signal.
+   * @param degraded_signal The degraded signal.
    * @return A std::tuple of two new signals and the lag of the degraded.
-   *   The start position will be what it was for the ref_signal, and the
+   *   The start position will be what it was for the reference_signal, and the
    *   durations will be truncated as needed so that they are the same length.
    **/
   static std::tuple<AudioSignal, AudioSignal, double> AlignAndTruncate(
-      const AudioSignal &ref_signal, const AudioSignal &deg_signal);
+      const AudioSignal& reference_signal, const AudioSignal& degraded_signal);
 };
 }  // namespace Visqol
 

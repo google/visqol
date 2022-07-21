@@ -1,31 +1,35 @@
-"""Tests for visqol.python.visqol_lib_py."""
-
+"""Tests for google3.third_party.visqol.python.visqol_lib_py."""
+from concurrent import futures
 import os
 
+from absl import logging
 import numpy as np
 
 # Placeholder for resource import.
 import unittest
-from visqol.python import visqol_lib_py
-from concurrent import futures
-from absl import logging
 
-MODEL_FILE = 'model/libsvm_nu_svr_model.txt'
-REF_FILE = 'testdata/clean_speech/CA01_01.wav'
-DEG_FILE = 'testdata/clean_speech/transcoded_CA01_01.wav'
+from python import visqol_lib_py
+import visqol_config_pb2
+import similarity_result_pb2
+
+SPEECH_MODEL_FILE = '../model/lattice_tcditugenmeetpackhref_ls2_nl60_lr12_bs2048_learn.005_ep2400_train1_7_raw.tflite'
+AUDIO_MODEL_FILE = '../model/libsvm_nu_svr_model.txt'
+REF_FILE = '../testdata/clean_speech/CA01_01.wav'
+DEG_FILE = '../testdata/clean_speech/transcoded_CA01_01.wav'
 
 CONFORMANCE_TOLERANCE = 0.0001
 
 
-def _CalculateVisqol(reference_file, degraded_file):
+def _calculate_visqol(reference_file, degraded_file):
 
   files_dir = os.path.dirname(__file__)
 
-  model_path = visqol_lib_py.FilePath(os.path.join(files_dir, MODEL_FILE))
+  model_path = visqol_lib_py.FilePath(
+      os.path.join(files_dir, SPEECH_MODEL_FILE))
   ref_path = visqol_lib_py.FilePath(os.path.join(files_dir, reference_file))
   deg_path = visqol_lib_py.FilePath(os.path.join(files_dir, degraded_file))
   manager = visqol_lib_py.VisqolManager()
-  manager.Init(model_path, True, False, 60)
+  manager.Init(model_path, True, False, 60, True)
   similarity_result = manager.Run(ref_path, deg_path)
   return similarity_result
 
@@ -41,10 +45,10 @@ def _log_wrapper(method, args, kwargs):
 
 class VisqolLibPyTest(unittest.TestCase):
 
-  def test_Parallel(self):
+  def test_parallel(self):
     methods_and_args = []
-    methods_and_args.append((_CalculateVisqol, [REF_FILE, DEG_FILE]))
-    methods_and_args.append((_CalculateVisqol, [REF_FILE, DEG_FILE]))
+    methods_and_args.append((_calculate_visqol, [REF_FILE, DEG_FILE]))
+    methods_and_args.append((_calculate_visqol, [REF_FILE, DEG_FILE]))
     results = []
     with futures.ThreadPoolExecutor(
         max_workers=len(methods_and_args)) as executor:
@@ -71,10 +75,10 @@ class VisqolLibPyTest(unittest.TestCase):
       return results
 
   def test_docstring(self):
-    self.assertContainsInOrder(['ViSQOL'], visqol_lib_py.__doc__)
+    self.assertIn('ViSQOL', visqol_lib_py.__doc__)
 
-  def test_VisqolManager(self):
-    similarity_result = _CalculateVisqol(REF_FILE, DEG_FILE)
+  def test_visqol_manager(self):
+    similarity_result = _calculate_visqol(REF_FILE, DEG_FILE)
 
     # The conformance value lives in a c++ header.
     conformance_value = visqol_lib_py.ConformanceSpeechCA01TranscodedValue()
@@ -86,12 +90,13 @@ class VisqolLibPyTest(unittest.TestCase):
     self.assertLess(similarity_result.moslqo,
                     conformance_value + CONFORMANCE_TOLERANCE)
 
-  def test_VisqolApi(self):
+  def test_visqol_api(self):
     files_dir = os.path.dirname(__file__)
 
-    model_path = os.path.join(files_dir, MODEL_FILE)
+    # This test is in 48kHz audio mode.
+    model_path = os.path.join(files_dir, AUDIO_MODEL_FILE)
 
-    config = visqol_lib_py.MakeVisqolConfig()
+    config = visqol_config_pb2.VisqolConfig()
     config.audio.sample_rate = 48000
     config.options.svr_model_path = model_path
 
@@ -104,6 +109,9 @@ class VisqolLibPyTest(unittest.TestCase):
 
     similarity_result = api.Measure(sin_ref, noisy_deg)
 
+    # NOTE: When the pybind11 bindings return the native type this should pass.
+    # self.assertIsInstance(similarity_result,
+    #                       similarity_result_pb2.SimilarityResultMsg)
     self.assertGreaterEqual(similarity_result.moslqo, 1.0)
     self.assertLess(similarity_result.moslqo, 5.0)
 

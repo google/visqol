@@ -19,10 +19,10 @@
 
 #include <vector>
 
+#include "absl/status/status.h"
 #include "file_path.h"
 #include "similarity_to_quality_mapper.h"
 #include "support_vector_regression_model.h"
-#include "absl/status/status.h"
 
 namespace Visqol {
 /**
@@ -37,11 +37,14 @@ class SvrSimilarityToQualityMapper : public SimilarityToQualityMapper {
    *
    * @param support_vector_model The filepath to the SVR model file.
    */
-  explicit SvrSimilarityToQualityMapper(const FilePath &support_vector_model);
+  explicit SvrSimilarityToQualityMapper(const FilePath& support_vector_model);
 
   // Docs inherited from parent.
-  double PredictQuality(const std::vector<double> &similarity_vector) const
-      override;
+  double PredictQuality(
+      const std::vector<double>& fvnsim_vector,
+      const std::vector<double>& fvnsim10_vector,
+      const std::vector<double>& fstdnsim_vector,
+      const std::vector<double>& fvdegenergy_vector) const override;
 
   // Docs inherited from parent.
   absl::Status Init() override;

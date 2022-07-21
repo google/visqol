@@ -15,12 +15,11 @@
 #include "equivalent_rectangular_bandwidth.h"
 
 #include <algorithm>
-#include <cstdint>
 #include <complex>
+#include <cstdint>
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"
-
 #include "complex_valarray.h"
 
 namespace Visqol {
@@ -31,9 +30,12 @@ ErbFiltersResult EquivalentRectangularBandwidth::MakeFilters(
   // The variable names are still quite meaningless.
 
   if (high_freq > sample_rate / 2.) {
-    ABSL_RAW_LOG(WARNING, "EquivalentRectangularBandwidth::MakeFilters "
+    ABSL_RAW_LOG(
+        WARNING,
+        "EquivalentRectangularBandwidth::MakeFilters "
         "high_freq >= (sample_rate / 2), for sample_rate=%zu high_freq=%f. "
-        "Falling back to (sample_rate / 2)", sample_rate, high_freq);
+        "Falling back to (sample_rate / 2)",
+        sample_rate, high_freq);
     high_freq = sample_rate / 2.;
   }
   auto cf1 = EquivalentRectangularBandwidth::CalcUniformCenterFreqs(
@@ -98,15 +100,15 @@ ErbFiltersResult EquivalentRectangularBandwidth::MakeFilters(
 
   // stick it all together so that we can turn it into a matrix later
   std::vector<std::vector<double>> vfCoeffs{A0,
-                                  A11.ToDoubleVector(),
-                                  A12.ToDoubleVector(),
-                                  A13.ToDoubleVector(),
-                                  A14.ToDoubleVector(),
-                                  A2,
-                                  B0,
-                                  B1.ToDoubleVector(),
-                                  B2.ToDoubleVector(),
-                                  gain};
+                                            A11.ToDoubleVector(),
+                                            A12.ToDoubleVector(),
+                                            A13.ToDoubleVector(),
+                                            A14.ToDoubleVector(),
+                                            A2,
+                                            B0,
+                                            B1.ToDoubleVector(),
+                                            B2.ToDoubleVector(),
+                                            gain};
 
   ErbFiltersResult r;
   r.centerFreqs = cf.ToDoubleVector();

@@ -20,62 +20,65 @@ namespace Visqol {
 namespace {
 
 // The reference signal
-const AMatrix<double> kRefSignal{std::valarray<double>{
-  2.0, 2.0, 1.0, 0.1, -3.0, 0.1, 1.0, 2.0, 2.0, 6.0, 8.0, 6.0, 2.0, 2.0
-}};
+const AMatrix<double> kReferenceSignal{std::valarray<double>{
+    2.0, 2.0, 1.0, 0.1, -3.0, 0.1, 1.0, 2.0, 2.0, 6.0, 8.0, 6.0, 2.0, 2.0}};
 
 // A degraded signal with a 2 sample lag.
-const AMatrix<double> kDegSignalLag2{std::valarray<double>{
-  1.2, 0.1, -3.3, 0.1, 1.1, 2.2, 2.1, 7.1, 8.3, 6.8, 2.4, 2.2, 2.2, 2.1
-}};
+const AMatrix<double> kDegradedSignalLag2{std::valarray<double>{
+    1.2, 0.1, -3.3, 0.1, 1.1, 2.2, 2.1, 7.1, 8.3, 6.8, 2.4, 2.2, 2.2, 2.1}};
 
 // A degraded signal (that is longer than the reference) with a 2 sample lag.
-const AMatrix<double> kLongDegSignalLag2{std::valarray<double>{
-  1.2, 0.1, -3.3, 0.1, 1.1, 2.2, 2.1, 7.1, 8.3, 6.8, 2.4, 2.2, 2.2, 2.1, 2.0
-}};
+const AMatrix<double> kLongDegradedSignalLag2{
+    std::valarray<double>{1.2, 0.1, -3.3, 0.1, 1.1, 2.2, 2.1, 7.1, 8.3, 6.8,
+                          2.4, 2.2, 2.2, 2.1, 2.0}};
 
 // A degraded signal (that is shorter than the reference) with a 2 sample lag.
-const AMatrix<double> kShortDegSignalLag2{std::valarray<double>{
-  1.2, 0.1, -3.3, 0.1, 1.1, 2.2, 2.1, 7.1, 8.3, 6.8, 2.4, 2.2, 2.2
-}};
+const AMatrix<double> kShortDegradedSignalLag2{std::valarray<double>{
+    1.2, 0.1, -3.3, 0.1, 1.1, 2.2, 2.1, 7.1, 8.3, 6.8, 2.4, 2.2, 2.2}};
 
 // A degraded signal with a negative 2 sample lag.
-const AMatrix<double> kDegSignalNegativeLag2{std::valarray<double>{
-  2.0, 2.0, 2.0, 2.0, 1.0, 0.1, -3.0, 0.1, 1.0, 2.0, 2.0, 6.0, 8.0, 6.0
-}};
+const AMatrix<double> kDegradedSignalNegativeLag2{std::valarray<double>{
+    2.0, 2.0, 2.0, 2.0, 1.0, 0.1, -3.0, 0.1, 1.0, 2.0, 2.0, 6.0, 8.0, 6.0}};
 
 // These lag values were calculated manually from the simple signals above.
-const long kBestLagPositive2 = 2;
-const long kBestLagNegative2 = -2;
+const int64_t kBestLagPositive2 = 2;
+const int64_t kBestLagNegative2 = -2;
 
 // Test the calculation of the best lag between a reference and degraded signal.
 // Test case where the ref and deg signals are the same length.
 TEST(XCorr, BestLagSameLength) {
-  ASSERT_TRUE(kRefSignal.NumElements() == kDegSignalLag2.NumElements());
-  auto best_lag = XCorr::CalcBestLag(kRefSignal, kDegSignalLag2);
+  ASSERT_TRUE(kReferenceSignal.NumElements() ==
+              kDegradedSignalLag2.NumElements());
+  const int64_t best_lag =
+      XCorr::FindLowestLagIndex(kReferenceSignal, kDegradedSignalLag2);
   ASSERT_EQ(kBestLagPositive2, best_lag);
 }
 
 // Test the calculation of the best lag between a reference and degraded signal.
 // Test case where the ref signal is shorter than the deg signal.
 TEST(XCorr, BestLagRefShorter) {
-  ASSERT_TRUE(kRefSignal.NumElements() < kLongDegSignalLag2.NumElements());
-  auto best_lag = XCorr::CalcBestLag(kRefSignal, kLongDegSignalLag2);
+  ASSERT_TRUE(kReferenceSignal.NumElements() <
+              kLongDegradedSignalLag2.NumElements());
+  const int64_t best_lag =
+      XCorr::FindLowestLagIndex(kReferenceSignal, kLongDegradedSignalLag2);
   ASSERT_EQ(kBestLagPositive2, best_lag);
 }
 
 // Test the calculation of the best lag between a reference and degraded signal.
 // Test case where the ref signal is longer than the deg signal.
 TEST(XCorr, BestLagRefLonger) {
-  ASSERT_TRUE(kRefSignal.NumElements() > kShortDegSignalLag2.NumElements());
-  auto best_lag = XCorr::CalcBestLag(kRefSignal, kShortDegSignalLag2);
+  ASSERT_TRUE(kReferenceSignal.NumElements() >
+              kShortDegradedSignalLag2.NumElements());
+  const int64_t best_lag =
+      XCorr::FindLowestLagIndex(kReferenceSignal, kShortDegradedSignalLag2);
   ASSERT_EQ(kBestLagPositive2, best_lag);
 }
 
 // Test the calculation of the best lag between a reference and degraded signal.
 // Test case where the lag between the signals is negative.
 TEST(XCorr, NegativeBestLag) {
-  auto best_lag = XCorr::CalcBestLag(kRefSignal, kDegSignalNegativeLag2);
+  const int64_t best_lag =
+      XCorr::FindLowestLagIndex(kReferenceSignal, kDegradedSignalNegativeLag2);
   ASSERT_EQ(kBestLagNegative2, best_lag);
 }
 

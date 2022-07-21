@@ -1,4 +1,4 @@
-load("//third_party/pybind11/:build_defs.bzl", "pybind_extension")
+load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
 
 licenses(["notice"])
 
@@ -8,15 +8,12 @@ pybind_extension(
     srcs = ["visqol_lib_py.cc"],
     visibility = ["//visibility:public"],
     deps = [
-        "@com_google_absl//absl/status",
-        "@pybind11_bazel//:pybind11_eigen",
-        "@pybind11_abseil//:absl_casters",
-        "@pybind11_abseil//:absl_numpy_span_caster",
-        "@pybind11_abseil//:status_casters",
-        "@pybind11_protobuf//:proto_casters",
-        "//third_party/visqol:similarity_result_cc_proto",
+        "//:similarity_result_cc_proto",
         "//:visqol_config_cc_proto",
         "//:visqol_lib",
+        "@pybind11_abseil//pybind11_abseil:absl_casters",
+        "@pybind11_abseil//pybind11_abseil:status_casters",
+        "@pybind11_protobuf//pybind11_protobuf:native_proto_caster",
     ],
 )
 
@@ -24,14 +21,14 @@ py_test(
     name = "visqol_lib_py_test",
     srcs = ["visqol_lib_py_test.py"],
     data = [
-        "//model:libsvm_nu_svr_model.txt",
+        ":visqol_lib_py.so",
         "//testdata:clean_speech/CA01_01.wav",
         "//testdata:clean_speech/transcoded_CA01_01.wav",
     ],
     python_version = "PY3",
     deps = [
-        ":visqol_lib_py",
-        "//testing/pybase",
-        "@numpy//:numpy",
+        "//:similarity_result_py_pb2",
+        "//:visqol_config_py_pb2",
+        "@com_google_protobuf//:protobuf_python",
     ],
 )

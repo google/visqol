@@ -64,9 +64,7 @@ class AudioChannel {
    *
    * @return A reference to the sample.
    */
-  float& operator[](size_t index) {
-    return *(begin() + index);
-  }
+  float& operator[](size_t index) { return *(begin() + index); }
 
   /**
    * Const Array subscript operator. Return a const reference to the sample at
@@ -76,9 +74,7 @@ class AudioChannel {
    *
    * @return A const reference to the sample.
    */
-  const float& operator[](size_t index) const {
-    return *(begin() + index);
-  }
+  const float& operator[](size_t index) const { return *(begin() + index); }
 
   /**
    * Returns the number of samples in this channel.
@@ -92,43 +88,33 @@ class AudioChannel {
    *
    * @return A float pointer to the first sample.
    */
-  float* begin() {
-    return begin_itr_;
-  }
+  float* begin() { return begin_itr_; }
 
   /**
    * Returns a float pointer to the last sample in the channel.
    *
    * @return A float pointer to the last sample.
    */
-  float* end() {
-    return begin_itr_ + size_;
-  }
+  float* end() { return begin_itr_ + size_; }
 
   /**
    * Returns a const float pointer to the first sample in the channel.
    *
    * @return A const float pointer to the first sample.
    */
-  const float* begin() const {
-    return begin_itr_;
-  }
+  const float* begin() const { return begin_itr_; }
 
   /**
    * Returns a const float pointer to the last sample in the channel.
    *
    * @return A const float pointer to the last sample.
    */
-  const float* end() const {
-    return begin_itr_ + size_;
-  }
+  const float* end() const { return begin_itr_ + size_; }
 
   /**
    * Set all samples in the AudioChannel to 0.
    */
-  void Clear() {
-    memset(begin(), 0, sizeof(float) * size_);
-  }
+  void Clear() { memset(begin(), 0, sizeof(float) * size_); }
 
  private:
   /**
