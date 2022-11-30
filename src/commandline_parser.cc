@@ -86,6 +86,8 @@ ABSL_FLAG(int, search_window_radius, 60,
           "search to discover patch matches. For a given reference frame, it "
           "will look at 2*search_window_radius + 1 patches to find the most "
           "optimal match.");
+ABSL_FLAG(bool, disable_global_alignment, false, "Disables global alignment");
+ABSL_FLAG(bool, disable_realignment, false, "Disables realignment");
 
 namespace Visqol {
 ABSL_CONST_INIT const char kDefaultAudioModelFile[] =
@@ -113,6 +115,8 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
   bool use_lattice_model;
   bool use_unscaled_mapping;
   int search_window;
+  bool disable_global_alignment;
+  bool disable_realignment;
 
   batch_input = FilePath(absl::GetFlag(FLAGS_batch_input_csv));
   if (!batch_input.Path().empty()) {
@@ -132,6 +136,8 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
   verbose = absl::GetFlag(FLAGS_verbose);
   search_window = absl::GetFlag(FLAGS_search_window_radius);
   debug_output = FilePath(absl::GetFlag(FLAGS_output_debug));
+  disable_global_alignment = absl::GetFlag(FLAGS_disable_global_alignment);
+  disable_realignment = absl::GetFlag(FLAGS_disable_realignment);
 
   similarity_to_quality_model =
       FilePath(absl::GetFlag(FLAGS_similarity_to_quality_model));
@@ -175,7 +181,9 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
       .use_speech_mode = use_speech,
       .use_unscaled_speech_mos_mapping = use_unscaled_mapping,
       .search_window_radius = search_window,
-      .use_lattice_model = use_lattice_model};
+      .use_lattice_model = use_lattice_model,
+      .disable_global_alignment = disable_global_alignment,
+      .disable_realignment = disable_realignment};
 }
 
 std::vector<ReferenceDegradedPathPair>

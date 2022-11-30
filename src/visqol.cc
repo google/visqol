@@ -39,7 +39,8 @@ absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
     const ImagePatchCreator* patch_creator,
     const ComparisonPatchesSelector* comparison_patches_selector,
     const SimilarityToQualityMapper* sim_to_qual_mapper,
-    const int search_window) const {
+    const int search_window,
+    const bool disable_realignment) const {
   /////////////////// Stage 1: Preprocessing ///////////////////
   deg_signal =
       MiscAudio::ScaleToMatchSoundPressureLevel(ref_signal, deg_signal);
@@ -89,14 +90,18 @@ absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
 
   // Realign the patches in time domain subsignals that start at the coarse
   // patch times.
-  auto realign_result =
-      comparison_patches_selector->FinelyAlignAndRecreatePatches(
-          sim_match_info, ref_signal, deg_signal, spect_builder, window);
-  if (!realign_result.ok()) {
-    return realign_result.status();
-  }
+  if (disable_realignment) {
+    sim_match_info = most_sim_patch_result.value();
+  } else {
+    auto realign_result =
+        comparison_patches_selector->FinelyAlignAndRecreatePatches(
+            sim_match_info, ref_signal, deg_signal, spect_builder, window);
+    if (!realign_result.ok()) {
+      return realign_result.status();
+    }
 
-  sim_match_info = realign_result.value();
+    sim_match_info = realign_result.value();
+  }
 
   AMatrix<double> fvnsim = CalcPerPatchMeanFreqBandMeans(sim_match_info);
   AMatrix<double> fvnsim10 = CalcPerPatchFreqBandQuantile(sim_match_info, 0.10);

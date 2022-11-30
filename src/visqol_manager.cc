@@ -51,11 +51,14 @@ const double VisqolManager::kDurationMismatchTolerance = 1.0;
 
 absl::Status VisqolManager::Init(
     const FilePath& similarity_to_quality_mapper_model, bool use_speech_mode,
-    bool use_unscaled_speech, int search_window, bool use_lattice_model) {
+    bool use_unscaled_speech, int search_window, bool use_lattice_model,
+    bool disable_global_alignment, bool disable_realignment) {
   use_speech_mode_ = use_speech_mode;
   use_unscaled_speech_mos_mapping_ = use_unscaled_speech;
   search_window_ = search_window;
   use_lattice_model_ = use_lattice_model;
+  disable_global_alignment_ = disable_global_alignment;
+  disable_realignment_ = disable_realignment;
 
   InitPatchCreator();
   InitPatchSelector();
@@ -75,10 +78,12 @@ absl::Status VisqolManager::Init(
 absl::Status VisqolManager::Init(
     absl::string_view similarity_to_quality_mapper_model_string,
     bool use_speech_mode, bool use_unscaled_speech, int search_window,
-    bool use_lattice_model) {
+    bool use_lattice_model, bool disable_global_alignment,
+    bool disable_realignment) {
   return Init(FilePath(similarity_to_quality_mapper_model_string),
               use_speech_mode, use_unscaled_speech, search_window,
-              use_lattice_model);
+              use_lattice_model, disable_global_alignment,
+              disable_realignment);
 }
 
 void VisqolManager::InitPatchCreator() {
@@ -154,9 +159,16 @@ absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
 
   VISQOL_RETURN_IF_ERROR(ValidateInputAudio(ref_signal, deg_signal));
 
-  // Adjust for codec initial padding.
-  auto alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal);
-  deg_signal = std::get<0>(alignment_result);
+  std::tuple<AudioSignal, double> alignment_result;
+  if (!disable_global_alignment_) {
+    // Adjust for codec initial padding.
+    alignment_result = Alignment::GloballyAlign(ref_signal, deg_signal);
+    deg_signal = std::get<0>(alignment_result);
+  }
+  else {
+    // If no alignment is performed, lag should be set to 0
+    alignment_result = std::make_tuple(deg_signal, 0.0);
+  }
 
   const AnalysisWindow window{ref_signal.sample_rate, kOverlap};
 
@@ -168,7 +180,7 @@ absl::StatusOr<SimilarityResultMsg> VisqolManager::Run(
       sim_result, visqol.CalculateSimilarity(
                       ref_signal, deg_signal, spectrogram_builder_.get(),
                       window, patch_creator_.get(), patch_selector_.get(),
-                      sim_to_qual_.get(), search_window_));
+                      sim_to_qual_.get(), search_window_, disable_realignment_));
   SimilarityResultMsg sim_result_msg = PopulateSimResultMsg(sim_result);
   sim_result_msg.set_alignment_lag_s(std::get<1>(alignment_result));
   return sim_result_msg;

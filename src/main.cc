@@ -35,7 +35,8 @@ int main(int argc, char** argv) {
   auto init_status = visqol.Init(
       cmd_args.similarity_to_quality_mapper_model, cmd_args.use_speech_mode,
       cmd_args.use_unscaled_speech_mos_mapping, cmd_args.search_window_radius,
-      cmd_args.use_lattice_model);
+      cmd_args.use_lattice_model, cmd_args.disable_global_alignment,
+      cmd_args.disable_realignment);
   if (!init_status.ok()) {
     ABSL_RAW_LOG(ERROR, "%s", init_status.ToString().c_str());
     return -1;
