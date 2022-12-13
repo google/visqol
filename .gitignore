@@ -3,4 +3,5 @@
 /bazel-out
 /bazel-testlogs
 /bazel-visqol
+/visqol_lib_py
 .vscode
