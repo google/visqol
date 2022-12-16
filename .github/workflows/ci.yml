@@ -1,0 +1,21 @@
+name: build
+
+on: [push, pullrequest]
+
+jobs:
+  linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Setup ViSQOL dependencies
+        uses: ./.github/actions/setup_visqol_deps
+      - name: Build, test, and upload
+        uses: ./.github/actions/visqol_builder
+        with:
+          platform: linux
+          architecture: amd64
