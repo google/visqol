@@ -107,13 +107,19 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 
 `--similarity_to_quality_model`
 
-- The libsvm model to use during comparison. Use this only if you want to explicitly specify the model file location, otherwise the default model will be used.
+- The lattice or libsvm model to use during comparison. Use this only if you want to explicitly specify the model file location, otherwise the default model will be used.
 
 `--use_speech_mode`
+
 - Use a wideband model (sensitive up to 8kHz) with voice activity detection that normalizes the polynomial NSIM->MOS mapping so that a perfect NSIM score of 1.0 translates to 5.0.
 
 `--use_unscaled_speech_mos_mapping`
+
 - When used in conjunction with --use_speech_mode, this flag will prevent a perfect NSIM score of 1.0 being translated to a MOS score of 5.0. Perfect NSIM scores will instead result in MOS scores of ~4.x.
+
+`--use_lattice_model`
+
+- (default: true) Use a deep lattice network model to map similarity to quality. This produces more accurate results for speech (audio mode is not yet supported).
 
 #### Example Command Line Usage
 

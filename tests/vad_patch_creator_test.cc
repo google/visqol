@@ -64,7 +64,7 @@ TEST(VadPatchCreatorTest, PatchIndices) {
 
   // Create the spectrogram.
   std::unique_ptr<SpectrogramBuilder> spectro_builder =
-      absl::make_unique<GammatoneSpectrogramBuilder>(
+      std::make_unique<GammatoneSpectrogramBuilder>(
           GammatoneFilterBank{kNumBands, kMinimumFreq}, true);
   const auto spectro_result = spectro_builder->Build(ref_signal, window);
   ASSERT_TRUE(spectro_result.ok());

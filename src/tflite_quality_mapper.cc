@@ -55,6 +55,8 @@ absl::Status TFLiteQualityMapper::Init() {
 
   // Use XNN if possible.
   TfLiteXNNPackDelegateOptions opts{.num_threads = 1};
+  // TODO(b/219786261) Remove once XNNPACK is enabled by default.
+  opts.flags |= TFLITE_XNNPACK_DELEGATE_FLAG_QU8;
   delegate_ =
       std::unique_ptr<TfLiteDelegate, std::function<void(TfLiteDelegate*)>>(
           TfLiteXNNPackDelegateCreate(&opts), &TfLiteXNNPackDelegateDelete);

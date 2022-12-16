@@ -76,7 +76,7 @@ std::vector<double> XCorr::InverseFFTPointwiseProduct(
   const size_t fft_points = pow(2, exponent);
 
   // Calculate the pointwise product of the forward fft of both signals.
-  auto fft_manager = absl::make_unique<FftManager>(fft_points);
+  auto fft_manager = std::make_unique<FftManager>(fft_points);
   const AMatrix<std::complex<double>> pointwise_product =
       FFTPointwiseProduct(signal_1_vec, signal_2_vec, fft_manager, fft_points);
 
