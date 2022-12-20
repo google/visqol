@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <complex>
 #include <cstdio>
+#include <memory>
 #include <vector>
 
 #include "absl/memory/memory.h"
@@ -38,7 +39,7 @@ AMatrix<double> Envelope::CalcUpperEnv(const AMatrix<double>& signal) {
 }
 
 AMatrix<std::complex<double>> Envelope::Hilbert(const AMatrix<double>& signal) {
-  auto fft_manager = absl::make_unique<FftManager>(signal.NumElements());
+  auto fft_manager = std::make_unique<FftManager>(signal.NumElements());
   AMatrix<std::complex<double>> freq_domain_signal =
       FastFourierTransform::Forward1d(fft_manager, signal);
 

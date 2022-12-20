@@ -1,7 +1,7 @@
 load("//devtools/python/blaze:pytype.bzl", "pytype_strict_binary")
 load("//devtools/python/blaze:strict.bzl", "py_strict_test")
 
-licenses(["notice"])  # BSD
+licenses(["notice"])
 
 py_binary(
     name = "create_conformance_scores",

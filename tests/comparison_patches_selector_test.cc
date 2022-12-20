@@ -16,6 +16,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <random>
 #include <vector>
@@ -103,7 +104,7 @@ TEST_F(ComparisonPatchesSelectorTest, Slice) {
 
 TEST_F(ComparisonPatchesSelectorTest, OptimalPatches) {
   ComparisonPatchesSelector selector(
-      absl::make_unique<NeurogramSimiliarityIndexMeasure>());
+      std::make_unique<NeurogramSimiliarityIndexMeasure>());
   ComparisonPatchesSelectorPeer selectorPeer(&selector);
 
   // Defining the reference audio matrix
@@ -118,7 +119,7 @@ TEST_F(ComparisonPatchesSelectorTest, OptimalPatches) {
   // Create reference patches from given patch indices
   int patch_size = 1;
   std::vector<size_t> patch_indices{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  auto patch_creator(absl::make_unique<ImagePatchCreator>(patch_size));
+  auto patch_creator(std::make_unique<ImagePatchCreator>(patch_size));
   std::vector<ImagePatch> ref_patches =
       patch_creator->CreatePatchesFromIndices(ref_matrix, patch_indices);
 
@@ -148,7 +149,7 @@ TEST_F(ComparisonPatchesSelectorTest, OptimalPatches) {
 
 TEST_F(ComparisonPatchesSelectorTest, OutOfOrderMatches) {
   ComparisonPatchesSelector selector(
-      absl::make_unique<NeurogramSimiliarityIndexMeasure>());
+      std::make_unique<NeurogramSimiliarityIndexMeasure>());
   ComparisonPatchesSelectorPeer selectorPeer(&selector);
 
   // Defining the reference audio matrix
@@ -163,7 +164,7 @@ TEST_F(ComparisonPatchesSelectorTest, OutOfOrderMatches) {
   // Create reference patches from given patch indices
   int patch_size = 1;
   std::vector<size_t> patch_indices{0, 1, 2, 3};
-  auto patch_creator(absl::make_unique<ImagePatchCreator>(patch_size));
+  auto patch_creator(std::make_unique<ImagePatchCreator>(patch_size));
   std::vector<ImagePatch> ref_patches =
       patch_creator->CreatePatchesFromIndices(ref_matrix, patch_indices);
 
@@ -191,7 +192,7 @@ TEST_F(ComparisonPatchesSelectorTest, OutOfOrderMatches) {
 
 TEST_F(ComparisonPatchesSelectorTest, DifferentResults) {
   ComparisonPatchesSelector selector(
-      absl::make_unique<NeurogramSimiliarityIndexMeasure>());
+      std::make_unique<NeurogramSimiliarityIndexMeasure>());
   ComparisonPatchesSelectorPeer selectorPeer(&selector);
 
   // Defining the reference audio matrix
@@ -206,7 +207,7 @@ TEST_F(ComparisonPatchesSelectorTest, DifferentResults) {
   // Create reference patches from given patch indices
   int patch_size = 1;
   std::vector<size_t> patch_indices{0};
-  auto patch_creator(absl::make_unique<ImagePatchCreator>(patch_size));
+  auto patch_creator(std::make_unique<ImagePatchCreator>(patch_size));
   std::vector<ImagePatch> ref_patches =
       patch_creator->CreatePatchesFromIndices(ref_matrix, patch_indices);
 
@@ -234,7 +235,7 @@ TEST_F(ComparisonPatchesSelectorTest, DifferentResults) {
 
 TEST_F(ComparisonPatchesSelectorTest, BigExample) {
   ComparisonPatchesSelector selector(
-      absl::make_unique<NeurogramSimiliarityIndexMeasure>());
+      std::make_unique<NeurogramSimiliarityIndexMeasure>());
   ComparisonPatchesSelectorPeer selectorPeer(&selector);
 
   // Defining the reference audio matrix
@@ -252,7 +253,7 @@ TEST_F(ComparisonPatchesSelectorTest, BigExample) {
   // Create reference patches from given patch indices
   int patch_size = 2;
   std::vector<size_t> patch_indices{4, 6, 10, 12, 14, 22};
-  auto patch_creator(absl::make_unique<ImagePatchCreator>(patch_size));
+  auto patch_creator(std::make_unique<ImagePatchCreator>(patch_size));
   std::vector<ImagePatch> ref_patches =
       patch_creator->CreatePatchesFromIndices(ref_matrix, patch_indices);
 

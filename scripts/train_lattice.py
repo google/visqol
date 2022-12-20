@@ -269,7 +269,7 @@ def make_linear_estimator(
       model_config=model_config,
       loss_fn=loss_fn,
       feature_analysis_input_fn=feature_analysis_input_fn,
-      optimizer=tf.keras.optimizers.Adam(config['learning_rate']))
+      optimizer=tf.keras.optimizers.legacy.Adam(config['learning_rate']))
 
 
 def make_random_ensemble_estimator(
@@ -310,7 +310,7 @@ def make_random_ensemble_estimator(
       model_config=model_config,
       loss_fn=loss_fn,
       feature_analysis_input_fn=feature_analysis_input_fn,
-      optimizer=tf.keras.optimizers.Adam(config['learning_rate']))
+      optimizer=tf.keras.optimizers.legacy.Adam(config['learning_rate']))
 
 
 def make_tau_ensemble_estimator(
@@ -414,7 +414,7 @@ def make_tau_ensemble_estimator(
       model_config=model_config,
       loss_fn=loss_fn,
       feature_analysis_input_fn=feature_analysis_input_fn,
-      optimizer=tf.keras.optimizers.Adam(config['learning_rate']))
+      optimizer=tf.keras.optimizers.legacy.Adam(config['learning_rate']))
 
 
 def make_feature_columns(config: Dict[str, Any]) -> List[Any]:

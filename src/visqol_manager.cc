@@ -83,24 +83,24 @@ absl::Status VisqolManager::Init(
 
 void VisqolManager::InitPatchCreator() {
   if (use_speech_mode_) {
-    patch_creator_ = absl::make_unique<VadPatchCreator>(kPatchSizeSpeech);
+    patch_creator_ = std::make_unique<VadPatchCreator>(kPatchSizeSpeech);
   } else {
-    patch_creator_ = absl::make_unique<ImagePatchCreator>(kPatchSize);
+    patch_creator_ = std::make_unique<ImagePatchCreator>(kPatchSize);
   }
 }
 
 void VisqolManager::InitPatchSelector() {
   // Setup the patch similarity comparator to use the Neurogram.
-  patch_selector_ = absl::make_unique<ComparisonPatchesSelector>(
-      absl::make_unique<NeurogramSimiliarityIndexMeasure>());
+  patch_selector_ = std::make_unique<ComparisonPatchesSelector>(
+      std::make_unique<NeurogramSimiliarityIndexMeasure>());
 }
 
 void VisqolManager::InitSpectrogramBuilder() {
   if (use_speech_mode_) {
-    spectrogram_builder_ = absl::make_unique<GammatoneSpectrogramBuilder>(
+    spectrogram_builder_ = std::make_unique<GammatoneSpectrogramBuilder>(
         GammatoneFilterBank{kNumBandsSpeech, kMinimumFreq}, true);
   } else {
-    spectrogram_builder_ = absl::make_unique<GammatoneSpectrogramBuilder>(
+    spectrogram_builder_ = std::make_unique<GammatoneSpectrogramBuilder>(
         GammatoneFilterBank{kNumBandsAudio, kMinimumFreq}, false);
   }
 }
@@ -110,10 +110,10 @@ absl::Status VisqolManager::InitSimilarityToQualityMapper(
   if (use_speech_mode_) {
     if (use_lattice_model_) {
       // Speech mode is always 21 bands.
-      sim_to_qual_ = absl::make_unique<TFLiteQualityMapper>(
+      sim_to_qual_ = std::make_unique<TFLiteQualityMapper>(
           sim_to_quality_mapper_model.Path(), 21);
     } else {
-      sim_to_qual_ = absl::make_unique<SpeechSimilarityToQualityMapper>(
+      sim_to_qual_ = std::make_unique<SpeechSimilarityToQualityMapper>(
           !use_unscaled_speech_mos_mapping_);
     }
   } else {
@@ -123,7 +123,7 @@ absl::Status VisqolManager::InitSimilarityToQualityMapper(
           "Lattice models are not yet supported for audio mode, falling back "
           "to SVR model.");
     }
-    sim_to_qual_ = absl::make_unique<SvrSimilarityToQualityMapper>(
+    sim_to_qual_ = std::make_unique<SvrSimilarityToQualityMapper>(
         sim_to_quality_mapper_model);
   }
   return sim_to_qual_->Init();

@@ -15,6 +15,7 @@
 #include "fast_fourier_transform.h"
 
 #include <complex>
+#include <memory>
 #include <string>
 #include <valarray>
 
@@ -217,7 +218,7 @@ const AMatrix<double> k65SamplesZero{std::valarray<double>{
 // Test the function Forward1d(FftManager,AMatrix<double>). Ensure
 // that the correct matrix is returned for an input matrix of random doubles.
 TEST(FastFourierTransformTest, Forward1d_MatrixContentsRandom) {
-  auto fft_manager = absl::make_unique<FftManager>(k65Samples.NumElements());
+  auto fft_manager = std::make_unique<FftManager>(k65Samples.NumElements());
   auto fft_out_matrix =
       FastFourierTransform::Forward1d(fft_manager, k65Samples);
 
@@ -231,7 +232,7 @@ TEST(FastFourierTransformTest, Forward1d_MatrixContentsRandom) {
 // Ensure that the correct matrix is returned for an input matrix of doubles
 // of value zero. Specify a new size for the fft.
 TEST(FastFourierTransformTest, Forward1d_Resize_MatrixContentsRandom) {
-  auto fft_manager = absl::make_unique<FftManager>(k65Samples.NumElements());
+  auto fft_manager = std::make_unique<FftManager>(k65Samples.NumElements());
   auto fft_out_matrix = FastFourierTransform::Forward1d(
       fft_manager, k65Samples, k65Samples.NumElements() + 1);
 
@@ -245,7 +246,7 @@ TEST(FastFourierTransformTest, Forward1d_Resize_MatrixContentsRandom) {
 // Ensure that following a forward fft, the inverse fft will reconstruct the
 // original input (in complex format).
 TEST(FastFourierTransformTest, FftReconstruct) {
-  auto fft_manager = absl::make_unique<FftManager>(k65Samples.NumElements());
+  auto fft_manager = std::make_unique<FftManager>(k65Samples.NumElements());
   auto fft_forward = FastFourierTransform::Forward1d(fft_manager, k65Samples);
   auto fft_inverse = FastFourierTransform::Inverse1d(fft_manager, fft_forward);
 
@@ -259,7 +260,7 @@ TEST(FastFourierTransformTest, FftReconstruct) {
 // Ensure that following a forward fft, the inverse fft will reconstruct the
 // original input (in real format).
 TEST(FastFourierTransformTest, FftReconstructConjsym) {
-  auto fft_manager = absl::make_unique<FftManager>(k65Samples.NumElements());
+  auto fft_manager = std::make_unique<FftManager>(k65Samples.NumElements());
   auto fft_forward = FastFourierTransform::Forward1d(fft_manager, k65Samples);
   auto fft_inverse =
       FastFourierTransform::Inverse1dConjSym(fft_manager, fft_forward);
@@ -273,8 +274,7 @@ TEST(FastFourierTransformTest, FftReconstructConjsym) {
 // Test that the fft (both forward and inverse) will correctly handle the case
 // where the input is all zeros.
 TEST(FastFourierTransformTest, FftReconstructConjsymZero) {
-  auto fft_manager =
-      absl::make_unique<FftManager>(k65SamplesZero.NumElements());
+  auto fft_manager = std::make_unique<FftManager>(k65SamplesZero.NumElements());
   auto fft_forward =
       FastFourierTransform::Forward1d(fft_manager, k65SamplesZero);
   auto fft_inverse =

@@ -73,9 +73,9 @@ http_archive(
 git_repository(
     name = "org_tensorflow",
     remote = "https://github.com/tensorflow/tensorflow.git",
-    # Below is reproducible and equivalent to `tag = "v2.8.0"`
-    commit = "3f878cff5b698b82eea85db2b60d65a2e320850e",
-    shallow_since = "1643656653 -0800" ,
+    # Below is reproducible and equivalent to `tag = "v2.11.0"`
+    commit = "d5b57ca93e506df258271ea00fc29cf98383a374",
+    shallow_since = "1668561432 -0800",
 )
 
 # Import all of TensorFlow Serving's external dependencies.
@@ -88,14 +88,6 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_pkg/releases/download/0.2.5/rules_pkg-0.2.5.tar.gz",
 )
 
-# Check bazel version requirement, which is stricter than TensorFlow's.
-load(
-    "@org_tensorflow//tensorflow:version_check.bzl",
-    "check_bazel_version_at_least",
-)
-
-check_bazel_version_at_least("3.7.2")
-
 # Begin TF WORKSPACE Loading
 # This section uses a subset of the tensorflow WORKSPACE loading by reusing its contents.
 # TF's loading is very complicated, and we only need a subset for TFLite.
@@ -103,6 +95,10 @@ check_bazel_version_at_least("3.7.2")
 
 load("@org_tensorflow//tensorflow:workspace3.bzl", "workspace")
 workspace()
+
+# Check bazel version requirement, which is stricter than TensorFlow's.
+load("@bazel_skylib//lib:versions.bzl", "versions")
+versions.check("3.7.2")
 
 load("@org_tensorflow//tensorflow:workspace2.bzl", workspace2 = "workspace")
 workspace2()
