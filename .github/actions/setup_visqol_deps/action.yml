@@ -1,0 +1,11 @@
+name: setup_visqol_deps
+
+description: setup numpy and abseil
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        pip install numpy absl-py

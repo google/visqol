@@ -1,0 +1,51 @@
+name: visqol_builder
+
+description: Build, test, and upload ViSQOL
+
+inputs:
+  platform:
+    description: Host platform to build on
+    required: true
+  architecture:
+    description: target architecture to build for
+    required: true
+    build-options:
+      description: bazel build command options
+      required: false
+      default: ""
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        bazelisk test -c opt :all ${{inputs.build-options}}
+    - shell: bash
+      run: |
+        if [[ "${{inputs.platform}}" != "windows" ]]; then
+          bazelisk test -c opt python:all ${{inputs.build-options}}
+        fi
+    - shell: bash
+      run: |
+        bazelisk build -c opt :all ${{inputs.build-options}}
+    - shell: bash
+      run: |
+        if [[ "${{inputs.platform}}" != "windows" ]]; then
+          bazelisk build -c opt python:all ${{inputs.build-options}}
+        fi
+    - shell: bash
+      run: |
+        mkdir action-product
+        cp bazel-bin/visqol action-product/
+        if [[ "${{inputs.platform}}" != "windows" ]]; then
+          cp bazel-bin/*_pb2.py action-product/
+          cp bazel-bin/python/visqol_lib_py.so action-product/
+        fi
+        cp model/lattice_tcditugenmeetpackhref_ls2_nl60_lr12_bs2048_learn.005_ep2400_train1_7_raw.tflite action-product/
+        cp model/libsvm_nu_svr_model.txt  action-product/
+    - uses: actions/upload-artifact@v2
+      with:
+        name: visqol-${{ inputs.platform }}-${{ inputs.architecture }}
+        path: action-product        
+        
+    
