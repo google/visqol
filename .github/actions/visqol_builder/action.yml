@@ -19,16 +19,16 @@ runs:
   steps:
     - shell: bash
       run: |
-        bazel test -c opt :all ${{inputs.build-options}}
+        bazelisk test -c opt :all ${{inputs.build-options}}
     - shell: bash
       run: |
-        bazel test -c opt python:all ${{inputs.build-options}}
+        bazelisk test -c opt python:all ${{inputs.build-options}}
     - shell: bash
       run: |
-        bazel build -c opt :all ${{inputs.build-options}}
+        bazelisk build -c opt :all ${{inputs.build-options}}
     - shell: bash
       run: |
-        bazel build -c opt python:all ${{inputs.build-options}}
+        bazelisk build -c opt python:all ${{inputs.build-options}}
     - shell: bash
       run: |
         mkdir action-product
