@@ -33,7 +33,7 @@ runs:
       run: |
         mkdir action-product
         cp bazel-bin/visqol action-product/
-        cp bazel-bin/*._pb2.py action-product/
+        cp bazel-bin/*_pb2.py action-product/
         cp bazel-bin/python/visqol_lib_py.so action-product/
         cp model/lattice_tcditugenmeetpackhref_ls2_nl60_lr12_bs2048_learn.005_ep2400_train1_7_raw.tflite action-product/
         cp model/libsvm_nu_svr_model.txt  action-product/
