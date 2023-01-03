@@ -14,7 +14,7 @@ ViSQOL (Virtual Speech Quality Objective Listener) is an objective, full-referen
 - [Acknowledgement](#acknowledgement)
 
 ## Guidelines
-ViSQOL can be run from the command line, or integrated into a project and used through its API. Whether being used from the command line, or used through the API, ViSQOL is capable of running in two modes:
+ViSQOL can be run from the command line, or integrated into a project and used through its C++ or Python APIs. Whether being used from the command line, or used through the API, ViSQOL is capable of running in two modes:
 1. #### Audio Mode:
 - When running in audio mode, input signals must have a 48kHz sample rate.  Input should be resampled to 48kHz.
 - Input signals can be multi-channel, but they will be down-mixed to mono for performing the comparison.
@@ -161,7 +161,7 @@ To compare two files using unscaled speech mode and output their similarity to t
 ##### Windows:
 - `bazel-bin\visqol.exe --reference_file "ref1.wav" --degraded_file "deg1.wav" --use_speech_mode --use_unscaled_speech_mos_mapping --verbose`
 
-## API Usage
+## C++ API Usage
 #### ViSQOL Integration
 To integrate ViSQOL with your Bazel project:
 1. Add ViSQOL to your WORKSPACE file as a local_repository:
@@ -272,6 +272,46 @@ int main(int argc, char **argv) {
   return 0;
 }
 ```
+## Python API Usage
+#### ViSQOL Installation
+From within the root directory install ViSQOL using pip.
+```
+pip install .
+```
+#### Sample Program
+```python
+import os
+
+from visqol import visqol_lib_py
+from visqol.pb2 import visqol_config_pb2
+from visqol.pb2 import similarity_result_pb2
+
+config = visqol_config_pb2.VisqolConfig()
+
+mode = "audio"
+if mode == "audio":
+    config.audio.sample_rate = 48000
+    config.options.use_speech_scoring = False
+    svr_model_path = "libsvm_nu_svr_model.txt"
+elif mode == "speech":
+    config.audio.sample_rate = 16000
+    config.options.use_speech_scoring = True
+    svr_model_path = "lattice_tcditugenmeetpackhref_ls2_nl60_lr12_bs2048_learn.005_ep2400_train1_7_raw.tflite"
+else:
+    raise ValueError(f"Unrecognized mode: {mode}")
+
+config.options.svr_model_path = os.path.join(
+    os.path.dirname(visqol_lib_py.__file__), "model", svr_model_path)
+
+api = visqol_lib_py.VisqolApi()
+
+api.Create(config)
+
+similarity_result = api.Measure(reference, degraded)
+
+print(similarity_result.moslqo)
+```
+
 ## Dependencies
 
 Armadillo - http://arma.sourceforge.net/
