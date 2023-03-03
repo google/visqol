@@ -8,22 +8,8 @@ on:
   pull_request:
 
 jobs:
-  build-test:
-    runs-on: ${{ matrix.os }}
-    continue-on-error: false
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          [
-            "ubuntu-20.04",
-            "ubuntu-22.04",
-            "macos-12",
-            "macos-11",
-            "windows-latest",
-          ]
-    timeout-minutes: 80
-
+  linux-amd64:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -37,6 +23,23 @@ jobs:
         uses: ./.github/actions/visqol_builder
         with:
           platform: linux
+          architecture: amd64
+
+  macos-amd64:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Setup ViSQOL dependencies
+        uses: ./.github/actions/setup_visqol_deps
+      - name: Build, test, and upload
+        uses: ./.github/actions/visqol_builder
+        with:
+          platform: macos
           architecture: amd64
 
   macos-arm64:
@@ -55,3 +58,20 @@ jobs:
         with:
           platform: macos
           architecture: arm64
+
+  windows-amd64:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Setup ViSQOL dependencies
+        uses: ./.github/actions/setup_visqol_deps
+      - name: Build, test, and upload
+        uses: ./.github/actions/visqol_builder
+        with:
+          platform: windows
+          architecture: amd64
