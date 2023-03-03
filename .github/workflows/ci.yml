@@ -37,6 +37,23 @@ jobs:
           platform: macos
           architecture: amd64
 
+  macos-arm64:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Setup ViSQOL dependencies
+        uses: ./.github/actions/setup_visqol_deps
+      - name: Build, test, and upload
+        uses: ./.github/actions/visqol_builder
+        with:
+          platform: macos
+          architecture: arm64
+
   windows-amd64:
     runs-on: windows-latest
     steps:
