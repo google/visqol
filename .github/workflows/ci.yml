@@ -22,7 +22,7 @@ jobs:
             "macos-11",
             "windows-latest",
           ]
-    timeout-minutes: 40
+    timeout-minutes: 80
 
     steps:
       - name: Checkout repo
