@@ -22,6 +22,8 @@
 
 #include "amatrix.h"
 
+#include "Eigen/Dense"
+
 namespace Visqol {
 
 /**
@@ -66,7 +68,7 @@ class GammatoneFilterBank {
    *
    * @return The filtered output.
    */
-  AMatrix<double> ApplyFilter(const std::valarray<double>& signal);
+  Eigen::MatrixXd ApplyFilter(const Eigen::MatrixXd &signal);
 
   /**
    * Set the equivalent rectangular bandwidth filter coefficients that are to
@@ -95,20 +97,21 @@ class GammatoneFilterBank {
    */
   double min_freq_;
 
-  std::valarray<std::valarray<double>> fltr_cond_1_;
-  std::valarray<std::valarray<double>> fltr_cond_2_;
-  std::valarray<std::valarray<double>> fltr_cond_3_;
-  std::valarray<std::valarray<double>> fltr_cond_4_;
-  std::valarray<double> fltr_coeff_A0_;
-  std::valarray<double> fltr_coeff_A11_;
-  std::valarray<double> fltr_coeff_A12_;
-  std::valarray<double> fltr_coeff_A13_;
-  std::valarray<double> fltr_coeff_A14_;
-  std::valarray<double> fltr_coeff_A2_;
-  std::valarray<double> fltr_coeff_B0_;
-  std::valarray<double> fltr_coeff_B1_;
-  std::valarray<double> fltr_coeff_B2_;
-  std::valarray<double> fltr_coeff_gain_;
+  Eigen::MatrixXd fltr_cond_1_;
+  Eigen::MatrixXd fltr_cond_2_;
+  Eigen::MatrixXd fltr_cond_3_;
+  Eigen::MatrixXd fltr_cond_4_;
+  Eigen::MatrixXd a1;
+  Eigen::MatrixXd a2;
+  Eigen::MatrixXd a3;
+  Eigen::MatrixXd a4;
+  Eigen::MatrixXd b;
+
+  /**
+   * This is dependent to the filters order. For a 2nd order filter
+   * we need 3 coeffs for numerator and denominator.
+   */
+   const int kFilterLength = 3;
 };
 }  // namespace Visqol
 
