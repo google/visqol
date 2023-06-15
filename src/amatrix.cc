@@ -14,8 +14,8 @@
 
 #include "amatrix.h"
 
-#include <armadillo>
 #include <complex>
+#include <iostream>
 #include <utility>
 #include <valarray>
 #include <vector>
@@ -25,95 +25,97 @@
 namespace Visqol {
 template <typename T>
 inline AMatrix<T>::AMatrix(const AMatrix<T>& other) {
-  matrix_ = arma::Mat<T>(other.matrix_);
+  matrix_ = BackendMatrix<T>(other.matrix_);
 }
 
 template <typename T>
-inline AMatrix<T>::AMatrix(const arma::Mat<T>& mat) {
+inline AMatrix<T>::AMatrix(const BackendMatrix<T>& mat) {
   matrix_ = mat;
 }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(const std::vector<T>& col) {
-  matrix_ = arma::Mat<T>(col);
+  matrix_ = BackendMatrix<T>::Map(col.data(), col.size(), 1);
 }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(const absl::Span<T>& col) {
-  matrix_ = arma::Mat<T>(col.data(), col.size(), 1);
+  matrix_ = BackendMatrix<T>::Map(col.data(), col.size(), 1);
 }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(const std::valarray<T>& va) {
   std::vector<T> v;
-  v.reserve(va.size());
+  v.resize(va.size());
   v.assign(std::begin(va), std::end(va));
-  matrix_ = arma::Mat<T>(v);
+  matrix_ = BackendMatrix<T>::Map(v.data(), v.size(), 1);
 }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(const std::vector<std::vector<T>>& vecOfCols) {
   // assumes all vectors all of equal length
-  matrix_ = arma::Mat<T>(vecOfCols[0].size(), vecOfCols.size());
+  matrix_ = BackendMatrix<T>(vecOfCols[0].size(), vecOfCols.size());
   for (size_t i = 0; i < vecOfCols.size(); i++) {
-    matrix_.col(i) = arma::Col<T>(vecOfCols[i]);
+    matrix_.col(i) = BackendMatrix<T>::Map(vecOfCols[i].data(), vecOfCols[i].size(), 1);
   }
 }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(size_t rows, size_t cols, std::vector<T>&& data) {
-  matrix_ = arma::Mat<T>(&data[0], (arma::uword)rows, (arma::uword)cols, false);
+  // TODO: We should avoid copying here
+  matrix_ = BackendMatrix<T>::Map(data.data(), rows, cols);
 }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(size_t rows, size_t cols,
                            const std::vector<T>& data) {
-  matrix_ = arma::Mat<T>(&data[0], (arma::uword)rows, (arma::uword)cols);
+  matrix_ = BackendMatrix<T>::Map(data.data(), rows, cols);
 }
 
 template <typename T>
 inline AMatrix<T>::AMatrix(size_t rows, size_t cols) {
-  matrix_ = arma::Mat<T>((arma::uword)rows, (arma::uword)cols);
+  matrix_ = BackendMatrix<T>(rows, cols);
 }
 
 template <typename T>
-inline AMatrix<T>::AMatrix(arma::Mat<T>&& matrix) {
+inline AMatrix<T>::AMatrix(BackendMatrix<T>&& matrix) {
   matrix_ = std::move(matrix);
 }
 
 template <typename T>
 AMatrix<T> AMatrix<T>::GetSpan(size_t rowStart, size_t rowEnd, size_t colStart,
                                size_t colEnd) const {
-  arma::Mat<T> m = matrix_.submat(rowStart, colStart, rowEnd, colEnd);
+  size_t num_rows = rowEnd - rowStart + 1;
+  size_t num_cols = colEnd - colStart + 1;
+  BackendMatrix<T> m = matrix_.block(rowStart, colStart, num_rows, num_cols);
   return AMatrix<T>(m);
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::Filled(size_t rows, size_t cols, T initialValue) {
-  arma::Mat<T> m((arma::uword)rows, (arma::uword)cols);
+  BackendMatrix<T> m (rows, cols);
   m.fill(initialValue);
-  AMatrix<T> am(std::move(m));
-  return am;
+  return AMatrix<T>(std::move(m));
 }
 
 template <typename T>
 inline T& AMatrix<T>::operator()(size_t row, size_t column) {
-  return matrix_((arma::uword)row, (arma::uword)column);
+  return matrix_(row, column);
 }
 
 template <typename T>
 inline T AMatrix<T>::operator()(size_t row, size_t column) const {
-  return matrix_((arma::uword)row, (arma::uword)column);
+  return matrix_(row, column);
 }
 
 template <typename T>
 inline T& AMatrix<T>::operator()(size_t elementIndex) {
-  return matrix_.at((arma::uword)elementIndex);
+  return *(matrix_.data() + elementIndex);
 }
 
 template <typename T>
 inline T AMatrix<T>::operator()(size_t elementIndex) const {
-  return matrix_((arma::uword)elementIndex);
+  return *(matrix_.data() + elementIndex);
 }
 
 template <typename T>
@@ -124,281 +126,309 @@ inline AMatrix<T>& AMatrix<T>::operator=(const AMatrix<T>& other) {
 
 template <typename T>
 inline bool AMatrix<T>::operator==(const AMatrix<T>& other) const {
-  if (matrix_.n_rows != other.matrix_.n_rows) return false;
-  if (matrix_.n_cols != other.matrix_.n_cols) return true;
-  return std::equal(matrix_.cbegin(), matrix_.cend(), other.matrix_.cbegin());
-  // Why doesn't == work when documentation says it does? matrix_ ==
-  // other.matrix_;
+  if (matrix_.rows() != other.matrix_.rows()) return false;
+  if (matrix_.cols() != other.matrix_.cols()) return false;
+  return matrix_ == other.matrix_;
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::operator+(const AMatrix<T>& other) const {
-  return AMatrix<T>(matrix_ + other.matrix_);
+  return AMatrix<T>((matrix_.array() + other.matrix_.array()).matrix());
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::operator+(T v) const {
-  return AMatrix<T>(matrix_ + v);
+  return AMatrix<T>(matrix_.array() + v);
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::operator*(T v) const {
-  return AMatrix<T>(matrix_ * v);
+  return AMatrix<T>(matrix_.array() * v);
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::operator-(T v) const {
-  return AMatrix<T>(matrix_ - v);
+  return AMatrix<T>(matrix_.array() - v);
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::operator/(T v) const {
-  return AMatrix<T>(matrix_ / v);
+  return AMatrix<T>(matrix_.array() / v);
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::operator-(const AMatrix<T>& m) const {
-  return AMatrix<T>(matrix_ - m.matrix_);
+  return AMatrix<T>((matrix_.array() - m.matrix_.array()).matrix());
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::PointWiseProduct(const AMatrix<T>& m) const {
-  return AMatrix<T>(std::move(matrix_ % m.matrix_));
+  return AMatrix<T>(std::move(matrix_.cwiseProduct(m.matrix_)));
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::PointWiseDivide(const AMatrix<T>& m) const {
-  return AMatrix<T>(std::move(matrix_ / m.matrix_));
+  return AMatrix<T>(std::move(matrix_.array() / m.matrix_.array()));
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::Transpose() const {
-  return AMatrix<T>{std::move(trans(matrix_))};
+  return AMatrix<T>{std::move(matrix_.transpose())};
 }
 
 template <typename T>
 inline std::vector<T> AMatrix<T>::RowSubset(size_t rowIndex,
                                             size_t startColumnIndex,
                                             size_t endColumnIndex) const {
-  std::vector<T> vec(arma::conv_to<std::vector<T>>::from(
-      matrix_.row(rowIndex).subvec(startColumnIndex, endColumnIndex)));
+  std::vector<T> vec;
+  vec.resize(endColumnIndex - startColumnIndex + 1);
+  for (size_t colIndex = startColumnIndex; colIndex <= endColumnIndex; ++colIndex) {
+    vec[colIndex - startColumnIndex] = matrix_(rowIndex, colIndex);
+  }
   return vec;
 }
 
 template <typename T>
 inline size_t AMatrix<T>::LongestDimensionLength() const {
-  return (matrix_.n_rows > matrix_.n_cols) ? matrix_.n_rows : matrix_.n_cols;
+  return (matrix_.rows() > matrix_.cols()) ? matrix_.rows() : matrix_.cols();
 }
 
 template <>
 inline AMatrix<double> AMatrix<double>::Abs() const {
-  AMatrix<double> absMatrix(matrix_.n_rows, matrix_.n_cols);
-  for (size_t i = 0; i < absMatrix.NumElements(); i++) {
-    absMatrix.matrix_(i) = std::abs(matrix_(i));
-  }
-  return absMatrix;
+  return AMatrix<double>(matrix_.cwiseAbs());
 }
 
 template <>
 inline AMatrix<double> AMatrix<std::complex<double>>::Abs() const {
-  arma::Mat<double> absMatrix;
-  absMatrix.set_size(matrix_.n_rows, matrix_.n_cols);
-  for (size_t i = 0; i < absMatrix.n_elem; i++) {
-    absMatrix(i) = std::abs(matrix_(i));
+  BackendMatrix<double> absMatrix (matrix_.rows(), matrix_.cols());
+  for (size_t rowIndex = 0; rowIndex < matrix_.rows(); rowIndex++) {
+    for (size_t colIndex = 0; colIndex < matrix_.rows(); colIndex++) {
+      absMatrix(rowIndex, colIndex) = std::abs(matrix_(rowIndex, colIndex));
+    }
   }
   return AMatrix<double>(std::move(absMatrix));
 }
 
 template <typename T>
 inline std::vector<T> AMatrix<T>::GetRow(size_t row) const {
-  std::vector<T> vec(arma::conv_to<std::vector<T>>::from(matrix_.row(row)));
+  std::vector<T> vec;
+  vec.resize(matrix_.cols());
+  for (size_t i = 0; i < matrix_.cols(); ++i)
+  {
+    vec[i] = matrix_(row, i);
+  }
   return vec;
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::GetRows(size_t rowStart, size_t rowEnd) const {
-  return AMatrix<T>(std::move(matrix_.rows(rowStart, rowEnd)));
+  return AMatrix<T>(std::move(matrix_.middleRows(rowStart, rowEnd - rowStart + 1)));
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::GetColumn(size_t column) const {
-  return AMatrix<T>(matrix_.cols(column, column));
+  return AMatrix<T>(matrix_.col(column));
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::GetColumns(size_t colStart, size_t colEnd) const {
-  return AMatrix<T>(matrix_.cols(colStart, colEnd));
+  return AMatrix<T>(matrix_.middleCols(colStart, colEnd - colStart + 1));
 }
 
 template <typename T>
 inline void AMatrix<T>::SetRow(size_t rowIndex, const std::vector<T>& row) {
-  matrix_.row(rowIndex) = std::move(arma::Row<T>(row));
+  matrix_.row(rowIndex) = BackendMatrix<T>::Map(row.data(), 1, row.size());
 }
 
 template <typename T>
 inline void AMatrix<T>::SetColumn(size_t colIndex, AMatrix<T>&& col) {
-  matrix_.col(colIndex) = std::move(col.GetArmaMat());
+  matrix_.col(colIndex) = std::move(col.matrix_);
 }
 
 template <typename T>
 inline void AMatrix<T>::SetColumn(size_t colIndex, std::vector<T>&& col) {
-  matrix_.col(colIndex) = std::move(arma::Col<T>(col));
+  matrix_.col(colIndex) = std::move(BackendMatrix<T>::Map(col.data(), col.size(), 1));
 }
 
 template <typename T>
 inline void AMatrix<T>::SetColumn(size_t colIndex, std::valarray<T>&& col) {
-  std::vector<T> v;
-  v.reserve(col.size());
-  v.assign(std::begin(col), std::end(col));
-  matrix_.col(colIndex) = std::move(arma::Col<T>(v));
+  for (size_t i = 0; i < col.size(); ++i) {
+    matrix_(i, colIndex) = col[i];
+  }
 }
 
 template <typename T>
 inline void AMatrix<T>::SetRow(size_t rowIndex, std::valarray<T>&& row) {
-  std::vector<T> v;
-  v.reserve(row.size());
-  v.assign(std::begin(row), std::end(row));
-  matrix_.row(rowIndex) = std::move(arma::Row<T>(v));
+  for (size_t colIndex = 0; colIndex < matrix_.cols(); ++colIndex) {
+    matrix_(rowIndex, colIndex) = row[colIndex];
+  }
 }
 
 template <typename T>
 void AMatrix<T>::Print() const {
   printf("\n");
-  matrix_.print();
+  std::cout << matrix_ << std::endl;
 }
 
 template <>
 void AMatrix<std::complex<double>>::PrintSummary(const char* s) const {
   printf("%s\n", s);
-  size_t outMatSize = matrix_.n_rows;
+  size_t outMatSize = matrix_.rows();
   printf("first five\n");
   for (size_t i = 0; i < 5; i++) {
-    printf("complex[%2zu] = %9.20f , %9.20f\n", i, matrix_(i).real(),
-           matrix_(i).imag());
+    printf("complex[%2zu] = %9.20f , %9.20f\n", i, (matrix_.data() + i)->real(),
+           (matrix_.data() + i)->imag());
   }
   printf("middle \n");
   for (size_t i = (outMatSize / 2) - 4; i < (outMatSize / 2) + 6; i++) {
-    printf("complex[%2zu] = %9.20f , %9.20f\n", i, matrix_(i).real(),
-           matrix_(i).imag());
+    printf("complex[%2zu] = %9.20f , %9.20f\n", i, (matrix_.data() + i)->real(),
+           (matrix_.data() + i)->imag());
   }
   printf("last five\n");
   for (size_t i = outMatSize - 6; i < outMatSize; i++) {
-    printf("complex[%2zu] = %9.20f , %9.20f\n", i, matrix_(i).real(),
-           matrix_(i).imag());
+    printf("complex[%2zu] = %9.20f , %9.20f\n", i, (matrix_.data() + i)->real(),
+           (matrix_.data() + i)->imag());
   }
 }
 
 template <>
 void AMatrix<double>::PrintSummary(const char* s) const {
   printf("%s\n", s);
-  size_t outMatSize = matrix_.n_rows;
+  size_t outMatSize = matrix_.rows();
   printf("first five\n");
   for (size_t i = 0; i < 5; i++) {
-    printf("double[%2zu] = %9.20f\n", i, matrix_(i));
+    printf("double[%2zu] = %9.20f\n", i, *(matrix_.data() + i));
   }
   printf("middle \n");
   for (size_t i = (outMatSize / 2) - 4; i < (outMatSize / 2) + 6; i++) {
-    printf("double[%2zu] = %9.20f\n", i, matrix_(i));
+    printf("double[%2zu] = %9.20f\n", i, *(matrix_.data() + i));
   }
   printf("last five\n");
   for (size_t i = outMatSize - 6; i < outMatSize; i++) {
-    printf("double[%2zu] = %9.20f\n", i, matrix_(i));
+    printf("double[%2zu] = %9.20f\n", i, *(matrix_.data() + i));
   }
 }
 
 template <typename T>
 inline const T* AMatrix<T>::MemPtr() const {
-  return matrix_.memptr();
+  return matrix_.data();
 }
 
 template <typename T>
 inline void AMatrix<T>::Resize(const size_t rows, const size_t cols) {
-  matrix_.resize(rows, cols);
+  // We need to try to keep the same data
+  matrix_.conservativeResize(rows, cols);
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::JoinVertically(const AMatrix<T>& other) const {
-  // Having a separate line for return is needed to cast to Mat
-  arma::Mat<T> m = arma::join_vert(matrix_, other.GetArmaMat());
+  // Asserting other matrix has the same number of columns
+  if (matrix_.cols() != other.matrix_.cols()) return AMatrix<T> ();
+  size_t numCols = matrix_.cols();
+  size_t numRows = matrix_.rows() + other.matrix_.rows();
+  BackendMatrix<T> m (numRows, numCols);
+  m.topRows(matrix_.rows()) = matrix_;
+  m.bottomRows(other.matrix_.rows()) = other.matrix_;
   return m;
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::FlipUpDown() const {
-  return AMatrix<T>(arma::flipud(matrix_));
+  return AMatrix<T>(matrix_.colwise().reverse());
 }
 
 template <typename T>
 inline AMatrix<T> AMatrix<T>::Mean(kDimension dim) const {
-  return AMatrix<T>(arma::mean(matrix_, static_cast<int>(dim)));
+  if (dim == kDimension::COLUMN) {
+    return AMatrix<T>(matrix_.colwise().mean());
+  }
+  else { // if (dim == kDimension::ROW)
+    return AMatrix<T>(matrix_.rowwise().mean());
+  }
 }
 
 template <typename T>
 inline AMatrix<double> AMatrix<T>::StdDev(kDimension dim) const {
   // The second parameter of arma::stddev is norm_type.
   // norm_type=0 means that stddev should use the unbiased estimate.
-  return AMatrix<double>(arma::stddev(matrix_, 0, static_cast<int>(dim)));
+  if (dim == kDimension::COLUMN) {
+    if (matrix_.rows() == 1) {
+      return AMatrix<double>(BackendMatrix<double>::Zero(1, matrix_.cols()));
+    }
+    else {
+      return AMatrix<double>((matrix_.rowwise() - matrix_.colwise().mean()).colwise().norm()/std::sqrt((double)matrix_.rows()-1.0));
+    }
+  }
+  else { // if (dim == kDimension::ROW)
+    if (matrix_.cols() == 1) {
+      return AMatrix<double>(BackendMatrix<double>::Zero(matrix_.rows(), 1));
+    }
+    else {
+      return AMatrix<double>((matrix_.colwise() - matrix_.rowwise().mean()).rowwise().norm()/std::sqrt((double)matrix_.cols()-1.0));
+    }
+  }
 }
 
 template <typename T>
-inline const arma::Mat<T>& AMatrix<T>::GetArmaMat() const {
+inline const BackendMatrix<T>& AMatrix<T>::GetBackendMat() const {
   return matrix_;
 }
 
 template <typename T>
 inline std::vector<T> AMatrix<T>::ToVector() const {
-  return arma::conv_to<std::vector<T>>::from(matrix_.col(0));
+  std::vector<T> v (static_cast<size_t>(matrix_.rows()));
+  for (size_t rowIndex = 0; rowIndex < matrix_.rows(); ++rowIndex) {
+    v[rowIndex] = matrix_(rowIndex, 0);
+  }
+  return std::move(v);
 }
 
 template <typename T>
 inline std::valarray<T> AMatrix<T>::ToValArray() const {
-  std::vector<T> v = arma::conv_to<std::vector<T>>::from(matrix_.col(0));
-  return std::valarray<T>(v.data(), v.size());
-}
-
-template <>
-inline std::vector<std::complex<double>>
-AMatrix<std::complex<double>>::ToVector() const {
-  return arma::conv_to<std::vector<std::complex<double>>>::from(matrix_.col(0));
+  std::valarray<T> v (static_cast<size_t>(matrix_.rows()));
+  for (size_t rowIndex = 0; rowIndex < matrix_.rows(); ++rowIndex) {
+    v[rowIndex] = matrix_(rowIndex, 0);
+  }
+  return std::move(v);
 }
 
 template <typename T>
 inline size_t AMatrix<T>::NumRows() const {
-  return matrix_.n_rows;
+  return matrix_.rows();
 }
 template <typename T>
 inline size_t AMatrix<T>::NumCols() const {
-  return matrix_.n_cols;
+  return matrix_.cols();
 }
 template <typename T>
 inline size_t AMatrix<T>::NumElements() const {
-  return matrix_.n_elem;
+  return matrix_.size();
 }
 
 template <typename T>
 inline typename AMatrix<T>::iterator AMatrix<T>::begin() {
-  return matrix_.begin();
+  return matrix_.data();
 }
 template <typename T>
 inline typename AMatrix<T>::iterator AMatrix<T>::end() {
-  return matrix_.end();
+  return matrix_.data() + matrix_.size();
 }
 template <typename T>
 inline typename AMatrix<T>::const_iterator AMatrix<T>::cbegin() const {
-  return matrix_.cbegin();
+  return matrix_.data();
 }
 template <typename T>
 inline typename AMatrix<T>::const_iterator AMatrix<T>::cend() const {
-  return matrix_.cend();
+  return matrix_.data() + matrix_.size();
 }
 
 template <typename T>
 inline const T* AMatrix<T>::data() const {
-  return matrix_.mem;
+  return matrix_.data();
 }
 template <typename T>
 inline T* AMatrix<T>::mutData() const {
-  return const_cast<T*>(matrix_.mem);
+  return const_cast<T*>(matrix_.data());
 }
 
 template class AMatrix<double>;

@@ -17,13 +17,12 @@
 #ifndef VISQOL_INCLUDE_AMATRIX_H
 #define VISQOL_INCLUDE_AMATRIX_H
 
-#include <armadillo>
+#include "Eigen/Dense"
 #include <memory>
 #include <valarray>
 #include <vector>
 
 #include "absl/types/span.h"
-#define ARMA_64BIT_WORD
 
 #if defined(_MSC_VER) && _MSC_VER >= 1400
 #pragma warning(push)
@@ -32,6 +31,10 @@
 
 namespace Visqol {
 enum class kDimension { COLUMN = 0, ROW = 1 };
+
+// Define an alias for the Eigen matrix
+template<class T>
+using BackendMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 
 template <typename T>
 class AMatrix;
@@ -43,7 +46,7 @@ template <typename T>
 class AMatrix {
  public:
   AMatrix<T>() {}
-  AMatrix<T>(const arma::Mat<T>& mat);
+  AMatrix<T>(const BackendMatrix<T>& mat);
   AMatrix<T>(const AMatrix<T>& other);
   AMatrix<T>(const std::vector<T>& col);
   AMatrix<T>(const absl::Span<T>& col);
@@ -52,7 +55,7 @@ class AMatrix {
   AMatrix<T>(size_t rows, size_t cols);
   AMatrix<T>(size_t rows, size_t cols, std::vector<T>&& data);
   AMatrix<T>(size_t rows, size_t cols, const std::vector<T>& data);
-  AMatrix<T>(arma::Mat<T>&& matrix);  // could this be private?
+  AMatrix<T>(BackendMatrix<T>&& matrix);  // could this be private?
   T& operator()(size_t row, size_t column);
   T operator()(size_t row, size_t column) const;
   T& operator()(size_t elementIndex);
@@ -104,11 +107,11 @@ class AMatrix {
   std::valarray<T> ToValArray() const;
 
   // hack to access private member
-  const arma::Mat<T>& GetArmaMat() const;
+  const BackendMatrix<T>& GetBackendMat() const;
 
  public:
-  typedef typename arma::Mat<T>::iterator iterator;
-  typedef typename arma::Mat<T>::const_iterator const_iterator;
+  using iterator = T*;
+  using const_iterator = const T*;
   iterator begin();
   iterator end();
   const_iterator cbegin() const;
@@ -118,7 +121,7 @@ class AMatrix {
   T* mutData() const;  // bit of a hack
 
  private:
-  arma::Mat<T> matrix_;
+  BackendMatrix<T> matrix_;
 };
 }  // namespace Visqol
 

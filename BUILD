@@ -129,7 +129,7 @@ cc_library(
         ":similarity_to_quality_mapper",
         ":tflite_quality_mapper",
         ":visqol_config_cc_proto",
-        "@armadillo_headers//:armadillo_header",
+        "@eigen//:eigen",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/flags:usage",
