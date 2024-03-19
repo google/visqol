@@ -106,6 +106,16 @@ struct CommandLineArgs {
    * If true, use a lattice model to map similarity to MOS.
    */
   bool use_lattice_model = true;
+
+  /**
+  * If true, disables global alignment.
+  **/
+  bool disable_global_alignment;
+
+  /**
+  * If true, disables patch-wise realignment.
+  **/
+  bool disable_realignment;
 };
 
 /**

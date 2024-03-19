@@ -57,6 +57,7 @@ class Visqol {
    *    score.
    * @param search_window This parameter is used to determine how far the
    *    algorithm will search in order to find the most optimal match.
+   * @param disable_realignment Disables refined patch realignment
    *
    * @return If the comparison was successful, return the similarity result and
    *    associated debug info. Else, return an error status.
@@ -67,7 +68,7 @@ class Visqol {
       const ImagePatchCreator* patch_creator,
       const ComparisonPatchesSelector* comparison_patches_selector,
       const SimilarityToQualityMapper* sim_to_qual_mapper,
-      const int search_window) const;
+      const int search_window, const bool disable_realignment) const;
 
   /**
    * Produces a set of FVNSIM scores, which represent the similarity between

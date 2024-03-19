@@ -29,7 +29,7 @@ def _calculate_visqol(reference_file, degraded_file):
   ref_path = visqol_lib_py.FilePath(os.path.join(files_dir, reference_file))
   deg_path = visqol_lib_py.FilePath(os.path.join(files_dir, degraded_file))
   manager = visqol_lib_py.VisqolManager()
-  manager.Init(model_path, True, False, 60, True)
+  manager.Init(model_path, True, False, 60, True, False, False)
   similarity_result = manager.Run(ref_path, deg_path)
   return similarity_result
 

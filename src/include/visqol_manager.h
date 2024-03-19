@@ -92,12 +92,16 @@ class VisqolManager {
    *    a given reference patch.
    * @param use_lattice_model If true, use a lattice model for mapping
    *    similarity to quality.
+   * @param disable_global_alignment Disables global alignment
+   * @param disable_realignment Disables refined patch realignment
    *
    * @return An 'OK' status if initialised successfully, else an error status.
    */
   absl::Status Init(const FilePath& similarity_to_quality_mapper_model,
                     bool use_speech_mode, bool use_unscaled_speech,
-                    int search_window, bool use_lattice_model = true);
+                    int search_window, bool use_lattice_model = true,
+                    bool disable_global_alignment = false,
+                    bool disable_realignment = false);
 
   /**
    * Initializes an instance for use with the given similarity to quality
@@ -114,12 +118,16 @@ class VisqolManager {
    *    a given reference patch.
    * @param use_lattice_model If true, use a lattice model for mapping
    *    similarity to quality.
+   * @param disable_global_alignment Disables global alignment
+   * @param disable_realignment Disables refined patch realignment
    *
    * @return An 'OK' status if initialised successfully, else an error status.
    */
   absl::Status Init(absl::string_view similarity_to_quality_mapper_model_string,
                     bool use_speech_mode, bool use_unscaled_speech,
-                    int search_window, bool use_lattice_model = true);
+                    int search_window, bool use_lattice_model = true,
+                    bool disable_global_alignment = false,
+                    bool disable_realignment = false);
 
   /**
    * Perform a comparison on a single reference/degraded audio file pair.
@@ -173,6 +181,16 @@ class VisqolManager {
    * order to find the most optimal match.
    */
   int search_window_ = 60;
+
+  /**
+   * True if global realignment step should be skipped.
+   */
+  bool disable_global_alignment_ = false;
+
+  /**
+   * True if per-patch realignment is disabled.
+   */
+  bool disable_realignment_ = false;
 
   /**
    * Used for creating the patches from both the reference and degraded signals

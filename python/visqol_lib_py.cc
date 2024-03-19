@@ -25,7 +25,7 @@ PYBIND11_MODULE(visqol_lib_py, m) {
       .def(pybind11::init<>())
       .def("Init",
            pybind11::overload_cast<const Visqol::FilePath&, bool, bool, int,
-                                   bool>(&Visqol::VisqolManager::Init))
+                                   bool, bool, bool>(&Visqol::VisqolManager::Init))
       .def("Run", pybind11::overload_cast<const Visqol::FilePath&,
                                           const Visqol::FilePath&>(
                       &Visqol::VisqolManager::Run));
