@@ -158,20 +158,21 @@ cc_library(
     urls = ["https://github.com/cjlin1/libsvm/archive/v324.zip"],
 )
 
-# Armadillo Headers
+# Eigen dependency
 http_archive(
-    name = "armadillo_headers",
+    name = "eigen",
     build_file_content = """
 cc_library(
-    name = "armadillo_header",
-    hdrs = glob(["include/armadillo", "include/armadillo_bits/*.hpp"]),
-    includes = ["include/"],
-    visibility = ["//visibility:public"],
+    name = 'eigen',
+    srcs = [],
+    includes = ['Eigen'],
+    hdrs = glob(['Eigen/**']),
+    visibility = ['//visibility:public'],
 )
 """,
-    sha256 = "53d7ad6124d06fdede8d839c091c649c794dae204666f1be0d30d7931737d635",
-    strip_prefix = "armadillo-9.900.1",
-    urls = ["http://sourceforge.net/projects/arma/files/armadillo-9.900.1.tar.xz"],
+    sha256 = "0fa5cafe78f66d2b501b43016858070d52ba47bd9b1016b0165a7b8e04675677",
+    strip_prefix = "eigen-3.3.9",
+    urls = ["https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.bz2",],
 )
 
 # PFFFT
