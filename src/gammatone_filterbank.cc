@@ -16,81 +16,113 @@
 
 #include <utility>
 #include <valarray>
+#include <cstring>
 
 #include "amatrix.h"
+#include "equivalent_rectangular_bandwidth.h"
 #include "signal_filter.h"
+
+using namespace Eigen;
 
 namespace Visqol {
 GammatoneFilterBank::GammatoneFilterBank(const size_t num_bands,
                                          const double min_freq)
-    : num_bands_(num_bands),
-      min_freq_(min_freq),
-      fltr_cond_1_({0.0, 0.0}, num_bands),
-      fltr_cond_2_({0.0, 0.0}, num_bands),
-      fltr_cond_3_({0.0, 0.0}, num_bands),
-      fltr_cond_4_({0.0, 0.0}, num_bands) {}
+    : num_bands_(num_bands), min_freq_(min_freq)
+      {
+        fltr_cond_1_ = MatrixXd::Zero(num_bands, kFilterLength);
+        fltr_cond_2_ = MatrixXd::Zero(num_bands, kFilterLength);
+        fltr_cond_3_ = MatrixXd::Zero(num_bands, kFilterLength);
+        fltr_cond_4_ = MatrixXd::Zero(num_bands, kFilterLength);
+        a1 = MatrixXd::Zero(num_bands, kFilterLength);
+        a2 = MatrixXd::Zero(num_bands, kFilterLength);
+        a3 = MatrixXd::Zero(num_bands, kFilterLength);
+        a4 = MatrixXd::Zero(num_bands, kFilterLength);
+        b = MatrixXd::Zero(num_bands, kFilterLength);
+      }
 
 size_t GammatoneFilterBank::GetNumBands() const { return num_bands_; }
 
 double GammatoneFilterBank::GetMinFreq() const { return min_freq_; }
 
 void GammatoneFilterBank::ResetFilterConditions() {
-  fltr_cond_1_ = {{0.0, 0.0}, num_bands_};
-  fltr_cond_2_ = {{0.0, 0.0}, num_bands_};
-  fltr_cond_3_ = {{0.0, 0.0}, num_bands_};
-  fltr_cond_4_ = {{0.0, 0.0}, num_bands_};
+  fltr_cond_1_.fill(0.0);
+  fltr_cond_2_.fill(0.0);
+  fltr_cond_3_.fill(0.0);
+  fltr_cond_4_.fill(0.0);
 }
 
 void GammatoneFilterBank::SetFilterCoefficients(
-    const AMatrix<double>& filter_coeffs) {
-  fltr_coeff_A0_ = filter_coeffs.GetColumn(0).ToValArray();
-  fltr_coeff_A11_ = filter_coeffs.GetColumn(1).ToValArray();
-  fltr_coeff_A12_ = filter_coeffs.GetColumn(2).ToValArray();
-  fltr_coeff_A13_ = filter_coeffs.GetColumn(3).ToValArray();
-  fltr_coeff_A14_ = filter_coeffs.GetColumn(4).ToValArray();
-  fltr_coeff_A2_ = filter_coeffs.GetColumn(5).ToValArray();
-  fltr_coeff_B0_ = filter_coeffs.GetColumn(6).ToValArray();
-  fltr_coeff_B1_ = filter_coeffs.GetColumn(7).ToValArray();
-  fltr_coeff_B2_ = filter_coeffs.GetColumn(8).ToValArray();
-  fltr_coeff_gain_ = filter_coeffs.GetColumn(9).ToValArray();
+    const AMatrix<double> &filter_coeffs) {
+  for (size_t i = 0; i < num_bands_; ++i) {
+    Eigen::RowVector3d a1_i = {filter_coeffs(i, ErbFiltersResult::A0) / filter_coeffs(i, ErbFiltersResult::Gain),
+                         filter_coeffs(i, ErbFiltersResult::A11) / filter_coeffs(i, ErbFiltersResult::Gain),
+                         filter_coeffs(i, ErbFiltersResult::A2) / filter_coeffs(i, ErbFiltersResult::Gain)};
+    a1.row(i) = a1_i;
+
+    Eigen::RowVector3d a2_i = {filter_coeffs(i, ErbFiltersResult::A0), filter_coeffs(i, ErbFiltersResult::A12), filter_coeffs(i, ErbFiltersResult::A2)};
+    a2.row(i) = a2_i;
+
+    Eigen::RowVector3d a3_i = {filter_coeffs(i, ErbFiltersResult::A0), filter_coeffs(i, ErbFiltersResult::A13), filter_coeffs(i, ErbFiltersResult::A2)};
+    a3.row(i) = a3_i;
+
+    Eigen::RowVector3d a4_i = {filter_coeffs(i, ErbFiltersResult::A0), filter_coeffs(i, ErbFiltersResult::A14), filter_coeffs(i, ErbFiltersResult::A2)};
+    a4.row(i) = a4_i;
+
+    Eigen::RowVector3d b_i = {filter_coeffs(i, ErbFiltersResult::B0), filter_coeffs(i, ErbFiltersResult::B1), filter_coeffs(i, ErbFiltersResult::B2)};
+    b.row(i) = b_i;
+  }
 }
 
-AMatrix<double> GammatoneFilterBank::ApplyFilter(
-    const std::valarray<double>& signal) {
-  AMatrix<double> output(num_bands_, signal.size());
-  std::valarray<double> a1, a2, a3, a4, b;
+void BatchFilterSignal(const MatrixXd &numer_coeffs,
+                       const MatrixXd &denom_coeffs,
+                       const MatrixXd &input_signal,
+                       MatrixXd &output_signal,
+                       MatrixXd &init_conditions) {
+  size_t i, n = denom_coeffs.cols();
+  for (size_t m = 0; m < input_signal.rows(); m++) {
+    output_signal.col(m) = numer_coeffs.col(0) * input_signal(m, 0) + init_conditions.col(0);
+    for (i = 1; i < n; i++) {
+      init_conditions.col(i - 1) = numer_coeffs.col(i) * input_signal(m, 0) +
+        init_conditions.col(i) - denom_coeffs.col(i).cwiseProduct(output_signal.col(m));
+    }
+  }
+}
+
+void BatchFilterBands(const MatrixXd &numer_coeffs,
+                      const MatrixXd &denom_coeffs,
+                      const MatrixXd &input_signal,
+                      MatrixXd &output_signal,
+                      MatrixXd &init_conditions) {
+  size_t i, n = denom_coeffs.cols();
+  for (size_t m = 0; m < input_signal.cols(); m++) {
+    output_signal.col(m) = numer_coeffs.col(0).cwiseProduct(input_signal.col(m)) + init_conditions.col(0);
+    for (i = 1; i < n; i++) {
+      init_conditions.col(i - 1) = numer_coeffs.col(i).cwiseProduct(input_signal.col(m)) +
+        init_conditions.col(i) - denom_coeffs.col(i).cwiseProduct(output_signal.col(m));
+    }
+  }
+}
+
+MatrixXd GammatoneFilterBank::ApplyFilter(const MatrixXd &signal) {
+
+  MatrixXd helper1 = Eigen::MatrixXd::Zero(num_bands_, signal.rows());
+  MatrixXd helper2 = Eigen::MatrixXd::Zero(num_bands_, signal.rows());
 
   // Loop over each filter coefficient now to produce a filtered column.
-  for (size_t chan = 0; chan < num_bands_; chan++) {
-    a1 = {fltr_coeff_A0_[chan] / fltr_coeff_gain_[chan],
-          fltr_coeff_A11_[chan] / fltr_coeff_gain_[chan],
-          fltr_coeff_A2_[chan] / fltr_coeff_gain_[chan]};
-    a2 = {fltr_coeff_A0_[chan], fltr_coeff_A12_[chan], fltr_coeff_A2_[chan]};
-    a3 = {fltr_coeff_A0_[chan], fltr_coeff_A13_[chan], fltr_coeff_A2_[chan]};
-    a4 = {fltr_coeff_A0_[chan], fltr_coeff_A14_[chan], fltr_coeff_A2_[chan]};
-    b = {fltr_coeff_B0_[chan], fltr_coeff_B1_[chan], fltr_coeff_B2_[chan]};
+  // First filter
+  Visqol::BatchFilterSignal(a1, b, signal, helper1, fltr_cond_1_);
 
-    // First filter
-    auto fltr_rslt = SignalFilter::Filter(a1, b, signal, fltr_cond_1_[chan]);
-    fltr_cond_1_[chan] = fltr_rslt.finalConditions;
+  // Second filter
+  Visqol::BatchFilterBands(a2, b, helper1, helper2, fltr_cond_2_);
 
-    // Second filter
-    fltr_rslt = SignalFilter::Filter(a2, b, std::move(fltr_rslt.filteredSignal),
-                                     fltr_cond_2_[chan]);
-    fltr_cond_2_[chan] = fltr_rslt.finalConditions;
+  // Third filter
+  helper1.fill(0.0);
+  Visqol::BatchFilterBands(a3, b, helper2, helper1, fltr_cond_3_);
 
-    // Third filter
-    fltr_rslt = SignalFilter::Filter(a3, b, std::move(fltr_rslt.filteredSignal),
-                                     fltr_cond_3_[chan]);
-    fltr_cond_3_[chan] = fltr_rslt.finalConditions;
+  // Fourth filter
+  helper2.fill(0.0);
+  Visqol::BatchFilterBands(a4, b, helper1, helper2, fltr_cond_4_);
 
-    // Fourth filter
-    fltr_rslt = SignalFilter::Filter(a4, b, std::move(fltr_rslt.filteredSignal),
-                                     fltr_cond_4_[chan]);
-    fltr_cond_4_[chan] = fltr_rslt.finalConditions;
-
-    output.SetRow(chan, std::move(fltr_rslt.filteredSignal));
-  }
-  return output;
+  return helper2;
 }
 }  // namespace Visqol

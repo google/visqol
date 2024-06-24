@@ -27,6 +27,10 @@
 #include "signal_filter.h"
 #include "spectrogram.h"
 
+#include "Eigen/Dense"
+
+using namespace Eigen;
+
 namespace Visqol {
 
 const double GammatoneSpectrogramBuilder::kSpeechModeMaxFreq = 8000.0;
@@ -63,31 +67,32 @@ absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
                      " required minimum)."));
   }
   size_t num_cols = 1 + floor((sig.NumRows() - window.size) / hop_size);
-  AMatrix<double> out_matrix(filter_bank_.GetNumBands(), num_cols);
 
-  auto sig_val_arr = sig.GetColumn(0).ToValArray();
-  for (size_t i = 0; i < out_matrix.NumCols(); i++) {
-    const size_t start_col = i * hop_size;
-    // Select the next frame from the input signal to filter.
-    const std::slice_array<double> frame =
-        sig_val_arr[std::slice(start_col, window.size, 1)];
+  MatrixXd out_eigen (filter_bank_.GetNumBands(), num_cols);
+  MatrixXd frame_eigen (window.size, 1);
+  MatrixXd hann_window (window.size, 1);
+  for (int i = 0; i < window.size; ++i) {
+    hann_window(i, 0) = 0.5 - (0.5 * cos(2.0 * M_PI * i / (window.size - 1)));
+  }
+
+  // run the windowing
+  for (size_t i = 0; i < out_eigen.cols(); i++) {
+    const size_t start_row = i * hop_size;
+    // select the next frame from the input signal to filter.
+    frame_eigen = sig.GetBackendMat().col(0).middleRows(start_row, window.size);
 
     // Apply a Hann window to reduce artifacts.
-    const std::valarray<double> windowed_frame = window.ApplyHannWindow(frame);
+    frame_eigen.array() *= hann_window.array();
 
-    // Apply the filter.
+    // apply the filter
     filter_bank_.ResetFilterConditions();
-    auto filtered_signal = filter_bank_.ApplyFilter(windowed_frame);
-    // Calculate the mean of each row.
-    std::transform(filtered_signal.begin(), filtered_signal.end(),
-                   filtered_signal.begin(),
-                   [](decltype(*filtered_signal.begin())& d) { return d * d; });
-    AMatrix<double> row_means = filtered_signal.Mean(kDimension::ROW);
-    std::transform(row_means.begin(), row_means.end(), row_means.begin(),
-                   [](decltype(*row_means.begin())& d) { return sqrt(d); });
-    // Set this filtered frame as a column in the spectrogram.
-    out_matrix.SetColumn(i, std::move(row_means));
+    MatrixXd filtered_signal = filter_bank_.ApplyFilter(frame_eigen);
+
+    // calculate the mean of each row
+    out_eigen.col(i) = filtered_signal.array().square().rowwise().mean().sqrt();
   }
+
+  AMatrix<double> out_matrix(out_eigen);
 
   // Order the center freq bands from lowest to highest.
   std::vector<double> ordered_cfb;

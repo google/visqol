@@ -25,13 +25,13 @@ const size_t kSampleRate = 48000;
 const size_t kNumBands = 32;
 const double kMinFreq = 50;
 
-// The contents of this input signal are random figures.
-const AMatrix<double> k10Samples{
-    std::valarray<double>{0.2, 0.4, 0.6, 0.8, 0.9, 0.1, 0.3, 0.5, 0.7, 0.9}};
-
 // Ensure that the output matrix from the signal filter has the correct
 // dimensions.
 TEST(ApplyFilterTest, basic_positive_flow) {
+  // The contents of this input signal are random figures.
+  Eigen::MatrixXd k10Samples (10, 1);
+  k10Samples << 0.2, 0.4, 0.6, 0.8, 0.9, 0.1, 0.3, 0.5, 0.7, 0.9;
+
   auto filter_bank = GammatoneFilterBank{kNumBands, kMinFreq};
   auto erb = EquivalentRectangularBandwidth::MakeFilters(
       kSampleRate, kNumBands, kMinFreq, kSampleRate / 2);
@@ -39,10 +39,10 @@ TEST(ApplyFilterTest, basic_positive_flow) {
   filter_coeffs = filter_coeffs.FlipUpDown();
   filter_bank.SetFilterCoefficients(filter_coeffs);
   auto filtered_signal =
-      filter_bank.ApplyFilter(k10Samples.GetColumn(0).ToValArray());
+      filter_bank.ApplyFilter(k10Samples);
 
-  ASSERT_EQ(k10Samples.NumElements(), filtered_signal.NumCols());
-  ASSERT_EQ(kNumBands, filtered_signal.NumRows());
+  ASSERT_EQ(k10Samples.size(), filtered_signal.cols());
+  ASSERT_EQ(kNumBands, filtered_signal.rows());
 }
 
 }  // namespace

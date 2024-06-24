@@ -28,6 +28,23 @@ namespace Visqol {
  */
 struct ErbFiltersResult {
   /**
+  * An enumeration that assigns the ERB filters coefficient names to the corresponding
+  * column indices of the ErbFiltersResult::filterCoeffs matrix.
+  */
+  enum CoeffsMap {
+    A0 = 0,
+    A11 = 1,
+    A12 = 2,
+    A13 = 3,
+    A14 = 4,
+    A2 = 5,
+    B0 = 6,
+    B1 = 7,
+    B2 = 8,
+    Gain = 9
+  };
+
+  /**
    * The filter coefficients for the ERB filter.
    */
   std::vector<std::vector<double>> filterCoeffs;
