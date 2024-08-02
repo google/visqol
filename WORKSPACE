@@ -169,9 +169,9 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 """,
-    sha256 = "53d7ad6124d06fdede8d839c091c649c794dae204666f1be0d30d7931737d635",
-    strip_prefix = "armadillo-9.900.1",
-    urls = ["http://sourceforge.net/projects/arma/files/armadillo-9.900.1.tar.xz"],
+    sha256 = "72e3f1b4b4d1b4df70d9cb1e321a254ea04d7843f68a6c34d82691997d558395",
+    strip_prefix = "armadillo-10.1.0",
+    urls = ["http://sourceforge.net/projects/arma/files/armadillo-10.1.0.tar.xz"],
 )
 
 # PFFFT
