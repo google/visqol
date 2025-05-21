@@ -1,11 +1,20 @@
 import os
+import distutils.command.build
 from setuptools import setup
+
+# Override build command in order to prevent a naming clash with the
+# existing 'BUILD' file on non case sensitive filesystems (like on macOS)
+class BuildCommand(distutils.command.build.build):
+    def initialize_options(self):
+        distutils.command.build.build.initialize_options(self)
+        self.build_base = 'python_build'
 
 os.system("bazel build -c opt //:similarity_result_py_pb2")
 os.system("bazel build -c opt //:visqol_config_py_pb2")
 os.system("bazel build -c opt //python:visqol_lib_py.so")
 
 setup(
+    cmdclass={"build": BuildCommand},
     name="visqol",
     version="3.3.3",
     url="https://github.com/google/visqol",
