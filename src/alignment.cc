@@ -27,7 +27,8 @@ std::tuple<AudioSignal, AudioSignal, double> Alignment::AlignAndTruncate(
     const AudioSignal& reference_signal, const AudioSignal& degraded_signal) {
   std::tuple<AudioSignal, double> alignment_result =
       Alignment::GloballyAlign(reference_signal, degraded_signal);
-  AudioSignal aligned_degraded_signal = std::get<0>(alignment_result);
+  AudioSignal aligned_degraded_signal =
+      std::move(std::get<0>(alignment_result));
   double lag = std::get<1>(alignment_result);
   const AMatrix<double>& reference_matrix = reference_signal.data_matrix;
   // Take the aligned degraded matrix.
@@ -53,9 +54,9 @@ std::tuple<AudioSignal, AudioSignal, double> Alignment::AlignAndTruncate(
         reference_matrix.NumRows() - 1);
   }
 
-  AudioSignal new_degraded_signal{new_degraded_matrix,
+  AudioSignal new_degraded_signal{std::move(new_degraded_matrix),
                                   degraded_signal.sample_rate};
-  AudioSignal new_reference_signal{new_reference_matrix,
+  AudioSignal new_reference_signal{std::move(new_reference_matrix),
                                    reference_signal.sample_rate};
   return std::make_tuple(new_reference_signal, new_degraded_signal, lag);
 }

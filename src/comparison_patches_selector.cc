@@ -30,88 +30,74 @@
 #include "image_patch_creator.h"
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
+#include "status_macros.h"
 
 namespace Visqol {
 ComparisonPatchesSelector::ComparisonPatchesSelector(
     std::unique_ptr<PatchSimilarityComparator> sim_comparator)
     : sim_comparator_{std::move(sim_comparator)} {}
 
-void ComparisonPatchesSelector::FindMostOptimalDegPatch(
+absl::Status ComparisonPatchesSelector::FindMostOptimalDegPatch(
     const AMatrix<double>& spectrogram_data, const ImagePatch& ref_patch,
     std::vector<ImagePatch>& deg_patches,
     std::vector<std::vector<double>>& cumulative_similarity_dp,
     std::vector<std::vector<int>>& backtrace,
     const std::vector<size_t>& ref_patch_indices, int patch_index,
     const int search_window) const {
-  // The similarity threshold below which the two patch matches are not a good
-  // match.
   int ref_frame_index = ref_patch_indices[patch_index];
-  ImagePatch deg_patch;
-  PatchSimilarityResult sim_result;
+  const int first = std::max(0, ref_frame_index - search_window);
+  const int last = std::min(static_cast<int>(spectrogram_data.NumCols()) - 1,
+                            ref_frame_index + search_window);
+  if (first > last) return absl::OkStatus();
+  std::vector<double> scores;
+  VISQOL_ASSIGN_OR_RETURN(scores,
+                          sim_comparator_->MeasureCandidateSimilarities(
+                              ref_patch, deg_patches, first, last - first + 1));
 
   // For a given reference frame index, this function compares the given
   // reference patch with all possible degraded patches in the search window and
   // populates the cumulative_similarity_dp vector accordingly. For more details
   // : https://en.wikipedia.org/wiki/Dynamic_time_warping
-  // Try Viterbi, if optimization is needed.
 
-  for (int slide_offset = ref_frame_index - search_window;
-       slide_offset <= ref_frame_index + search_window; slide_offset++) {
-    if (slide_offset < 0) {
-      // The degraded patch index cannot be less than 0.
-      slide_offset = -1;
-      continue;
-    }
-    if (slide_offset >= spectrogram_data.NumCols()) {
-      // The start of the degraded is past the end of the spectrogram, so
-      // nothing left to compare.
-      break;
-    }
-    deg_patch = deg_patches[slide_offset];
-    sim_result = sim_comparator_->MeasurePatchSimilarity(ref_patch, deg_patch);
+  double highest_sim = std::numeric_limits<double>::lowest();
+  int past_best = -1;
+  int next_predecessor =
+      patch_index > 0
+          ? std::max(0, static_cast<int>(ref_patch_indices[patch_index - 1]) -
+                            search_window)
+          : 0;
+  for (int slide_offset = first; slide_offset <= last; ++slide_offset) {
+    double similarity = scores[slide_offset - first];
 
     int past_slide_offset = -1;
-    double highest_sim = std::numeric_limits<double>::lowest();
-    // There's no need to backtrace for the first patch index.
     if (patch_index > 0) {
-      // The lower_limit parameter tells us how far we should go
-      // back to look for a possible match for the previous patch index
-      // (patch_index - 1). The current value of lower_limit is used because the
-      // search space for the previous patch index  is
-      // (ref_patch_indices[patch_index - 1] - search_window,
-      // ref_patch_indices[patch_index - 1] + search_window).
-      int lower_limit = ref_patch_indices[patch_index - 1] - search_window;
-      lower_limit = std::max(lower_limit, 0);
-      // The back_offset parameter determines all the offsets that should be
-      // considered while calculating the highest cumulative similarity score
-      // achieved till patch_index - 1. Since two reference patches should
-      // not map to the exact same degraded patch, the initial value of
-      // back_offset is set to slide_offset - 1.
-      int back_offset = slide_offset - 1;
-      for (; back_offset >= lower_limit; back_offset--) {
-        // The current for loop is used to find out the highest cumulative score
-        // achieved till the previous ref_patch_index.
-        if (cumulative_similarity_dp[patch_index - 1][back_offset] >
-            highest_sim) {
-          highest_sim = cumulative_similarity_dp[patch_index - 1][back_offset];
-          past_slide_offset = back_offset;
+      // Maintain the best predecessor as the candidate position advances.
+      // Ties select the largest index, matching the original reverse scan.
+      while (next_predecessor < slide_offset) {
+        const double value =
+            cumulative_similarity_dp[patch_index - 1][next_predecessor];
+        if (value > highest_sim || (past_best >= 0 && value == highest_sim)) {
+          highest_sim = value;
+          past_best = next_predecessor;
         }
+        ++next_predecessor;
       }
-      sim_result.similarity += highest_sim;
+      past_slide_offset = past_best;
+      similarity += highest_sim;
       // If the current reference patch experienced a packet loss, then the
       // cumulative similarity score till the previous patch might be more and
       // in that case no matching patch for the current reference patch is found
       // in the degraded window.
       if (cumulative_similarity_dp[patch_index - 1][slide_offset] >
-          sim_result.similarity) {
-        sim_result.similarity =
-            cumulative_similarity_dp[patch_index - 1][slide_offset];
+          similarity) {
+        similarity = cumulative_similarity_dp[patch_index - 1][slide_offset];
         past_slide_offset = slide_offset;
       }
     }
-    cumulative_similarity_dp[patch_index][slide_offset] = sim_result.similarity;
+    cumulative_similarity_dp[patch_index][slide_offset] = similarity;
     backtrace[patch_index][slide_offset] = past_slide_offset;
   }
+  return absl::OkStatus();
 }
 
 size_t ComparisonPatchesSelector::CalcMaxNumPatches(
@@ -164,21 +150,18 @@ ComparisonPatchesSelector::FindMostOptimalDegPatches(
       std::vector<double>(spectrogram_data.NumCols()));
   std::vector<std::vector<int>> backtrace(
       ref_patch_indices.size(), std::vector<int>(spectrogram_data.NumCols()));
-  std::vector<ImagePatch> deg_patches(spectrogram_data.NumCols());
-  for (size_t slide_offset = 0; slide_offset < spectrogram_data.NumCols();
-       slide_offset++) {
-    deg_patches[slide_offset] =
-        BuildDegradedPatch(spectrogram_data, slide_offset,
-                           slide_offset + ref_patches[0].NumCols() - 1,
-                           ref_patches[0].NumRows(), ref_patches[0].NumCols());
-  }
+  std::vector<ImagePatch> deg_patches;
+  VISQOL_ASSIGN_OR_RETURN(deg_patches,
+                          sim_comparator_->PrepareCandidateSearch(
+                              spectrogram_data, num_frames_per_patch));
   // Attempt to get a good alignment with backtracking.
   for (size_t patch_index = 0; patch_index < num_patches; patch_index++) {
     // Find the best alignment to the ref patch within a distance of
     // search_window on each side of the hard-aligned deg signal.
-    FindMostOptimalDegPatch(spectrogram_data, ref_patches[patch_index],
-                            deg_patches, cumulative_similarity_dp, backtrace,
-                            ref_patch_indices, patch_index, search_window);
+    VISQOL_RETURN_IF_ERROR(FindMostOptimalDegPatch(
+        spectrogram_data, ref_patches[patch_index], deg_patches,
+        cumulative_similarity_dp, backtrace, ref_patch_indices, patch_index,
+        search_window));
   }
   double max_similarity_score = std::numeric_limits<double>::lowest();
   // The patch index for the last reference patch.
@@ -305,77 +288,74 @@ ComparisonPatchesSelector::FinelyAlignAndRecreatePatches(
     SpectrogramBuilder* spect_builder, const AnalysisWindow& window) const {
   std::vector<PatchSimilarityResult> realigned_results(sim_results.size());
 
-  // The patches are already matched.  Iterate over each pair.
-  for (size_t i = 0; i < sim_results.size(); ++i) {
-    auto sim_result = sim_results[i];
-    if (sim_result.deg_patch_start_time == sim_result.deg_patch_end_time &&
-        sim_result.deg_patch_start_time == 0.0) {
-      realigned_results[i] = sim_result;
-      continue;
-    }
-
-    // 1. The sim results keep track of the start and end points of each matched
-    // pair.  Extract the audio for this segment.
-    auto ref_patch_audio = Slice(ref_signal, sim_result.ref_patch_start_time,
-                                 sim_result.ref_patch_end_time);
-    auto deg_patch_audio = Slice(deg_signal, sim_result.deg_patch_start_time,
-                                 sim_result.deg_patch_end_time);
-    // 2. For any pair, we want to shift the degraded signal to be maximally
-    // aligned.
-    auto aligned_result =
-        Alignment::AlignAndTruncate(ref_patch_audio, deg_patch_audio);
-    AudioSignal ref_audio_aligned = std::get<0>(aligned_result);
-    AudioSignal deg_audio_aligned = std::get<1>(aligned_result);
-    double lag = std::get<2>(aligned_result);
-
-    double new_ref_duration = ref_audio_aligned.GetDuration();
-    double new_deg_duration = deg_audio_aligned.GetDuration();
-    // 3. Compute a new spectrogram for the degraded audio.
-    const auto ref_spectro_result =
-        spect_builder->Build(ref_audio_aligned, window);
-    if (!ref_spectro_result.ok()) {
-      ABSL_RAW_LOG(ERROR, "Error building ref spectrogram: %s",
-                   ref_spectro_result.status().ToString().c_str());
-      return ref_spectro_result.status();
-    }
-    Spectrogram ref_spectrogram = ref_spectro_result.value();
-
-    const auto deg_spectro_result =
-        spect_builder->Build(deg_audio_aligned, window);
-    if (!deg_spectro_result.ok()) {
-      ABSL_RAW_LOG(ERROR, "Error building degraded spectrogram: %s",
-                   deg_spectro_result.status().ToString().c_str());
-      return deg_spectro_result.status();
-    }
-    Spectrogram deg_spectrogram = deg_spectro_result.value();
-
-    MiscAudio::PrepareSpectrogramsForComparison(ref_spectrogram,
-                                                deg_spectrogram);
-    // 4. Recreate an aligned degraded patch from the new spectrogram.
-    auto new_ref_patch = ref_spectrogram.Data();
-
-    auto new_deg_patch = deg_spectrogram.Data();
-    // 5. Update the similarity result with the new patch.
-    auto new_sim_result =
-        sim_comparator_->MeasurePatchSimilarity(new_ref_patch, new_deg_patch);
-    // Compare to the old result and take the max.
-    if (new_sim_result.similarity < sim_result.similarity) {
-      realigned_results[i] = sim_result;
-    } else {
-      if (lag > 0.) {
-        new_sim_result.ref_patch_start_time =
-            sim_result.ref_patch_start_time + lag;
-        new_sim_result.deg_patch_start_time = sim_result.deg_patch_start_time;
-      } else {
-        new_sim_result.ref_patch_start_time = sim_result.ref_patch_start_time;
-        new_sim_result.deg_patch_start_time =
-            sim_result.deg_patch_start_time - lag;
+  // Bound host/device workspace while combining independent local spectra.
+  constexpr size_t kPatchBatchSize = 16;
+  for (size_t batch = 0; batch < sim_results.size(); batch += kPatchBatchSize) {
+    const size_t end = std::min(sim_results.size(), batch + kPatchBatchSize);
+    std::vector<AudioSignal> signals;
+    std::vector<size_t> indices;
+    std::vector<double> lags;
+    for (size_t i = batch; i < end; ++i) {
+      const auto& sim_result = sim_results[i];
+      if (sim_result.deg_patch_start_time == sim_result.deg_patch_end_time &&
+          sim_result.deg_patch_start_time == 0.0) {
+        realigned_results[i] = sim_result;
+        continue;
       }
-      new_sim_result.ref_patch_end_time =
-          new_sim_result.ref_patch_start_time + new_ref_duration;
-      new_sim_result.deg_patch_end_time =
-          new_sim_result.deg_patch_start_time + new_deg_duration;
-      realigned_results[i] = new_sim_result;
+      auto ref_patch_audio = Slice(ref_signal, sim_result.ref_patch_start_time,
+                                   sim_result.ref_patch_end_time);
+      auto deg_patch_audio = Slice(deg_signal, sim_result.deg_patch_start_time,
+                                   sim_result.deg_patch_end_time);
+      auto aligned =
+          Alignment::AlignAndTruncate(ref_patch_audio, deg_patch_audio);
+      signals.push_back(std::move(std::get<0>(aligned)));
+      signals.push_back(std::move(std::get<1>(aligned)));
+      indices.push_back(i);
+      lags.push_back(std::get<2>(aligned));
+    }
+    auto spectra_result = spect_builder->BuildBatch(signals, window);
+    if (!spectra_result.ok()) {
+      ABSL_RAW_LOG(ERROR, "Error building realigned spectrograms: %s",
+                   spectra_result.status().ToString().c_str());
+      return spectra_result.status();
+    }
+    std::vector<Spectrogram> spectra = std::move(spectra_result).value();
+    for (size_t item = 0; item < indices.size(); ++item) {
+      const size_t i = indices[item];
+      const auto& sim_result = sim_results[i];
+      const double lag = lags[item];
+      const double new_ref_duration = signals[item * 2].GetDuration();
+      const double new_deg_duration = signals[item * 2 + 1].GetDuration();
+      auto& ref_spectrogram = spectra[item * 2];
+      auto& deg_spectrogram = spectra[item * 2 + 1];
+      MiscAudio::PrepareSpectrogramsForComparison(ref_spectrogram,
+                                                  deg_spectrogram);
+      // 4. Recreate an aligned degraded patch from the new spectrogram.
+      auto new_ref_patch = ref_spectrogram.Data();
+
+      auto new_deg_patch = deg_spectrogram.Data();
+      // 5. Update the similarity result with the new patch.
+      auto new_sim_result =
+          sim_comparator_->MeasurePatchSimilarity(new_ref_patch, new_deg_patch);
+      // Compare to the old result and take the max.
+      if (new_sim_result.similarity < sim_result.similarity) {
+        realigned_results[i] = sim_result;
+      } else {
+        if (lag > 0.) {
+          new_sim_result.ref_patch_start_time =
+              sim_result.ref_patch_start_time + lag;
+          new_sim_result.deg_patch_start_time = sim_result.deg_patch_start_time;
+        } else {
+          new_sim_result.ref_patch_start_time = sim_result.ref_patch_start_time;
+          new_sim_result.deg_patch_start_time =
+              sim_result.deg_patch_start_time - lag;
+        }
+        new_sim_result.ref_patch_end_time =
+            new_sim_result.ref_patch_start_time + new_ref_duration;
+        new_sim_result.deg_patch_end_time =
+            new_sim_result.deg_patch_start_time + new_deg_duration;
+        realigned_results[i] = new_sim_result;
+      }
     }
   }
   return realigned_results;

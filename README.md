@@ -48,6 +48,14 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 2. ##### Build ViSQOL
 - Change directory to the root of the ViSQOL project (i.e. where the WORKSPACE file is) and run the following command: `bazel build :visqol -c opt`
 
+For NVIDIA GPU acceleration, build with CUDA 11.8 and add `--use_cuda` when
+running:
+
+```sh
+bazel build :visqol -c opt --config=cuda
+./bazel-bin/visqol --reference_file ref.wav --degraded_file deg.wav --use_cuda
+```
+
 #### Windows Build Instructions (Experimental, last tested on Windows 10 x64, 2020 August)
 
 1. ##### Install Bazel
@@ -108,6 +116,10 @@ ViSQOL was trained with data from subjective tests that roughly follow industry 
 `--similarity_to_quality_model`
 
 - The lattice or libsvm model to use during comparison. Use this only if you want to explicitly specify the model file location, otherwise the default model will be used.
+
+`--use_cuda`
+
+- Enable NVIDIA GPU acceleration in a CUDA build (default: false).
 
 `--use_speech_mode`
 
@@ -176,6 +188,9 @@ To integrate ViSQOL with your Bazel project:
     deps = ["@visqol//:visqol_lib"],
     ```
 3. Note that Bazel does not currently resolve transitive dependencies (see [issue #2391](https://github.com/bazelbuild/bazel/issues/2391)). As a workaround, it is required that you copy the contents of the ViSQOL WORKSPACE file to your own project's WORKSPACE file until this is resolved.
+
+For a CUDA build, set `config.mutable_options()->set_use_cuda(true);` before
+calling `Create`.
 
 #### Sample Program
 ```cpp
@@ -278,6 +293,9 @@ From within the root directory install ViSQOL using pip.
 ```
 pip install .
 ```
+With a CUDA-built Python extension, set `config.options.use_cuda = True` before
+calling `api.Create(config)`.
+
 #### Sample Program
 ```python
 import os

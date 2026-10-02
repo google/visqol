@@ -62,22 +62,6 @@ class XCorr {
    */
   static std::vector<double> InverseFFTPointwiseProduct(
       const AMatrix<double>& signal_1, const AMatrix<double>& signal_2);
-
-  /**
-   * Helper function used to the pointwise product of the two signal's forward
-   * fft.
-   *
-   * These two fft operations are split over these functions to shorten the
-   * lifespan of these variables to reduce peak memory consumption.
-   *
-   * @param signal_1 The first signal to be processed.
-   * @param signal_1 The second signal to be processed.
-   *
-   * @return The pointwise product of the two signal's forward fft.
-   */
-  static AMatrix<std::complex<double>> FFTPointwiseProduct(
-      const std::vector<double>& signal_1, const std::vector<double>& signal_2,
-      const std::unique_ptr<FftManager>& fft_manager, const size_t fft_points);
 };
 }  // namespace Visqol
 

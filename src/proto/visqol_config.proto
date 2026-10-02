@@ -62,6 +62,10 @@ message VisqolConfig {
     // or SVR. This is recommended unless comparing to historic conformance
     // scores. The binary default for this is `true`.
     bool use_lattice_model = 8;
+
+    // Use CUDA for Gammatone spectrograms and candidate NSIM scores. Requires a
+    // CUDA build and GPU. Selected-patch statistics and MOS use the CPU.
+    bool use_cuda = 9;
   }
 
   VisqolAudioInfo audio = 1;

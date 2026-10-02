@@ -25,7 +25,15 @@ PYBIND11_MODULE(visqol_lib_py, m) {
       .def(pybind11::init<>())
       .def("Init",
            pybind11::overload_cast<const Visqol::FilePath&, bool, bool, int,
-                                   bool, bool, bool>(&Visqol::VisqolManager::Init))
+                                   bool, bool, bool, bool>(
+               &Visqol::VisqolManager::Init),
+           pybind11::arg("similarity_to_quality_mapper_model"),
+           pybind11::arg("use_speech_mode"),
+           pybind11::arg("use_unscaled_speech"), pybind11::arg("search_window"),
+           pybind11::arg("use_lattice_model"),
+           pybind11::arg("disable_global_alignment"),
+           pybind11::arg("disable_realignment"),
+           pybind11::arg("use_cuda") = false)
       .def("Run", pybind11::overload_cast<const Visqol::FilePath&,
                                           const Visqol::FilePath&>(
                       &Visqol::VisqolManager::Run));

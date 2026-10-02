@@ -94,6 +94,7 @@ class VisqolManager {
    *    similarity to quality.
    * @param disable_global_alignment Disables global alignment
    * @param disable_realignment Disables refined patch realignment
+   * @param use_cuda Enables CUDA spectrogram construction and candidate scoring
    *
    * @return An 'OK' status if initialised successfully, else an error status.
    */
@@ -101,7 +102,7 @@ class VisqolManager {
                     bool use_speech_mode, bool use_unscaled_speech,
                     int search_window, bool use_lattice_model = true,
                     bool disable_global_alignment = false,
-                    bool disable_realignment = false);
+                    bool disable_realignment = false, bool use_cuda = false);
 
   /**
    * Initializes an instance for use with the given similarity to quality
@@ -120,6 +121,7 @@ class VisqolManager {
    *    similarity to quality.
    * @param disable_global_alignment Disables global alignment
    * @param disable_realignment Disables refined patch realignment
+   * @param use_cuda Enables CUDA spectrogram construction and candidate scoring
    *
    * @return An 'OK' status if initialised successfully, else an error status.
    */
@@ -127,7 +129,7 @@ class VisqolManager {
                     bool use_speech_mode, bool use_unscaled_speech,
                     int search_window, bool use_lattice_model = true,
                     bool disable_global_alignment = false,
-                    bool disable_realignment = false);
+                    bool disable_realignment = false, bool use_cuda = false);
 
   /**
    * Perform a comparison on a single reference/degraded audio file pair.
@@ -224,12 +226,12 @@ class VisqolManager {
   /**
    * Initialises the comparison patch selector.
    */
-  void InitPatchSelector();
+  absl::Status InitPatchSelector(bool use_cuda);
 
   /**
    * Initialises the spectrogram builder.
    */
-  void InitSpectrogramBuilder();
+  absl::Status InitSpectrogramBuilder(bool use_cuda);
 
   /**
    * Initialises the similiary to quality mapper using the provided model file.

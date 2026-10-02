@@ -16,6 +16,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <ostream>
 #include <random>
@@ -53,6 +54,17 @@ class ComparisonPatchesSelectorPeer {
                                            search_window);
   }
 
+  absl::Status CompareRow(const AMatrix<double>& spectrum,
+                          std::vector<ImagePatch>& candidates,
+                          std::vector<std::vector<double>>& dp,
+                          std::vector<std::vector<int>>& trace,
+                          const std::vector<size_t>& indices, int row,
+                          int radius) const {
+    return cps_->FindMostOptimalDegPatch(
+        spectrum, ImagePatch::Filled(1, 1, 0.0), candidates, dp, trace, indices,
+        row, radius);
+  }
+
  private:
   const ComparisonPatchesSelector* const cps_;
 };
@@ -63,6 +75,72 @@ class ComparisonPatchesSelectorTest : public ::testing::Test {
  protected:
   ComparisonPatchesSelectorTest() {}
 };
+
+class CandidateValueComparator : public PatchSimilarityComparator {
+ public:
+  PatchSimilarityResult MeasurePatchSimilarity(
+      const ImagePatch&, const ImagePatch& degraded) const override {
+    PatchSimilarityResult result{};
+    result.similarity = degraded(0, 0);
+    return result;
+  }
+};
+
+TEST_F(ComparisonPatchesSelectorTest, PrefixSearchPreservesReverseScanTies) {
+  ComparisonPatchesSelector selector(
+      std::make_unique<CandidateValueComparator>());
+  ComparisonPatchesSelectorPeer peer(&selector);
+  const std::vector<size_t> indices{0, 4, 8, 12};
+  AMatrix<double> spectrum(1, 16);
+  std::vector<ImagePatch> candidates(16);
+  for (int radius : {0, 2, 8, 20}) {
+    for (int pattern : {0, 1, 2}) {
+      for (size_t i = 0; i < candidates.size(); ++i) {
+        candidates[i] = ImagePatch::Filled(
+            1, 1,
+            pattern == 0   ? 1.0
+            : pattern == 1 ? 0.0
+                           : static_cast<double>(i % 3) - 1.0);
+      }
+      std::vector<std::vector<double>> expected(4, std::vector<double>(16));
+      auto actual = expected;
+      std::vector<std::vector<int>> expected_trace(4, std::vector<int>(16));
+      auto actual_trace = expected_trace;
+      for (int row = 0; row < 4; ++row) {
+        const int first = std::max(0, static_cast<int>(indices[row]) - radius);
+        const int last = std::min(15, static_cast<int>(indices[row]) + radius);
+        for (int offset = first; offset <= last; ++offset) {
+          double score = candidates[offset](0, 0);
+          int predecessor = -1;
+          if (row > 0) {
+            double best = std::numeric_limits<double>::lowest();
+            const int lower =
+                std::max(0, static_cast<int>(indices[row - 1]) - radius);
+            // Original quadratic reverse scan is the tie-breaking oracle.
+            for (int previous = offset - 1; previous >= lower; --previous) {
+              if (expected[row - 1][previous] > best) {
+                best = expected[row - 1][previous];
+                predecessor = previous;
+              }
+            }
+            score += best;
+            if (expected[row - 1][offset] > score) {
+              score = expected[row - 1][offset];
+              predecessor = offset;
+            }
+          }
+          expected[row][offset] = score;
+          expected_trace[row][offset] = predecessor;
+        }
+        ASSERT_TRUE(peer.CompareRow(spectrum, candidates, actual, actual_trace,
+                                    indices, row, radius)
+                        .ok());
+      }
+      EXPECT_EQ(actual, expected);
+      EXPECT_EQ(actual_trace, expected_trace);
+    }
+  }
+}
 
 TEST_F(ComparisonPatchesSelectorTest, EndPatches) {
   ComparisonPatchesSelector selector(nullptr);

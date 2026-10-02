@@ -159,7 +159,7 @@ class ComparisonPatchesSelector {
    * @return The function returns nothing. It's purpose is to populate the
    *    cumulative_similarity_dp and backtrace vectors.
    */
-  void FindMostOptimalDegPatch(
+  absl::Status FindMostOptimalDegPatch(
       const AMatrix<double>& spectrogram_data, const ImagePatch& ref_patch,
       std::vector<ImagePatch>& deg_patches,
       std::vector<std::vector<double>>& cumulative_similarity_dp,

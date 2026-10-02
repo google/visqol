@@ -18,12 +18,9 @@
 
 #include <algorithm>
 #include <complex>
-#include <iostream>
 #include <memory>
-#include <utility>
 #include <vector>
 
-#include "absl/memory/memory.h"
 #include "amatrix.h"
 #include "fast_fourier_transform.h"
 
@@ -38,62 +35,56 @@ int64_t XCorr::FindLowestLagIndex(const AMatrix<double>& signal_1,
 
   const std::vector<double> pointwise_fft_vec =
       InverseFFTPointwiseProduct(signal_1, signal_2);
-  // Build negatives corrs.
-  std::vector<double> corrs{pointwise_fft_vec.end() - max_lag,
-                            pointwise_fft_vec.end()};
-  // Build positive corrs.
-  const std::vector<double> positives{pointwise_fft_vec.begin(),
-                                      pointwise_fft_vec.begin() + max_lag + 1};
-  // Build total corrs.
-  corrs.insert(corrs.end(), positives.begin(), positives.end());
-  // Find best corr and from that the best lag.
-  auto best_corr = std::max_element(corrs.cbegin(), corrs.cend());
-  return std::distance(corrs.cbegin(), best_corr) - max_lag;
+  // Scan the negative and positive lag ranges directly. Strict comparison
+  // preserves the first maximum, including ties across the two ranges.
+  double best =
+      pointwise_fft_vec[max_lag == 0 ? 0 : pointwise_fft_vec.size() - max_lag];
+  int64_t best_lag = -max_lag;
+  for (int64_t lag = -max_lag + 1; lag <= max_lag; ++lag) {
+    const size_t index = lag < 0 ? pointwise_fft_vec.size() + lag : lag;
+    if (pointwise_fft_vec[index] > best) {
+      best = pointwise_fft_vec[index];
+      best_lag = lag;
+    }
+  }
+  return best_lag;
 }
 
 std::vector<double> XCorr::InverseFFTPointwiseProduct(
     const AMatrix<double>& signal_1, const AMatrix<double>& signal_2) {
-  std::vector<double> signal_1_vec = signal_1.ToVector();
-  std::vector<double> signal_2_vec = signal_2.ToVector();
-
-  // Add zeros until they're both the same length.
-  // Reserve then resize to prevent extraneous memory being allocated.
-  // Resize by itself can double the vector capacity.
-  const size_t biggest_vec = signal_1.NumRows() > signal_2.NumRows()
-                                 ? signal_1.NumRows()
-                                 : signal_2.NumRows();
-  if (signal_1.NumRows() > signal_2.NumRows()) {
-    signal_2_vec.reserve(biggest_vec);
-    signal_2_vec.resize(biggest_vec, 0.0);
-  } else if (signal_1.NumRows() < signal_2.NumRows()) {
-    signal_1_vec.reserve(biggest_vec);
-    signal_1_vec.resize(biggest_vec, 0.0);
-  }
-
-  // Calculate how many points in FFT (next ^2 elements)
+  const size_t samples = std::max(signal_1.NumRows(), signal_2.NumRows());
   int exponent;
-  frexp(std::abs((int64_t)signal_1_vec.size() * 2 - 1), &exponent);
-  const size_t fft_points = pow(2, exponent);
-
-  // Calculate the pointwise product of the forward fft of both signals.
-  auto fft_manager = std::make_unique<FftManager>(fft_points);
-  const AMatrix<std::complex<double>> pointwise_product =
-      FFTPointwiseProduct(signal_1_vec, signal_2_vec, fft_manager, fft_points);
-
-  return FastFourierTransform::Inverse1dConjSym(fft_manager, pointwise_product)
-      .ToVector();
+  frexp(std::abs(static_cast<int64_t>(samples) * 2 - 1), &exponent);
+  const size_t points = pow(2, exponent);
+  thread_local std::unique_ptr<FftManager> fft_manager;
+  if (!fft_manager || fft_manager->GetSamplesPerChannel() != points) {
+    fft_manager = std::make_unique<FftManager>(points);
+  }
+  auto& time = fft_manager->GetTimeChannel();
+  auto& freq = fft_manager->GetFreqChannel();
+  time.Clear();
+  for (size_t i = 0; i < signal_2.NumRows(); ++i) time[i] = signal_2(i);
+  fft_manager->FreqFromTimeDomain(time, &freq);
+  AudioChannel second;
+  second.Init(fft_manager->GetFftSize());
+  std::copy(freq.begin(), freq.end(), second.begin());
+  time.Clear();
+  for (size_t i = 0; i < signal_1.NumRows(); ++i) time[i] = signal_1(i);
+  fft_manager->FreqFromTimeDomain(time, &freq);
+  // Multiply only the nonredundant real FFT bins. Compute in double and round
+  // back to float at the same point as the original complex-matrix path.
+  freq[0] = static_cast<double>(freq[0]) * second[0];
+  freq[1] = static_cast<double>(freq[1]) * second[1];
+  for (size_t i = 2; i < freq.size(); i += 2) {
+    const std::complex<double> x(freq[i], freq[i + 1]);
+    const std::complex<double> y(second[i], second[i + 1]);
+    const auto product = x * std::conj(y);
+    freq[i] = product.real();
+    freq[i + 1] = product.imag();
+  }
+  fft_manager->GetPffftFormatFreqBuffer(freq, &second);
+  fft_manager->TimeFromFreqDomain(second, &time);
+  fft_manager->ApplyReverseFftScaling(&time);
+  return std::vector<double>(time.begin(), time.end());
 }
-
-AMatrix<std::complex<double>> XCorr::FFTPointwiseProduct(
-    const std::vector<double>& signal_1, const std::vector<double>& signal_2,
-    const std::unique_ptr<FftManager>& fft_manager, const size_t fft_points) {
-  AMatrix<std::complex<double>> fftsignal_2 =
-      FastFourierTransform::Forward1d(fft_manager, signal_2, fft_points);
-  std::transform(fftsignal_2.begin(), fftsignal_2.end(), fftsignal_2.begin(),
-                 [](decltype(*fftsignal_2.begin())& s) { return conj(s); });
-
-  return FastFourierTransform::Forward1d(fft_manager, signal_1, fft_points)
-      .PointWiseProduct(fftsignal_2);
-}
-
 }  // namespace Visqol

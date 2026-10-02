@@ -91,9 +91,10 @@ absl::Status VisqolApi::Create(const VisqolConfig config) {
   }
 
   // Initialize ViSQOL with the model file.
-  VISQOL_RETURN_IF_ERROR(visqol_.Init(FilePath(model_file), speech_mode,
-                                      unscaled_speech_map, search_window,
-                                      use_lattice_model));
+  VISQOL_RETURN_IF_ERROR(visqol_.Init(
+      FilePath(model_file), speech_mode, unscaled_speech_map, search_window,
+      use_lattice_model, /*disable_global_alignment=*/false,
+      /*disable_realignment=*/false, config.options().use_cuda()));
 
   return absl::Status();
 }

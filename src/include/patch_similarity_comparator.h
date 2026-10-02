@@ -17,6 +17,11 @@
 #ifndef VISQOL_INCLUDE_PATCHSIMILARITYCOMPARATOR_H
 #define VISQOL_INCLUDE_PATCHSIMILARITYCOMPARATOR_H
 
+#include <algorithm>
+#include <utility>
+#include <vector>
+
+#include "absl/status/statusor.h"
 #include "image_patch_creator.h"
 
 namespace Visqol {
@@ -108,6 +113,45 @@ class PatchSimilarityComparator {
    */
   virtual PatchSimilarityResult MeasurePatchSimilarity(
       const ImagePatch& ref_patch, const ImagePatch& deg_patch) const = 0;
+
+  // Prepare one search. The returned candidates are passed to
+  // MeasureCandidateSimilarities; backends may instead keep a resident
+  // spectrum. Preparation and all scores for a search must be serialized.
+  virtual absl::StatusOr<std::vector<ImagePatch>> PrepareCandidateSearch(
+      const AMatrix<double>& spectrum, size_t patch_cols) const {
+    if (spectrum.NumRows() == 0 || spectrum.NumCols() == 0 || patch_cols == 0) {
+      return absl::InvalidArgumentError(
+          "Candidate dimensions must be nonempty.");
+    }
+    std::vector<ImagePatch> patches;
+    patches.reserve(spectrum.NumCols());
+    for (size_t first = 0; first < spectrum.NumCols(); ++first) {
+      ImagePatch patch =
+          AMatrix<double>::Filled(spectrum.NumRows(), patch_cols, 0.0);
+      const size_t cols = std::min(patch_cols, spectrum.NumCols() - first);
+      std::copy_n(spectrum.cbegin() + first * spectrum.NumRows(),
+                  cols * spectrum.NumRows(), patch.begin());
+      patches.push_back(std::move(patch));
+    }
+    return patches;
+  }
+
+  // Returns NSIM scores for one reference against consecutive candidates.
+  // The default implementation preserves CPU behavior.
+  virtual absl::StatusOr<std::vector<double>> MeasureCandidateSimilarities(
+      const ImagePatch& ref_patch, const std::vector<ImagePatch>& deg_patches,
+      size_t first, size_t count) const {
+    if (first > deg_patches.size() || count > deg_patches.size() - first) {
+      return absl::InvalidArgumentError("Candidate range is out of bounds.");
+    }
+    std::vector<double> scores;
+    scores.reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+      scores.push_back(
+          MeasurePatchSimilarity(ref_patch, deg_patches[first + i]).similarity);
+    }
+    return scores;
+  }
 };
 }  // namespace Visqol
 

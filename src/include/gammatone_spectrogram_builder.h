@@ -17,7 +17,10 @@
 #ifndef VISQOL_INCLUDE_GAMMATONESPECTROGRAMBUILDER_H
 #define VISQOL_INCLUDE_GAMMATONESPECTROGRAMBUILDER_H
 
+#include <memory>
+
 #include "absl/status/statusor.h"
+#include "cuda_gammatone.h"
 #include "gammatone_filterbank.h"
 #include "spectrogram_builder.h"
 
@@ -48,9 +51,16 @@ class GammatoneSpectrogramBuilder : public SpectrogramBuilder {
   explicit GammatoneSpectrogramBuilder(const GammatoneFilterBank& filter_bank,
                                        const bool use_speech_mode);
 
+  // Enable CUDA spectrogram construction, including locally realigned patches.
+  absl::Status InitCuda();
+
   // Docs inherited from parent.
   absl::StatusOr<Spectrogram> Build(const AudioSignal& signal,
                                     const AnalysisWindow& window) override;
+
+  absl::StatusOr<std::vector<Spectrogram>> BuildBatch(
+      const std::vector<AudioSignal>& signals,
+      const AnalysisWindow& window) override;
 
  private:
   /**
@@ -62,6 +72,7 @@ class GammatoneSpectrogramBuilder : public SpectrogramBuilder {
    * If true, build the spectrogram for speech mode.
    */
   bool speech_mode_;
+  std::unique_ptr<CudaGammatone> cuda_;
 };
 }  // namespace Visqol
 

@@ -1,4 +1,5 @@
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
+load("@local_config_cuda//cuda:build_defs.bzl", "cuda_library", "if_cuda")
 
 package(
     default_visibility = ["//visibility:private"],
@@ -7,6 +8,49 @@ package(
 licenses(["notice"])
 
 exports_files(["LICENSE"])
+
+cc_library(
+    name = "status_macros",
+    hdrs = ["src/include/status_macros.h"],
+    includes = ["src/include"],
+    deps = [
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+    ],
+)
+
+# CUDA is optional; builds without --config=cuda use stubs and don't link cudart.
+cuda_library(
+    name = "cuda_nsim",
+    srcs = if_cuda(["src/cuda_nsim.cu.cc"], ["src/cuda_nsim_stub.cc"]),
+    hdrs = ["src/include/cuda_nsim.h"],
+    includes = ["src/include"],
+    deps = [
+        ":status_macros",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+    ] + if_cuda([
+        "@local_config_cuda//cuda:cuda_headers",
+        "@local_config_cuda//cuda:cudart",
+    ]),
+)
+
+cuda_library(
+    name = "cuda_gammatone",
+    srcs = if_cuda(["src/cuda_gammatone.cu.cc"], ["src/cuda_gammatone_stub.cc"]),
+    hdrs = ["src/include/cuda_gammatone.h"],
+    includes = ["src/include"],
+    deps = [
+        ":status_macros",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+    ] + if_cuda([
+        "@local_config_cuda//cuda:cuda_headers",
+        "@local_config_cuda//cuda:cudart",
+    ]),
+)
 
 # Libraries
 # =========================================================
@@ -93,13 +137,22 @@ cc_library(
         ],
         exclude = [
             "**/main.cc",
+            "src/cuda_nsim.cu.cc",
+            "src/cuda_nsim_stub.cc",
+            "src/cuda_gammatone.cu.cc",
+            "src/cuda_gammatone_stub.cc",
             "src/tflite_quality_mapper.cc",
+            "src/include/cuda_nsim.h",
+            "src/include/cuda_gammatone.h",
             "src/include/tflite_quality_mapper.h",
         ],
     ),
     hdrs = glob(
         ["src/include/*.h"],
         exclude = [
+            "src/include/cuda_nsim.h",
+            "src/include/cuda_gammatone.h",
+            "src/include/status_macros.h",
             "src/include/tflite_quality_mapper.h",
             "src/include/similarity_to_quality_mapper.h",
         ],
@@ -124,7 +177,10 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":cuda_nsim",
+        ":cuda_gammatone",
         ":file_path",
+        ":status_macros",
         ":similarity_result_cc_proto",
         ":similarity_to_quality_mapper",
         ":tflite_quality_mapper",
@@ -177,6 +233,8 @@ test_suite(
         "commandline_parser_test",
         "comparison_patches_selector_test",
         "convolution_2d_test",
+        "cuda_gammatone_test",
+        "cuda_patch_similarity_comparator_test",
         "fast_fourier_transform_test",
         "gammatone_filterbank_test",
         "gammatone_spectrogram_builder_test",
@@ -613,6 +671,31 @@ cc_test(
     data = ["//model:tflite_speech_lattice_default_model"],
     deps = [
         ":tflite_quality_mapper",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "cuda_patch_similarity_comparator_test",
+    srcs = ["tests/cuda_patch_similarity_comparator_test.cc"],
+    data = [
+        "//testdata/conformance_testdata_subset:contrabassoon48_stereo.wav",
+        "//testdata/conformance_testdata_subset:contrabassoon48_stereo_24kbps_aac.wav",
+    ],
+    copts = if_cuda(["-DVISQOL_TEST_CUDA=1"]),
+    deps = [
+        ":visqol_lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "cuda_gammatone_test",
+    srcs = ["tests/cuda_gammatone_test.cc"],
+    copts = if_cuda(["-DVISQOL_TEST_CUDA=1"]),
+    deps = [
+        ":cuda_gammatone",
+        ":visqol_lib",
         "@com_google_googletest//:gtest_main",
     ],
 )

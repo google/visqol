@@ -88,6 +88,9 @@ ABSL_FLAG(int, search_window_radius, 60,
           "optimal match.");
 ABSL_FLAG(bool, disable_global_alignment, false, "Disables global alignment");
 ABSL_FLAG(bool, disable_realignment, false, "Disables realignment");
+ABSL_FLAG(bool, use_cuda, false,
+          "Use CUDA for Gammatone spectrograms and candidate NSIM scores. Requires "
+          "a CUDA build and GPU; selected-patch statistics and MOS use the CPU.");
 
 namespace Visqol {
 ABSL_CONST_INIT const char kDefaultAudioModelFile[] =
@@ -183,7 +186,8 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
       .search_window_radius = search_window,
       .use_lattice_model = use_lattice_model,
       .disable_global_alignment = disable_global_alignment,
-      .disable_realignment = disable_realignment};
+      .disable_realignment = disable_realignment,
+      .use_cuda = absl::GetFlag(FLAGS_use_cuda)};
 }
 
 std::vector<ReferenceDegradedPathPair>

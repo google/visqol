@@ -26,6 +26,7 @@
 #include "equivalent_rectangular_bandwidth.h"
 #include "signal_filter.h"
 #include "spectrogram.h"
+#include "status_macros.h"
 
 namespace Visqol {
 
@@ -34,6 +35,13 @@ const double GammatoneSpectrogramBuilder::kSpeechModeMaxFreq = 8000.0;
 GammatoneSpectrogramBuilder::GammatoneSpectrogramBuilder(
     const GammatoneFilterBank& filter_bank, const bool use_speech_mode)
     : filter_bank_(filter_bank), speech_mode_(use_speech_mode) {}
+
+absl::Status GammatoneSpectrogramBuilder::InitCuda() {
+  auto cuda = std::make_unique<CudaGammatone>();
+  VISQOL_RETURN_IF_ERROR(cuda->Init());
+  cuda_ = std::move(cuda);
+  return absl::OkStatus();
+}
 
 absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
     const AudioSignal& signal, const AnalysisWindow& window) {
@@ -47,10 +55,6 @@ absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
       max_freq);
   AMatrix<double> filter_coeffs = AMatrix<double>(erb_rslt.filterCoeffs);
   filter_coeffs = filter_coeffs.FlipUpDown();
-
-  // Set the filter coefficients and init the filter conditions to 0.
-  filter_bank_.SetFilterCoefficients(filter_coeffs);
-  filter_bank_.ResetFilterConditions();
 
   // Set up the windowing.
   size_t hop_size = window.size * window.overlap;
@@ -66,27 +70,41 @@ absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
   AMatrix<double> out_matrix(filter_bank_.GetNumBands(), num_cols);
 
   auto sig_val_arr = sig.GetColumn(0).ToValArray();
-  for (size_t i = 0; i < out_matrix.NumCols(); i++) {
-    const size_t start_col = i * hop_size;
-    // Select the next frame from the input signal to filter.
-    const std::slice_array<double> frame =
-        sig_val_arr[std::slice(start_col, window.size, 1)];
-
-    // Apply a Hann window to reduce artifacts.
-    const std::valarray<double> windowed_frame = window.ApplyHannWindow(frame);
-
-    // Apply the filter.
+  if (cuda_) {
+    const auto hann =
+        window.ApplyHannWindow(std::valarray<double>(1.0, window.size));
+    VISQOL_RETURN_IF_ERROR(
+        cuda_->Build(&sig_val_arr[0], sig_val_arr.size(),
+                     &*filter_coeffs.cbegin(), filter_bank_.GetNumBands(),
+                     &hann[0], window.size, hop_size, &*out_matrix.begin()));
+  } else {
+    // Set coefficients and initialize the CPU filter conditions.
+    filter_bank_.SetFilterCoefficients(filter_coeffs);
     filter_bank_.ResetFilterConditions();
-    auto filtered_signal = filter_bank_.ApplyFilter(windowed_frame);
-    // Calculate the mean of each row.
-    std::transform(filtered_signal.begin(), filtered_signal.end(),
-                   filtered_signal.begin(),
-                   [](decltype(*filtered_signal.begin())& d) { return d * d; });
-    AMatrix<double> row_means = filtered_signal.Mean(kDimension::ROW);
-    std::transform(row_means.begin(), row_means.end(), row_means.begin(),
-                   [](decltype(*row_means.begin())& d) { return sqrt(d); });
-    // Set this filtered frame as a column in the spectrogram.
-    out_matrix.SetColumn(i, std::move(row_means));
+    for (size_t i = 0; i < out_matrix.NumCols(); i++) {
+      const size_t start_col = i * hop_size;
+      // Select the next frame from the input signal to filter.
+      const std::slice_array<double> frame =
+          sig_val_arr[std::slice(start_col, window.size, 1)];
+
+      // Apply a Hann window to reduce artifacts.
+      const std::valarray<double> windowed_frame =
+          window.ApplyHannWindow(frame);
+
+      // Apply the filter.
+      filter_bank_.ResetFilterConditions();
+      auto filtered_signal = filter_bank_.ApplyFilter(windowed_frame);
+      // Calculate the mean of each row.
+      std::transform(
+          filtered_signal.begin(), filtered_signal.end(),
+          filtered_signal.begin(),
+          [](decltype(*filtered_signal.begin())& d) { return d * d; });
+      AMatrix<double> row_means = filtered_signal.Mean(kDimension::ROW);
+      std::transform(row_means.begin(), row_means.end(), row_means.begin(),
+                     [](decltype(*row_means.begin())& d) { return sqrt(d); });
+      // Set this filtered frame as a column in the spectrogram.
+      out_matrix.SetColumn(i, std::move(row_means));
+    }
   }
 
   // Order the center freq bands from lowest to highest.
@@ -100,5 +118,57 @@ absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
   Spectrogram spectro(std::move(out_matrix));
   spectro.SetCenterFreqBands(ordered_cfb);
   return spectro;
+}
+absl::StatusOr<std::vector<Spectrogram>>
+GammatoneSpectrogramBuilder::BuildBatch(const std::vector<AudioSignal>& signals,
+                                        const AnalysisWindow& window) {
+  if (!cuda_ || signals.empty())
+    return SpectrogramBuilder::BuildBatch(signals, window);
+  const size_t rate = signals.front().sample_rate;
+  for (const auto& signal : signals) {
+    if (signal.sample_rate != rate)
+      return SpectrogramBuilder::BuildBatch(signals, window);
+  }
+  const size_t hop = window.size * window.overlap;
+  if (window.size < 2 || hop == 0)
+    return absl::InvalidArgumentError("Invalid analysis window.");
+  const size_t bands = filter_bank_.GetNumBands();
+  auto filters = EquivalentRectangularBandwidth::MakeFilters(
+      rate, bands, filter_bank_.GetMinFreq(),
+      speech_mode_ ? kSpeechModeMaxFreq : rate / 2.0);
+  auto coefficients = AMatrix<double>(filters.filterCoeffs).FlipUpDown();
+  const auto hann =
+      window.ApplyHannWindow(std::valarray<double>(1.0, window.size));
+  std::vector<double> packed;
+  std::vector<size_t> starts, counts;
+  for (const auto& signal : signals) {
+    const auto& data = signal.data_matrix;
+    if (data.NumRows() <= window.size || data.NumCols() == 0) {
+      return absl::InvalidArgumentError("Too few samples in batched signal.");
+    }
+    const size_t count = 1 + (data.NumRows() - window.size) / hop;
+    for (size_t frame = 0; frame < count; ++frame)
+      starts.push_back(packed.size() + frame * hop);
+    counts.push_back(count);
+    packed.insert(packed.end(), data.cbegin(), data.cbegin() + data.NumRows());
+  }
+  std::vector<double> output(starts.size() * bands);
+  VISQOL_RETURN_IF_ERROR(
+      cuda_->BuildBatch(packed.data(), packed.size(), &*coefficients.cbegin(),
+                        bands, &hann[0], window.size, starts, output.data()));
+  std::vector<double> centers(filters.centerFreqs.rbegin(),
+                              filters.centerFreqs.rend());
+  std::vector<Spectrogram> results;
+  results.reserve(signals.size());
+  size_t offset = 0;
+  for (size_t count : counts) {
+    AMatrix<double> data(bands, count);
+    std::copy_n(output.begin() + offset, bands * count, data.begin());
+    offset += bands * count;
+    Spectrogram spectrum(std::move(data));
+    spectrum.SetCenterFreqBands(centers);
+    results.push_back(std::move(spectrum));
+  }
+  return results;
 }
 }  // namespace Visqol

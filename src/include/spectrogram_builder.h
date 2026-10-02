@@ -17,6 +17,9 @@
 #ifndef VISQOL_INCLUDE_SPECTROGRAMBUILDER_H
 #define VISQOL_INCLUDE_SPECTROGRAMBUILDER_H
 
+#include <utility>
+#include <vector>
+
 #include "absl/status/statusor.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
@@ -51,6 +54,18 @@ class SpectrogramBuilder {
    */
   virtual absl::StatusOr<Spectrogram> Build(const AudioSignal& signal,
                                             const AnalysisWindow& window) = 0;
+  // Builders may combine independent signals into one device submission.
+  virtual absl::StatusOr<std::vector<Spectrogram>> BuildBatch(
+      const std::vector<AudioSignal>& signals, const AnalysisWindow& window) {
+    std::vector<Spectrogram> results;
+    results.reserve(signals.size());
+    for (const auto& signal : signals) {
+      auto result = Build(signal, window);
+      if (!result.ok()) return result.status();
+      results.push_back(std::move(result).value());
+    }
+    return results;
+  }
 };
 }  // namespace Visqol
 

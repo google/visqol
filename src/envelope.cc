@@ -14,60 +14,43 @@
 
 #include "envelope.h"
 
-#include <algorithm>
-#include <complex>
-#include <cstdio>
+#include <cmath>
 #include <memory>
-#include <vector>
 
-#include "absl/memory/memory.h"
 #include "fast_fourier_transform.h"
 #include "misc_vector.h"
 
 namespace Visqol {
 AMatrix<double> Envelope::CalcUpperEnv(const AMatrix<double>& signal) {
-  double mean = MiscVector::Mean(signal);
-  const auto signal_centered = signal - mean;
-  AMatrix<std::complex<double>> hilbert = Hilbert(signal_centered);
-  AMatrix<double> hilbert_amp(hilbert.NumRows(), hilbert.NumCols());
-  // to amplitude
-  for (size_t i = 0; i < hilbert.NumRows(); i++) {
-    hilbert_amp(i) = std::abs(hilbert(i));
+  const double mean = MiscVector::Mean(signal);
+  // One bounded workspace per thread; replace it when the input size changes.
+  // Keep PFFFT's float arithmetic and original Hilbert scaling unchanged.
+  thread_local std::unique_ptr<FftManager> fft_manager;
+  if (!fft_manager ||
+      fft_manager->GetSamplesPerChannel() != signal.NumElements()) {
+    fft_manager = std::make_unique<FftManager>(signal.NumElements());
   }
-
-  return hilbert_amp + mean;
-}
-
-AMatrix<std::complex<double>> Envelope::Hilbert(const AMatrix<double>& signal) {
-  auto fft_manager = std::make_unique<FftManager>(signal.NumElements());
-  AMatrix<std::complex<double>> freq_domain_signal =
-      FastFourierTransform::Forward1d(fft_manager, signal);
-
-  const bool is_odd = signal.NumRows() % 2 == 1;
-  const bool is_non_empty = signal.NumRows() > 0;
-  const double kInitVal = 0.0;
-  std::vector<double> hilbert_scaling(freq_domain_signal.NumRows(), kInitVal);
-  hilbert_scaling[0] = 1;
-
-  // even and nonempty, used for scaling
-  if (!is_odd && is_non_empty) {
-    hilbert_scaling[signal.NumRows() / 2] = 1.0;
-  } else if (is_odd && is_non_empty) {
-    hilbert_scaling[signal.NumRows() / 2] = 2.0;
+  auto& time = fft_manager->GetTimeChannel();
+  auto& freq = fft_manager->GetFreqChannel();
+  for (size_t i = 0; i < signal.NumElements(); ++i) time[i] = signal(i) - mean;
+  fft_manager->FreqFromTimeDomain(time, &freq);
+  // Canonical real FFT storage packs DC and Nyquist into the first pair.
+  // The padded Hilbert spectrum has zero weight at Nyquist.
+  if (signal.NumRows() != fft_manager->GetFftSize()) {
+    freq[1] = static_cast<double>(freq[1]) * 0.0;
   }
-  const size_t n = (is_odd) ? (freq_domain_signal.NumRows() + 1) / 2
-                            : ((freq_domain_signal.NumRows()) / 2);
-  for (size_t row_index = 1; row_index < n; row_index++) {
-    hilbert_scaling[row_index] = 2.0;
+  for (size_t i = 2; i < freq.size(); ++i) {
+    freq[i] = static_cast<double>(freq[i]) * 2.0;
   }
-
-  AMatrix<std::complex<double>> element_wise_prod(
-      freq_domain_signal.NumElements(), 1);
-  for (size_t i = 0; i < freq_domain_signal.NumRows(); i++) {
-    element_wise_prod(i) = freq_domain_signal(i) * hilbert_scaling[i];
+  AudioChannel reordered;
+  reordered.Init(fft_manager->GetFftSize());
+  fft_manager->GetPffftFormatFreqBuffer(freq, &reordered);
+  fft_manager->TimeFromFreqDomain(reordered, &time);
+  fft_manager->ApplyReverseFftScaling(&time);
+  AMatrix<double> amplitude(signal.NumRows(), signal.NumCols());
+  for (size_t i = 0; i < signal.NumRows(); ++i) {
+    amplitude(i) = std::abs(static_cast<double>(time[i]));
   }
-  auto hilbert =
-      FastFourierTransform::Inverse1d(fft_manager, element_wise_prod);
-  return hilbert;
+  return amplitude + mean;
 }
 }  // namespace Visqol

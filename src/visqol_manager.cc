@@ -26,6 +26,7 @@
 #include "alignment.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
+#include "cuda_patch_similarity_comparator.h"
 #include "gammatone_filterbank.h"
 #include "misc_audio.h"
 #include "neurogram_similiarity_index_measure.h"
@@ -52,7 +53,8 @@ const double VisqolManager::kDurationMismatchTolerance = 1.0;
 absl::Status VisqolManager::Init(
     const FilePath& similarity_to_quality_mapper_model, bool use_speech_mode,
     bool use_unscaled_speech, int search_window, bool use_lattice_model,
-    bool disable_global_alignment, bool disable_realignment) {
+    bool disable_global_alignment, bool disable_realignment, bool use_cuda) {
+  is_initialized_ = false;
   use_speech_mode_ = use_speech_mode;
   use_unscaled_speech_mos_mapping_ = use_unscaled_speech;
   search_window_ = search_window;
@@ -61,8 +63,8 @@ absl::Status VisqolManager::Init(
   disable_realignment_ = disable_realignment;
 
   InitPatchCreator();
-  InitPatchSelector();
-  InitSpectrogramBuilder();
+  VISQOL_RETURN_IF_ERROR(InitPatchSelector(use_cuda));
+  VISQOL_RETURN_IF_ERROR(InitSpectrogramBuilder(use_cuda));
   auto status =
       InitSimilarityToQualityMapper(similarity_to_quality_mapper_model);
 
@@ -79,11 +81,11 @@ absl::Status VisqolManager::Init(
     absl::string_view similarity_to_quality_mapper_model_string,
     bool use_speech_mode, bool use_unscaled_speech, int search_window,
     bool use_lattice_model, bool disable_global_alignment,
-    bool disable_realignment) {
+    bool disable_realignment, bool use_cuda) {
   return Init(FilePath(similarity_to_quality_mapper_model_string),
               use_speech_mode, use_unscaled_speech, search_window,
-              use_lattice_model, disable_global_alignment,
-              disable_realignment);
+              use_lattice_model, disable_global_alignment, disable_realignment,
+              use_cuda);
 }
 
 void VisqolManager::InitPatchCreator() {
@@ -94,20 +96,28 @@ void VisqolManager::InitPatchCreator() {
   }
 }
 
-void VisqolManager::InitPatchSelector() {
-  // Setup the patch similarity comparator to use the Neurogram.
-  patch_selector_ = std::make_unique<ComparisonPatchesSelector>(
-      std::make_unique<NeurogramSimiliarityIndexMeasure>());
+absl::Status VisqolManager::InitPatchSelector(bool use_cuda) {
+  std::unique_ptr<PatchSimilarityComparator> comparator;
+  if (use_cuda) {
+    auto cuda_comparator = std::make_unique<CudaPatchSimilarityComparator>();
+    VISQOL_RETURN_IF_ERROR(cuda_comparator->Init());
+    comparator = std::move(cuda_comparator);
+  } else {
+    comparator = std::make_unique<NeurogramSimiliarityIndexMeasure>();
+  }
+  patch_selector_ =
+      std::make_unique<ComparisonPatchesSelector>(std::move(comparator));
+  return absl::OkStatus();
 }
 
-void VisqolManager::InitSpectrogramBuilder() {
-  if (use_speech_mode_) {
-    spectrogram_builder_ = std::make_unique<GammatoneSpectrogramBuilder>(
-        GammatoneFilterBank{kNumBandsSpeech, kMinimumFreq}, true);
-  } else {
-    spectrogram_builder_ = std::make_unique<GammatoneSpectrogramBuilder>(
-        GammatoneFilterBank{kNumBandsAudio, kMinimumFreq}, false);
-  }
+absl::Status VisqolManager::InitSpectrogramBuilder(bool use_cuda) {
+  auto builder = std::make_unique<GammatoneSpectrogramBuilder>(
+      GammatoneFilterBank{use_speech_mode_ ? kNumBandsSpeech : kNumBandsAudio,
+                          kMinimumFreq},
+      use_speech_mode_);
+  if (use_cuda) VISQOL_RETURN_IF_ERROR(builder->InitCuda());
+  spectrogram_builder_ = std::move(builder);
+  return absl::OkStatus();
 }
 
 absl::Status VisqolManager::InitSimilarityToQualityMapper(

@@ -116,6 +116,9 @@ struct CommandLineArgs {
   * If true, disables patch-wise realignment.
   **/
   bool disable_realignment;
+
+  // Use optional CUDA spectrogram construction and candidate scoring.
+  bool use_cuda = false;
 };
 
 /**
