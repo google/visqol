@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "machine_learning.h"
 #include "svm.h"
 
 namespace Visqol {

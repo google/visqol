@@ -16,6 +16,8 @@
 
 #include <math.h>
 
+#include <cstddef>
+
 #include "gtest/gtest.h"
 
 /**

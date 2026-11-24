@@ -17,6 +17,8 @@
 #ifndef VISQOL_INCLUDE_AUDIO_SIGNAL_H
 #define VISQOL_INCLUDE_AUDIO_SIGNAL_H
 
+#include <cstddef>
+
 #include "amatrix.h"
 
 namespace Visqol {

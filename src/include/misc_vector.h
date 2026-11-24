@@ -17,11 +17,9 @@
 #ifndef VISQOL_INCLUDE_MISCVECTOR_H
 #define VISQOL_INCLUDE_MISCVECTOR_H
 
-#include <fstream>
-#include <string>
+#include <cstddef>
 #include <vector>
 
-#include "absl/strings/string_view.h"
 #include "amatrix.h"
 
 namespace Visqol {

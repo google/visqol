@@ -17,6 +17,7 @@
 #ifndef VISQOL_INCLUDE_PATCHSIMILARITYCOMPARATOR_H
 #define VISQOL_INCLUDE_PATCHSIMILARITYCOMPARATOR_H
 
+#include "amatrix.h"
 #include "image_patch_creator.h"
 
 namespace Visqol {

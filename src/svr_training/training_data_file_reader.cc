@@ -16,6 +16,8 @@
 
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include "absl/base/internal/raw_logging.h"
 #include "absl/strings/numbers.h"

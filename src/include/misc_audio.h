@@ -17,13 +17,15 @@
 #ifndef VISQOL_INCLUDE_MISCAUDIO_H
 #define VISQOL_INCLUDE_MISCAUDIO_H
 
+#include <cstddef>
+#include <sstream>
+#include <string>
 #include <vector>
 
 #include "absl/types/optional.h"
 #include "amatrix.h"
 #include "audio_signal.h"
 #include "file_path.h"
-#include "misc_math.h"
 #include "spectrogram.h"
 
 namespace Visqol {

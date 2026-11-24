@@ -15,10 +15,14 @@
 #include "neurogram_similiarity_index_measure.h"
 
 #include <algorithm>
+#include <cmath>
 #include <utility>
 #include <vector>
 
+#include "amatrix.h"
 #include "convolution_2d.h"
+#include "image_patch_creator.h"
+#include "patch_similarity_comparator.h"
 
 namespace Visqol {
 PatchSimilarityResult NeurogramSimiliarityIndexMeasure::MeasurePatchSimilarity(

@@ -18,6 +18,7 @@
 #define VISQOL_INCLUDE_FAST_FOURIER_TRANSFORM_H
 
 #include <complex>
+#include <cstddef>
 #include <memory>
 
 #include "amatrix.h"

@@ -15,16 +15,20 @@
 #include "gammatone_spectrogram_builder.h"
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <utility>
+#include <valarray>
 #include <vector>
 
 #include "absl/status/statusor.h"
-#include "absl/strings/str_cat.h"
+#include "absl/strings/substitute.h"
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
 #include "equivalent_rectangular_bandwidth.h"
-#include "signal_filter.h"
+#include "errors.h"
+#include "gammatone_filterbank.h"
 #include "spectrogram.h"
 
 namespace Visqol {
@@ -56,11 +60,11 @@ absl::StatusOr<Spectrogram> GammatoneSpectrogramBuilder::Build(
   size_t hop_size = window.size * window.overlap;
 
   // Ensure that the signal is large enough.
-  if (sig.NumRows() <= window.size) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Too few samples (", sig.NumRows(),
-                     ") in signal to  build spectrogram (", window.size,
-                     " required minimum)."));
+  if (sig.NumRows() < window.size) {
+    return InputAudioTooShort(
+        absl::Substitute("Too few samples ($0) in signal to build spectrogram "
+                         "(must be greater than $1)",
+                         sig.NumRows(), window.size));
   }
   size_t num_cols = 1 + floor((sig.NumRows() - window.size) / hop_size);
   AMatrix<double> out_matrix(filter_bank_.GetNumBands(), num_cols);

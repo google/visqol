@@ -17,7 +17,7 @@
 #ifndef VISQOL_INCLUDE_EQUIVALENTRECTANGULARBANDWIDTH_H
 #define VISQOL_INCLUDE_EQUIVALENTRECTANGULARBANDWIDTH_H
 
-#include <cstdint>
+#include <cstddef>
 #include <vector>
 
 namespace Visqol {

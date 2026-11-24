@@ -14,6 +14,8 @@
 
 #include "misc_vector.h"
 
+#include <cstddef>
+
 #include "amatrix.h"
 
 namespace Visqol {

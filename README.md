@@ -273,9 +273,48 @@ int main(int argc, char **argv) {
 }
 ```
 ## Python API Usage
-#### ViSQOL Installation
-From within the root directory install ViSQOL using pip.
+### Pure-Python / JAX (`visqol-jax`)
+`visqol-jax` provides ViSQOL v3.3.3 (speech and audio modes, WAV I/O, and the
+`visqol-jax` CLI) in pure Python and JAX (`Python >=3.12`,
+`dependencies = ["jax>=0.5", "numpy>=1.26"]`, without TensorFlow, Bazel, or a
+C++ compiler). It executes in default `float32` JAX (`< 1e-2` MOS-LQO delta vs
+C++, median `1.5e-4`) and bundles
+`_model_data/{svr_model.txt.gz,speech_lattice.npz}`.
+See [jax/README.md](jax/README.md) for `jax.jit` and `jax.vmap` batching,
+numerical parity details, and CLI flags.
+
+Install with `pip`:
+```sh
+pip install "git+https://github.com/google/visqol.git#subdirectory=jax"
 ```
+Or add with [uv](https://docs.astral.sh/uv/):
+```sh
+uv add "visqol-jax @ git+https://github.com/google/visqol.git#subdirectory=jax"
+```
+#### Sample `visqol-jax` Program and CLI
+```python
+import visqol_jax
+
+speech = visqol_jax.visqol_speech(reference_16k, degraded_16k, sample_rate=16000)
+audio = visqol_jax.visqol_audio(reference_48k, degraded_48k, sample_rate=48000)
+print(speech.moslqo, audio.moslqo)
+```
+```sh
+visqol-jax --reference_file ref.wav --degraded_file deg.wav --use_speech_mode --verbose
+```
+
+### C++ Python Bindings (`visqol`)
+#### ViSQOL Installation
+Requires [Bazelisk](https://github.com/bazelbuild/bazelisk) installed as
+`bazel` on `PATH` and a C++17 compiler (no `python3-dev` or preinstalled
+`numpy` is required).
+
+Add ViSQOL as a dependency with [uv](https://docs.astral.sh/uv/):
+```sh
+uv add "visqol @ git+https://github.com/google/visqol"
+```
+Or build and install from a local checkout with pip:
+```sh
 pip install .
 ```
 #### Sample Program

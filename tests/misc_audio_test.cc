@@ -14,6 +14,11 @@
 
 #include "misc_audio.h"
 
+#include <cstddef>
+#include <fstream>
+#include <ios>
+#include <sstream>
+
 #include "file_path.h"
 #include "gtest/gtest.h"
 

@@ -17,9 +17,6 @@
 #ifndef VISQOL_INCLUDE_NEUROGRAMSIMILARITYINDEXMEASURE_H
 #define VISQOL_INCLUDE_NEUROGRAMSIMILARITYINDEXMEASURE_H
 
-#include <vector>
-
-#include "amatrix.h"
 #include "image_patch_creator.h"
 #include "patch_similarity_comparator.h"
 

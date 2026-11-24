@@ -18,7 +18,6 @@
 #define VISQOL_INCLUDE_FILEPATH_H
 
 #include <filesystem>
-#include <fstream>
 #include <string>
 
 #include "absl/strings/string_view.h"

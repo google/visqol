@@ -18,7 +18,10 @@
 #define VISQOL_INCLUDE_GAMMATONESPECTROGRAMBUILDER_H
 
 #include "absl/status/statusor.h"
+#include "analysis_window.h"
+#include "audio_signal.h"
 #include "gammatone_filterbank.h"
+#include "spectrogram.h"
 #include "spectrogram_builder.h"
 
 namespace Visqol {

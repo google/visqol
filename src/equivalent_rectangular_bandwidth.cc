@@ -14,9 +14,9 @@
 
 #include "equivalent_rectangular_bandwidth.h"
 
-#include <algorithm>
+#include <cmath>
 #include <complex>
-#include <cstdint>
+#include <cstddef>
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"

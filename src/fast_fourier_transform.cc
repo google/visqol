@@ -15,11 +15,13 @@
 #include "fast_fourier_transform.h"
 
 #include <complex>
-#include <iterator>
+#include <cstddef>
 #include <memory>
 #include <vector>
 
 #include "amatrix.h"
+#include "audio_channel.h"
+#include "fft_manager.h"
 
 namespace Visqol {
 

@@ -17,11 +17,14 @@
 #include <assert.h>
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <ios>
+#include <istream>
 #include <string>
 #include <utility>
 
 #include "absl/base/internal/raw_logging.h"
-#include "misc_math.h"
 
 namespace Visqol {
 

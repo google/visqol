@@ -1,0 +1,10 @@
+--- a/tensorflow/lite/kernels/internal/spectrogram.cc
++++ b/tensorflow/lite/kernels/internal/spectrogram.cc
+@@ -17,6 +17,7 @@
+ 
+ #include <assert.h>
+ #include <math.h>
++#include <stdint.h>
+ 
+ #include "third_party/fft2d/fft.h"
+ 

@@ -16,6 +16,9 @@
 
 #include "complex_valarray.h"
 
+#include <complex>
+#include <cstddef>
+
 namespace Visqol {
 
 ComplexValArray operator*(double x, const ComplexValArray& v) { return v * x; }

@@ -17,18 +17,18 @@
 #ifndef VISQOL_INCLUDE_VISQOLAUDIO_H
 #define VISQOL_INCLUDE_VISQOLAUDIO_H
 
+#include <cstddef>
 #include <vector>
 
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
+#include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
 #include "comparison_patches_selector.h"
-#include "file_path.h"
 #include "image_patch_creator.h"
 #include "similarity_result.h"
 #include "similarity_to_quality_mapper.h"
-#include "spectrogram.h"
 #include "spectrogram_builder.h"
 
 namespace Visqol {

@@ -14,6 +14,9 @@
 
 #include "visqol.h"
 
+#include <vector>
+
+#include "amatrix.h"
 #include "gtest/gtest.h"
 #include "patch_similarity_comparator.h"
 

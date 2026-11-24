@@ -14,6 +14,9 @@
 
 #include "misc_math.h"
 
+#include <cstddef>
+#include <vector>
+
 #include "gtest/gtest.h"
 
 namespace Visqol {

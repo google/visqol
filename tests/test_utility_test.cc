@@ -14,6 +14,11 @@
 
 #include "test_utility.h"
 
+#include <complex>
+#include <string>
+#include <valarray>
+#include <vector>
+
 #include "amatrix.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

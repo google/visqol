@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "absl/status/status.h"
-#include "amatrix.h"
 #include "misc_math.h"
 
 namespace Visqol {

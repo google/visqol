@@ -26,7 +26,8 @@ message VisqolConfig {
 
   // Contains config info for ViSQOL
   message VisqolOptions {
-    // Not yet supported.
+    // Currently this option is ignored (unsupported); use `skip_mos_mapping`
+    // instead.
     bool output_mos_score = 1;
 
     // The path to a svr model file. If not supplied,
@@ -62,6 +63,10 @@ message VisqolConfig {
     // or SVR. This is recommended unless comparing to historic conformance
     // scores. The binary default for this is `true`.
     bool use_lattice_model = 8;
+
+    // If true, skips the step of mapping from NSIMs to MOS and thus don't
+    // populate `mosqlo` in the result.
+    bool skip_mos_mapping = 9;
   }
 
   VisqolAudioInfo audio = 1;

@@ -17,6 +17,8 @@
 #ifndef VISQOL_INCLUDE_CONVOLUTION_2D_H
 #define VISQOL_INCLUDE_CONVOLUTION_2D_H
 
+#include <cstddef>
+
 #include "amatrix.h"
 
 namespace Visqol {

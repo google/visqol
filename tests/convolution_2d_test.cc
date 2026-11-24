@@ -14,6 +14,11 @@
 
 #include "convolution_2d.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "amatrix.h"
 #include "gtest/gtest.h"
 #include "test_utility.h"
 

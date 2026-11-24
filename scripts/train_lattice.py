@@ -503,7 +503,7 @@ def make_feature_configs(config: Dict[str, Any]) -> List[configs.FeatureConfig]:
   return feature_configs
 
 
-def make_input_fn(x: Type[pd.DataFrame], y: Type[pd.DataFrame], epochs: int,
+def make_input_fn(x: pd.DataFrame, y: pd.Series, epochs: int,
                   batch_size: int) -> Callable[[], Tuple[tf.Tensor, tf.Tensor]]:
   """Create an estimator input_fn given some data."""
   pd_input_fn = tf_compat_v1_estimator.inputs.pandas_input_fn(
@@ -528,7 +528,7 @@ def make_input_fn(x: Type[pd.DataFrame], y: Type[pd.DataFrame], epochs: int,
   return merged_input_fn
 
 
-def train_lattice(train_data: Type[pd.DataFrame], test_data: Type[pd.DataFrame],
+def train_lattice(train_data: pd.DataFrame, test_data: pd.DataFrame,
                   config: Dict[str, Any]):
   """Train a deep lattice network on provided data.
 
@@ -632,7 +632,7 @@ def train_lattice(train_data: Type[pd.DataFrame], test_data: Type[pd.DataFrame],
 
 
 def load_csv_to_data_frame(
-    config: Dict[str, Any]) -> Tuple[Type[pd.DataFrame], Type[pd.DataFrame]]:
+    config: Dict[str, Any]) -> Tuple[pd.DataFrame, pd.DataFrame]:
   """Loads data from csv files.
 
   Args:
@@ -658,7 +658,7 @@ def load_csv_to_data_frame(
                              int(len(merged_list) * config['train_set_ratio']))
   test_list = [x for x in merged_list if x not in train_list]
 
-  def make_pandas_frame(data_list):
+  def make_pandas_frame(data_list) -> pd.DataFrame:
     data_dict = {}
     data_dict['mos'] = [v.mos for _, v in data_list]
     feature_names = get_feature_names(config['num_fvnsim_bands'])

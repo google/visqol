@@ -15,7 +15,10 @@
 #include "signal_filter.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <iterator>
 #include <utility>
+#include <valarray>
 
 namespace Visqol {
 

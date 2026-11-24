@@ -17,6 +17,7 @@
 #ifndef VISQOL_INCLUDE_IMAGEPATCHCREATOR_H
 #define VISQOL_INCLUDE_IMAGEPATCHCREATOR_H
 
+#include <cstddef>
 #include <vector>
 
 #include "absl/status/statusor.h"

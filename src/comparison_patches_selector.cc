@@ -16,6 +16,9 @@
 
 #include <assert.h>
 
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
 #include <limits>
 #include <memory>
 #include <utility>
@@ -26,10 +29,12 @@
 #include "absl/status/statusor.h"
 #include "alignment.h"
 #include "amatrix.h"
+#include "analysis_window.h"
 #include "audio_signal.h"
 #include "image_patch_creator.h"
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
+#include "spectrogram_builder.h"
 
 namespace Visqol {
 ComparisonPatchesSelector::ComparisonPatchesSelector(

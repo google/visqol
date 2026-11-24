@@ -17,24 +17,13 @@
 #ifndef VISQOL_INCLUDE_COMMANDLINE_PARSER_H
 #define VISQOL_INCLUDE_COMMANDLINE_PARSER_H
 
-#include <string>
-#include <utility>
+#include <optional>
 #include <vector>
 
 #include "absl/status/statusor.h"
 #include "file_path.h"
 
 namespace Visqol {
-
-/**
- * The relative location of the default SVR model file for audio.
- */
-extern const char kDefaultAudioModelFile[];
-
-/**
- * The relative location of the default TFLite model file for speech.
- */
-extern const char kDefaultSpeechModelFile[];
 
 /**
  * This struct is used for storing args provided at the command line.
@@ -54,9 +43,10 @@ struct CommandLineArgs {
 
   /**
    * The path to the similarity to quality mapper model file. If this is not
-   * supplied, the default model file is used.
+   * supplied, the default model file is used. When @c skip_mos_mapping is set,
+   * this field is @c std::nullopt.
    */
-  FilePath similarity_to_quality_mapper_model;
+  std::optional<FilePath> similarity_to_quality_mapper_model;
 
   /**
    * The path to a CSV file for storing similarity results. Optional.
@@ -108,14 +98,14 @@ struct CommandLineArgs {
   bool use_lattice_model = true;
 
   /**
-  * If true, disables global alignment.
-  **/
-  bool disable_global_alignment;
+   * If true, disables global alignment.
+   */
+  bool disable_global_alignment = false;
 
   /**
-  * If true, disables patch-wise realignment.
-  **/
-  bool disable_realignment;
+   * If true, disables patch-wise realignment.
+   */
+  bool disable_realignment = false;
 };
 
 /**

@@ -14,6 +14,11 @@
 
 #include "spectrogram.h"
 
+#include <string>
+#include <utility>
+#include <valarray>
+
+#include "amatrix.h"
 #include "gtest/gtest.h"
 #include "test_utility.h"
 

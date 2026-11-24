@@ -15,10 +15,19 @@
  */
 #include "tflite_quality_mapper.h"
 
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "absl/base/internal/raw_logging.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "tensorflow/lite/c/c_api_types.h"
 #include "tensorflow/lite/delegates/xnnpack/xnnpack_delegate.h"
 #include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/interpreter_builder.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model_builder.h"
 
@@ -55,14 +64,9 @@ absl::Status TFLiteQualityMapper::Init() {
 
   // Use XNN if possible.
   TfLiteXNNPackDelegateOptions opts{.num_threads = 1};
-  // TODO(b/219786261) Remove once XNNPACK is enabled by default.
-  opts.flags |= TFLITE_XNNPACK_DELEGATE_FLAG_QU8;
   delegate_ =
       std::unique_ptr<TfLiteDelegate, std::function<void(TfLiteDelegate*)>>(
           TfLiteXNNPackDelegateCreate(&opts), &TfLiteXNNPackDelegateDelete);
-
-  // Allow dynamic tensors.
-  // TODO(b/204470960): Remove this flag once the bug is fixed.
   delegate_->flags |= kTfLiteDelegateFlagsAllowDynamicTensors;
 
   TfLiteStatus xnn_status =

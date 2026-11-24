@@ -14,15 +14,16 @@
 
 #include "image_patch_creator.h"
 
+#include <cstddef>
 #include <utility>
 #include <vector>
 
-#include "absl/base/internal/raw_logging.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/str_cat.h"
+#include "absl/strings/substitute.h"
 #include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
+#include "errors.h"
 
 namespace Visqol {
 absl::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
@@ -53,11 +54,11 @@ absl::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
   auto spectrum_length = spectrogram.NumCols();
   auto init_patch_index = patch_size_ / 2;
   // Ensure that the spectrum is at least as big as a single patch
-  if (spectrum_length < patch_size_ + init_patch_index) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("Reference spectrum size (", spectrum_length,
-                     ") smaller than minimum patch size (",
-                     patch_size_ + init_patch_index, ")."));
+  if (auto minimum_patch_size = patch_size_ + init_patch_index;
+      spectrum_length < minimum_patch_size) {
+    return InputAudioTooShort(absl::Substitute(
+        "Reference spectrum size ($0) smaller than minimum patch size ($1)",
+        spectrum_length, minimum_patch_size));
   }
   refPatchIndices.reserve(spectrum_length / patch_size_);
   // If we get to this point, the spectrogram can support at least a single
@@ -70,4 +71,5 @@ absl::StatusOr<std::vector<size_t>> ImagePatchCreator::CreateRefPatchIndices(
   }
   return refPatchIndices;
 }
+
 }  // namespace Visqol

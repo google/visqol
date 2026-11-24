@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
       - name: Setup ViSQOL dependencies
@@ -24,9 +24,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
       - name: Setup ViSQOL dependencies
@@ -41,9 +41,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
       - name: Setup ViSQOL dependencies
@@ -53,3 +53,58 @@ jobs:
         with:
           platform: windows
           architecture: amd64
+
+  python-wheel-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+      - name: Build wheel with uv
+        run: |
+          uv python install 3.12
+          uv build --wheel --python 3.12 --out-dir /tmp/visqol-dist .
+      - name: Install wheel and run speech conformance smoke test
+        run: |
+          uv venv --python 3.12 /tmp/smoke-venv
+          uv pip install --python /tmp/smoke-venv/bin/python /tmp/visqol-dist/*.whl
+          /tmp/smoke-venv/bin/python - <<'EOF'
+          import os
+          from visqol import visqol_lib_py
+          from visqol.pb2 import similarity_result_pb2, visqol_config_pb2  # noqa: F401
+
+          model = os.path.join(
+              os.path.dirname(visqol_lib_py.__file__),
+              "model",
+              "lattice_tcditugenmeetpackhref_ls2_nl60_lr12_bs2048_learn.005_ep2400_train1_7_raw.tflite",
+          )
+          manager = visqol_lib_py.VisqolManager()
+          manager.Init(visqol_lib_py.FilePath(model), True, False, 60, True, False, False)
+          result = manager.Run(
+              visqol_lib_py.FilePath("testdata/clean_speech/CA01_01.wav"),
+              visqol_lib_py.FilePath("testdata/clean_speech/transcoded_CA01_01.wav"),
+          )
+          expected = visqol_lib_py.ConformanceSpeechCA01TranscodedValue()
+          print(f"MOS-LQO={result.moslqo:.6f} expected={expected:.6f} type={type(result).__module__}")
+          assert abs(result.moslqo - expected) < 1e-4, "conformance mismatch"
+          print("SMOKE_OK")
+          EOF
+
+  jax-tests:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.python-version == '3.15' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13", "3.14", "3.15"]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+      - name: Build and test visqol-jax wheel
+        run: |
+          uv build --wheel --python "${{ matrix.python-version }}" --out-dir /tmp/visqol-jax-dist ./jax
+          uv run --isolated --no-project --python "${{ matrix.python-version }}" --with /tmp/visqol-jax-dist/*.whl --with "pytest>=8.3.5" pytest jax/tests
+          uv run --isolated --no-project --python "${{ matrix.python-version }}" --with /tmp/visqol-jax-dist/*.whl visqol-jax --help

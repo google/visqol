@@ -17,6 +17,8 @@
 #ifndef VISQOL_INCLUDE_MISCMATH_H
 #define VISQOL_INCLUDE_MISCMATH_H
 
+#include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "amatrix.h"

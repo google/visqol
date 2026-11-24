@@ -17,9 +17,11 @@
 #ifndef VISQOL_INCLUDE_VADPATCHCREATOR_H
 #define VISQOL_INCLUDE_VADPATCHCREATOR_H
 
+#include <cstddef>
 #include <vector>
 
 #include "absl/status/statusor.h"
+#include "amatrix.h"
 #include "analysis_window.h"
 #include "audio_signal.h"
 #include "image_patch_creator.h"

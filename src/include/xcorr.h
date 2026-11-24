@@ -18,11 +18,13 @@
 #define VISQOL_INCLUDE_XCORR_H
 
 #include <complex>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
 #include "amatrix.h"
-#include "fast_fourier_transform.h"
+#include "fft_manager.h"
 
 namespace Visqol {
 

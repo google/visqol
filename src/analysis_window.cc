@@ -14,6 +14,9 @@
 
 #include "analysis_window.h"
 
+#include <cmath>
+#include <cstddef>
+#include <valarray>
 #include <vector>
 
 #include "absl/base/macros.h"

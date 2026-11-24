@@ -17,6 +17,7 @@
 #ifndef VISQOL_INCLUDE_SUPPORTVECTORREGRESSIONMODEL_H
 #define VISQOL_INCLUDE_SUPPORTVECTORREGRESSIONMODEL_H
 
+#include <cstddef>
 #include <vector>
 
 #include "absl/status/status.h"

@@ -15,13 +15,12 @@
 #include "comparison_patches_selector.h"
 
 #include <cstddef>
-#include <iostream>
 #include <memory>
-#include <ostream>
-#include <random>
 #include <vector>
 
 #include "absl/status/statusor.h"
+#include "amatrix.h"
+#include "audio_signal.h"
 #include "gtest/gtest.h"
 #include "image_patch_creator.h"
 #include "neurogram_similiarity_index_measure.h"

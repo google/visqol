@@ -15,6 +15,7 @@
 #include "rms_vad.h"
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 

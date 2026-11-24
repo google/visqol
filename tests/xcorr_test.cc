@@ -14,6 +14,10 @@
 
 #include "xcorr.h"
 
+#include <cstdint>
+#include <valarray>
+
+#include "amatrix.h"
 #include "gtest/gtest.h"
 
 namespace Visqol {

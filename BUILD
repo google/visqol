@@ -1,4 +1,6 @@
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_proto_library", "cc_test")
+load("@rules_proto//proto:defs.bzl", "proto_library")
 
 package(
     default_visibility = ["//visibility:private"],
@@ -35,12 +37,14 @@ cc_proto_library(
     deps = [":visqol_config"],
 )
 
+# buildifier: disable=native-py-proto
 py_proto_library(
     name = "similarity_result_py_pb2",
     visibility = ["//visibility:public"],
     deps = [":similarity_result"],
 )
 
+# buildifier: disable=native-py-proto
 py_proto_library(
     name = "visqol_config_py_pb2",
     visibility = ["//visibility:public"],
@@ -81,6 +85,41 @@ cc_library(
 )
 
 cc_library(
+    name = "model_file_path",
+    hdrs = [
+        "src/include/model_file_path.h",
+    ],
+    visibility = [
+        "//visibility:public",
+    ],
+    deps = [
+        "@com_google_absl//absl/base:core_headers",
+    ],
+)
+
+cc_library(
+    name = "commandline_parser",
+    srcs = [
+        "src/commandline_parser.cc",
+    ],
+    hdrs = [
+        "src/include/commandline_parser.h",
+    ],
+    includes = ["src/include"],
+    deps = [
+        ":file_path",
+        ":model_file_path",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "visqol_lib",
     srcs = glob(
         [
@@ -95,6 +134,7 @@ cc_library(
             "**/main.cc",
             "src/tflite_quality_mapper.cc",
             "src/include/tflite_quality_mapper.h",
+            "src/commandline_parser.cc",
         ],
     ),
     hdrs = glob(
@@ -102,6 +142,8 @@ cc_library(
         exclude = [
             "src/include/tflite_quality_mapper.h",
             "src/include/similarity_to_quality_mapper.h",
+            "src/include/commandline_parser.h",
+            "src/include/model_file_path.h",
         ],
     ),
     copts = select({
@@ -125,18 +167,16 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":file_path",
+        ":model_file_path",
         ":similarity_result_cc_proto",
         ":similarity_to_quality_mapper",
         ":tflite_quality_mapper",
         ":visqol_config_cc_proto",
         "@armadillo_headers//:armadillo_header",
-        "@com_google_absl//absl/flags:flag",
-        "@com_google_absl//absl/flags:parse",
-        "@com_google_absl//absl/flags:usage",
-        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:cord",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
@@ -157,8 +197,9 @@ cc_binary(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        ":commandline_parser",
         ":visqol_lib",
-        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/flags:usage",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
     ],
@@ -177,6 +218,7 @@ test_suite(
         "commandline_parser_test",
         "comparison_patches_selector_test",
         "convolution_2d_test",
+        "errors_test",
         "fast_fourier_transform_test",
         "gammatone_filterbank_test",
         "gammatone_spectrogram_builder_test",
@@ -208,7 +250,9 @@ cc_library(
     testonly = True,
     hdrs = ["tests/test_utility.h"],
     deps = [
+        ":commandline_parser",
         ":file_path",
+        ":model_file_path",
         ":visqol_lib",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/strings",
@@ -235,9 +279,10 @@ cc_test(
     ],
     shard_count = 15,
     deps = [
+        ":commandline_parser",
         ":test_utility",
         ":visqol_lib",
-        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -250,7 +295,6 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -278,11 +322,14 @@ cc_test(
     ],
     shard_count = 15,
     deps = [
+        ":model_file_path",
         ":similarity_result_cc_proto",
         ":visqol_config_cc_proto",
         ":visqol_lib",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -297,8 +344,11 @@ cc_test(
         "//testdata:example_batch/batch_input.csv",
     ],
     deps = [
+        ":commandline_parser",
         ":test_utility",
         ":visqol_lib",
+        "@com_google_absl//absl/flags:reflection",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -377,6 +427,7 @@ cc_test(
     ],
     shard_count = 15,
     deps = [
+        ":commandline_parser",
         ":test_utility",
         ":visqol_lib",
         "@com_google_absl//absl/strings",
@@ -396,7 +447,6 @@ cc_test(
     deps = [
         ":test_utility",
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -479,6 +529,7 @@ cc_test(
     ],
     shard_count = 15,
     deps = [
+        ":commandline_parser",
         ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -516,7 +567,6 @@ cc_test(
     ],
     deps = [
         ":visqol_lib",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -527,6 +577,17 @@ cc_test(
     srcs = ["tests/xcorr_test.cc"],
     deps = [
         ":visqol_lib",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "errors_test",
+    size = "small",
+    srcs = ["tests/errors_test.cc"],
+    deps = [
+        ":visqol_lib",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -557,6 +618,7 @@ cc_test(
         "//testdata/conformance_testdata_subset:guitar48_stereo_64kbps_aac.wav",
     ],
     deps = [
+        ":commandline_parser",
         ":test_utility",
         ":visqol_lib",
         "@com_google_absl//absl/flags:flag",
@@ -576,6 +638,7 @@ cc_test(
         "//testdata:long_duration/1_min/guitar48_stereo_ref_25s.wav",
     ],
     deps = [
+        ":commandline_parser",
         ":test_utility",
         ":visqol_lib",
         "@com_google_googletest//:gtest_main",
@@ -599,6 +662,7 @@ cc_test(
         "//testdata:short_duration/5_second/guitar48_stereo_5_sec.wav",
     ],
     deps = [
+        ":commandline_parser",
         ":test_utility",
         ":visqol_lib",
         "@com_google_absl//absl/status",
@@ -613,6 +677,8 @@ cc_test(
     data = ["//model:tflite_speech_lattice_default_model"],
     deps = [
         ":tflite_quality_mapper",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )
