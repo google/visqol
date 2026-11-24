@@ -14,8 +14,13 @@
 
 #include "amatrix.h"
 
+#include <stdio.h>
+
+#include <algorithm>
 #include <armadillo>
 #include <complex>
+#include <cstddef>
+#include <cstdlib>
 #include <utility>
 #include <valarray>
 #include <vector>
@@ -40,6 +45,11 @@ inline AMatrix<T>::AMatrix(const std::vector<T>& col) {
 
 template <typename T>
 inline AMatrix<T>::AMatrix(const absl::Span<T>& col) {
+  matrix_ = arma::Mat<T>(col.data(), col.size(), 1);
+}
+
+template <typename T>
+inline AMatrix<T>::AMatrix(const absl::Span<const T>& col) {
   matrix_ = arma::Mat<T>(col.data(), col.size(), 1);
 }
 

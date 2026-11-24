@@ -14,6 +14,7 @@
 
 #include "gammatone_filterbank.h"
 
+#include <cstddef>
 #include <utility>
 #include <valarray>
 

@@ -17,6 +17,7 @@
 #ifndef VISQOL_INCLUDE_SIMILARITYRESULT_H
 #define VISQOL_INCLUDE_SIMILARITYRESULT_H
 
+#include <optional>
 #include <vector>
 
 #include "file_path.h"
@@ -43,12 +44,12 @@ struct SimilarityResult {
    * The predicted Mean Opinion Score - Listening Quality Objective (scored 1
    * to 5)
    */
-  double moslqo;
+  std::optional<double> moslqo;
 
   /**
    * The mean of the FVNSIM values.
    */
-  double vnsim;
+  double vnsim = 0;
 
   /**
    * Represents the similarity between the two signals for each frequency band
@@ -105,7 +106,7 @@ struct SimilarityResult {
    * If the degraded audio was additionally aligned, this will store the value
    * received from alignment.cc
    */
-  double alignment_lag_s;
+  double alignment_lag_s = 0;
 };
 }  // namespace Visqol
 

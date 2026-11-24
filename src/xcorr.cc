@@ -18,14 +18,16 @@
 
 #include <algorithm>
 #include <complex>
-#include <iostream>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <iterator>
 #include <memory>
-#include <utility>
 #include <vector>
 
-#include "absl/memory/memory.h"
 #include "amatrix.h"
 #include "fast_fourier_transform.h"
+#include "fft_manager.h"
 
 namespace Visqol {
 

@@ -19,8 +19,8 @@
 #include <string>
 #include <valarray>
 
-#include "absl/memory/memory.h"
 #include "amatrix.h"
+#include "fft_manager.h"
 #include "gtest/gtest.h"
 #include "test_utility.h"
 

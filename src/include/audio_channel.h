@@ -18,7 +18,6 @@
 #define VISQOL_INCLUDE_AUDIO_CHANNEL_H
 
 #include <cstring>
-#include <vector>
 
 #include "pffft.h"
 

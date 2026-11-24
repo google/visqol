@@ -46,6 +46,4 @@ runs:
     - uses: actions/upload-artifact@v4
       with:
         name: visqol-${{ inputs.platform }}-${{ inputs.architecture }}
-        path: action-product        
-        
-    
+        path: action-product

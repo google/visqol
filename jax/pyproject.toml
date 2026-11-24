@@ -1,0 +1,67 @@
+[project]
+name = "visqol-jax"
+version = "0.0.1"
+description = "ViSQOL v3.3.3 (speech and audio modes) in JAX."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = [
+    "jax>=0.5",
+    "numpy>=1.26",
+]
+
+[project.scripts]
+visqol-jax = "visqol_jax.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "ruff>=0.15.21",
+    "pyrefly>=1.2.0",
+]
+convert = [
+    "click>=8.1",
+    "tensorflow>=2.16",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/visqol_jax"]
+artifacts = [
+    "src/visqol_jax/_model_data/*",
+]
+
+[tool.ruff]
+line-length = 80
+indent-width = 2
+target-version = "py312"
+
+[tool.ruff.format]
+quote-style = "preserve"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "PLC", "PLE", "PLW", "RUF100"]
+ignore = ["PLW0603", "PLW0120"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 100
+
+[tool.ruff.lint.isort]
+force-single-line = true
+force-sort-within-sections = true
+order-by-type = false
+single-line-exclusions = ["collections.abc", "typing"]
+
+[tool.pyrefly]
+python-version = "3.12"
+project-includes = ["src/visqol_jax"]
+search-path = ["src"]
+project-excludes = ["**/.venv", "**/.git"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"

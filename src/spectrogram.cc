@@ -15,12 +15,14 @@
 #include "spectrogram.h"
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
 #include <limits>
 #include <utility>
 #include <vector>
 
 #include "amatrix.h"
-#include "misc_audio.h"
 
 namespace Visqol {
 Spectrogram::Spectrogram(AMatrix<double>&& data) : data_{std::move(data)} {}

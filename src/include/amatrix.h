@@ -18,6 +18,7 @@
 #define VISQOL_INCLUDE_AMATRIX_H
 
 #include <armadillo>
+#include <cstddef>
 #include <memory>
 #include <valarray>
 #include <vector>
@@ -47,6 +48,7 @@ class AMatrix {
   AMatrix<T>(const AMatrix<T>& other);
   AMatrix<T>(const std::vector<T>& col);
   AMatrix<T>(const absl::Span<T>& col);
+  AMatrix<T>(const absl::Span<const T>& col);
   AMatrix<T>(const std::valarray<T>& va);
   AMatrix<T>(const std::vector<std::vector<T>>& vecOfCols);
   AMatrix<T>(size_t rows, size_t cols);

@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
-
+#include "commandline_parser.h"
 #include "gtest/gtest.h"
-#include "similarity_result.h"
 #include "test_utility.h"
 #include "visqol_manager.h"
 

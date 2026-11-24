@@ -17,8 +17,6 @@
 #ifndef VISQOL_INCLUDE_ANALYSIS_WINDOW_H
 #define VISQOL_INCLUDE_ANALYSIS_WINDOW_H
 
-#include <math.h>
-
 #include <cstddef>
 #include <valarray>
 

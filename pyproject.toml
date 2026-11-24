@@ -1,0 +1,4 @@
+[build-system]
+# numpy is required by TensorFlow's python_configure repository rule.
+requires = ["setuptools>=64", "numpy"]
+build-backend = "setuptools.build_meta"

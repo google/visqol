@@ -17,7 +17,7 @@
 #ifndef VISQOL_INCLUDE_COMPLEXVALARRAY_H
 #define VISQOL_INCLUDE_COMPLEXVALARRAY_H
 
-#include <algorithm>
+#include <cmath>
 #include <complex>
 #include <cstdio>
 #include <valarray>

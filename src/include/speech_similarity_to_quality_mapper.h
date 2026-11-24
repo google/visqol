@@ -21,7 +21,6 @@
 
 #include "absl/status/status.h"
 #include "similarity_to_quality_mapper.h"
-#include "support_vector_regression_model.h"
 
 namespace Visqol {
 /**

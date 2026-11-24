@@ -14,6 +14,11 @@
 
 #include "alignment.h"
 
+#include <cstdint>
+#include <tuple>
+#include <valarray>
+
+#include "amatrix.h"
 #include "audio_signal.h"
 #include "gtest/gtest.h"
 #include "xcorr.h"

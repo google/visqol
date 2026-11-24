@@ -17,7 +17,7 @@
 #ifndef VISQOL_INCLUDE_VISQOL_API_H
 #define VISQOL_INCLUDE_VISQOL_API_H
 
-#include <string>
+#include <cstddef>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -63,7 +63,8 @@ class VisqolApi {
    *    details. If the comparison fails, an error is returned.
    */
   absl::StatusOr<SimilarityResultMsg> Measure(
-      const absl::Span<double>& reference, const absl::Span<double>& degraded);
+      const absl::Span<const double>& reference,
+      const absl::Span<const double>& degraded);
 
  private:
   /**

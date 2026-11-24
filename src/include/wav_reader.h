@@ -17,10 +17,9 @@
 #ifndef VISQOL_INCLUDE_WAV_READER_H_
 #define VISQOL_INCLUDE_WAV_READER_H_
 
+#include <cstddef>
 #include <cstdint>
 #include <istream>
-
-#include "misc_math.h"
 
 namespace Visqol {
 

@@ -14,6 +14,9 @@
 
 #include "gammatone_filterbank.h"
 
+#include <cstddef>
+#include <valarray>
+
 #include "amatrix.h"
 #include "equivalent_rectangular_bandwidth.h"
 #include "gtest/gtest.h"

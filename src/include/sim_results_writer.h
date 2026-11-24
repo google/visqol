@@ -17,6 +17,8 @@
 #ifndef VISQOL_INCLUDE_SIMRESULTSWRITER_H
 #define VISQOL_INCLUDE_SIMRESULTSWRITER_H
 
+#include <cassert>
+#include <cstddef>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -71,11 +73,16 @@ class SimilarityResultsWriter {
     std::cout << "ViSQOL conformance version: " << kVisqolConformanceNumber
               << std::endl;
     std::cout << (use_speech_mode ? "Speech mode, " : "Audio mode, ");
-    if (use_speech_mode) {
-      std::cout << (use_lattice ? "lattice model" : "exponential model")
-                << std::endl;
-    } else {
-      std::cout << "support vector regression model" << std::endl;
+    // MOSQLO is in [1, 5], if populated.
+    double moslqo = sim_res_msg.moslqo();
+    bool has_mosqlo = moslqo != 0;
+    if (has_mosqlo) {
+      if (use_speech_mode) {
+        std::cout << (use_lattice ? "lattice model" : "exponential model")
+                  << std::endl;
+      } else {
+        std::cout << "support vector regression model" << std::endl;
+      }
     }
     if (verbose) {
       std::cout << std::endl;
@@ -84,7 +91,11 @@ class SimilarityResultsWriter {
       std::cout << "Degraded Filepath:\t" << sim_res_msg.degraded_filepath()
                 << std::endl;
     }
-    std::cout << "MOS-LQO:\t\t" << sim_res_msg.moslqo() << std::endl;
+    if (has_mosqlo) {
+      std::cout << "MOS-LQO:\t\t" << moslqo << std::endl;
+    } else {
+      std::cout << "VNSIM:\t\t" << sim_res_msg.vnsim() << std::endl;
+    }
     if (verbose) {
       std::cout << std::endl << FormatFVNSIM(sim_res_msg) << std::endl;
       std::cout << FormatPatchSimilarity(sim_res_msg) << std::endl;

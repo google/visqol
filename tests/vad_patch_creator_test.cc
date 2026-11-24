@@ -14,15 +14,18 @@
 
 #include "vad_patch_creator.h"
 
+#include <cstddef>
 #include <memory>
-#include <random>
+#include <vector>
 
-#include "absl/memory/memory.h"
 #include "analysis_window.h"
+#include "audio_signal.h"
 #include "file_path.h"
+#include "gammatone_filterbank.h"
 #include "gammatone_spectrogram_builder.h"
 #include "gtest/gtest.h"
 #include "misc_audio.h"
+#include "spectrogram_builder.h"
 
 namespace Visqol {
 

@@ -14,6 +14,7 @@
 
 #include "convolution_2d.h"
 
+#include <cstddef>
 #include <utility>
 
 #include "amatrix.h"

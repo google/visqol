@@ -17,11 +17,14 @@
 #ifndef VISQOL_INCLUDE_COMPARISON_PATCHES_SELECTOR_H
 #define VISQOL_INCLUDE_COMPARISON_PATCHES_SELECTOR_H
 
+#include <cstddef>
 #include <memory>
 #include <vector>
 
 #include "absl/status/statusor.h"
 #include "amatrix.h"
+#include "analysis_window.h"
+#include "audio_signal.h"
 #include "image_patch_creator.h"
 #include "patch_similarity_comparator.h"
 #include "spectrogram_builder.h"

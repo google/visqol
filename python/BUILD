@@ -8,9 +8,9 @@ pybind_extension(
     srcs = ["visqol_lib_py.cc"],
     visibility = ["//visibility:public"],
     deps = [
-        "//:similarity_result_cc_proto",
-        "//:visqol_config_cc_proto",
+        "//:model_file_path",
         "//:visqol_lib",
+        "@com_google_absl//absl/strings",
         "@pybind11_abseil//pybind11_abseil:absl_casters",
         "@pybind11_abseil//pybind11_abseil:status_casters",
         "@pybind11_protobuf//pybind11_protobuf:native_proto_caster",
@@ -25,7 +25,6 @@ py_test(
         "//testdata:clean_speech/CA01_01.wav",
         "//testdata:clean_speech/transcoded_CA01_01.wav",
     ],
-    python_version = "PY3",
     deps = [
         "//:similarity_result_py_pb2",
         "//:visqol_config_py_pb2",

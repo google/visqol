@@ -15,19 +15,22 @@
 #include "commandline_parser.h"
 
 #include <fstream>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
 
 // Placeholder for runfiles.
-#include "absl/base/attributes.h"
 #include "absl/base/internal/raw_logging.h"
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "absl/flags/usage.h"
+#include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "file_path.h"
+#include "model_file_path.h"
 
 ABSL_FLAG(std::string, reference_file, "",
           "The wav file path used as the reference audio.");
@@ -81,6 +84,8 @@ ABSL_FLAG(bool, use_unscaled_speech_mos_mapping, false,
           "perfect NSIM score of 1.0 being translated to a MOS score of 5.0. "
           "Perfect\n"
           "NSIM scores will instead result in MOS scores of ~4.x.");
+ABSL_FLAG(bool, skip_mos_mapping, false,
+          "If true, skips the step of mapping NSIMs to MOS.");
 ABSL_FLAG(int, search_window_radius, 60,
           "The search_window parameter determines how far the algorithm will "
           "search to discover patch matches. For a given reference frame, it "
@@ -90,23 +95,15 @@ ABSL_FLAG(bool, disable_global_alignment, false, "Disables global alignment");
 ABSL_FLAG(bool, disable_realignment, false, "Disables realignment");
 
 namespace Visqol {
-ABSL_CONST_INIT const char kDefaultAudioModelFile[] =
-    "/model/libsvm_nu_svr_model.txt";
-ABSL_CONST_INIT const char kDefaultSpeechModelFile[] =
-    "/model/"
-    "lattice_tcditugenmeetpackhref_ls2_nl60_lr12_bs2048_learn.005_ep2400"
-    "_train1_7_raw.tflite";
 
 absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
                                                                char** argv) {
-  absl::SetProgramUsageMessage(
-      "Perceptual quality estimator for speech and audio");
   absl::ParseCommandLine(argc, argv);
 
   bool error_found = false;
   FilePath reference_file;
   FilePath degraded_file;
-  FilePath similarity_to_quality_model;
+  std::optional<FilePath> similarity_to_quality_model;
   FilePath result_output_csv;
   FilePath batch_input;
   FilePath debug_output;
@@ -114,6 +111,7 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
   bool use_speech;
   bool use_lattice_model;
   bool use_unscaled_mapping;
+  bool skip_mos_mapping;
   int search_window;
   bool disable_global_alignment;
   bool disable_realignment;
@@ -136,37 +134,40 @@ absl::StatusOr<CommandLineArgs> VisqolCommandLineParser::Parse(int argc,
   verbose = absl::GetFlag(FLAGS_verbose);
   search_window = absl::GetFlag(FLAGS_search_window_radius);
   debug_output = FilePath(absl::GetFlag(FLAGS_output_debug));
+  skip_mos_mapping = absl::GetFlag(FLAGS_skip_mos_mapping);
   disable_global_alignment = absl::GetFlag(FLAGS_disable_global_alignment);
   disable_realignment = absl::GetFlag(FLAGS_disable_realignment);
 
-  similarity_to_quality_model =
-      FilePath(absl::GetFlag(FLAGS_similarity_to_quality_model));
-  // The quality model file is only relevant for SVR in audio mode,
-  // so check that before validating
-  if (!similarity_to_quality_model.Path().empty() && !use_speech) {
-    error_found |= !FileExists(similarity_to_quality_model);
-  }
-
-  if (error_found) {
-    return absl::InvalidArgumentError(
-        "Invalid command line argument detected. "
-        "Run with --helpfull for usage.");
-  }
-  if (similarity_to_quality_model.Path().empty()) {
-    if (use_speech) {
-      similarity_to_quality_model =
-          FilePath(FilePath::currentWorkingDir() + kDefaultSpeechModelFile);
-    } else {
-      similarity_to_quality_model =
-          FilePath(FilePath::currentWorkingDir() + kDefaultAudioModelFile);
+  if (!skip_mos_mapping) {
+    similarity_to_quality_model =
+        FilePath(absl::GetFlag(FLAGS_similarity_to_quality_model));
+    // The quality model file is only relevant for SVR in audio mode,
+    // so check that before validating
+    if (!similarity_to_quality_model->Path().empty() && !use_speech) {
+      error_found |= !FileExists(*similarity_to_quality_model);
     }
-    if (!similarity_to_quality_model.Path().empty() &&
-        !FileExists(similarity_to_quality_model)) {
-      return absl::InvalidArgumentError(absl::StrCat(
-          "Failed to load the default SVR model ",
-          similarity_to_quality_model.Path(),
-          ". Specify the correct path using '--similarity_to_quality_model"
-          " <path/to/libsvm_nu_svr_model.txt>'?"));
+
+    if (error_found) {
+      return absl::InvalidArgumentError(
+          "Invalid command line argument detected. "
+          "Run with --helpfull for usage.");
+    }
+    if (similarity_to_quality_model->Path().empty()) {
+      if (use_speech) {
+        similarity_to_quality_model =
+            FilePath(FilePath::currentWorkingDir() + kDefaultSpeechModelFile);
+      } else {
+        similarity_to_quality_model =
+            FilePath(FilePath::currentWorkingDir() + kDefaultAudioModelFile);
+      }
+      if (!similarity_to_quality_model->Path().empty() &&
+          !FileExists(*similarity_to_quality_model)) {
+        return absl::InvalidArgumentError(absl::StrCat(
+            "Failed to load the default SVR model ",
+            similarity_to_quality_model->Path(),
+            ". Specify the correct path using '--similarity_to_quality_model"
+            " <path/to/libsvm_nu_svr_model.txt>'?"));
+      }
     }
   }
 

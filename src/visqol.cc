@@ -14,16 +14,20 @@
 
 #include "visqol.h"
 
+#include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <numeric>
 #include <utility>
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"
 #include "absl/status/statusor.h"
+#include "absl/types/span.h"
 #include "amatrix.h"
+#include "analysis_window.h"
+#include "audio_signal.h"
 #include "comparison_patches_selector.h"
-#include "file_path.h"
 #include "image_patch_creator.h"
 #include "misc_audio.h"
 #include "patch_similarity_comparator.h"
@@ -39,8 +43,7 @@ absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
     const ImagePatchCreator* patch_creator,
     const ComparisonPatchesSelector* comparison_patches_selector,
     const SimilarityToQualityMapper* sim_to_qual_mapper,
-    const int search_window,
-    const bool disable_realignment) const {
+    const int search_window, const bool disable_realignment) const {
   /////////////////// Stage 1: Preprocessing ///////////////////
   deg_signal =
       MiscAudio::ScaleToMatchSoundPressureLevel(ref_signal, deg_signal);
@@ -109,8 +112,6 @@ absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
       CalcPerPatchMeanFreqBandStdDevs(sim_match_info, frame_duration);
   AMatrix<double> fvdegenergy =
       CalcPerPatchMeanFreqBandDegradedEnergy(sim_match_info);
-  double moslqo =
-      PredictMos(fvnsim, fvnsim10, fstdnsim, fvdegenergy, sim_to_qual_mapper);
 
   // calc vnsim
   double sum = 0;
@@ -118,8 +119,6 @@ absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
     sum += d;
   }
   double vnsim = sum / fvnsim.NumRows();
-
-  moslqo = AlterForSimilarityExtremes(vnsim, moslqo);
 
   // gather results
   SimilarityDebugInfo d;
@@ -130,7 +129,12 @@ absl::StatusOr<SimilarityResult> Visqol::CalculateSimilarity(
   r.fvnsim10 = fvnsim10.ToVector();
   r.fstdnsim = fstdnsim.ToVector();
   r.fvdegenergy = fvdegenergy.ToVector();
-  r.moslqo = moslqo;
+  if (sim_to_qual_mapper) {
+    double moslqo =
+        PredictMos(fvnsim, fvnsim10, fstdnsim, fvdegenergy, sim_to_qual_mapper);
+    moslqo = AlterForSimilarityExtremes(vnsim, moslqo);
+    r.moslqo = moslqo;
+  }
   r.debug_info = std::move(d);
   r.center_freq_bands = ref_spectrogram.GetCenterFreqBands();
   return r;

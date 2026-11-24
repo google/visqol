@@ -14,6 +14,8 @@
 
 #include "support_vector_regression_model.h"
 
+#include <cstddef>
+#include <cstdlib>
 #include <vector>
 
 #include "absl/status/status.h"
@@ -21,6 +23,7 @@
 #include "absl/synchronization/mutex.h"
 #include "file_path.h"
 #include "libsvm_target_observation_convertor.h"
+#include "machine_learning.h"
 #include "svm.h"
 
 namespace Visqol {

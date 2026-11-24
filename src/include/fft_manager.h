@@ -17,6 +17,8 @@
 #ifndef VISQOL_INCLUDE_FFT_MANAGER_H
 #define VISQOL_INCLUDE_FFT_MANAGER_H
 
+#include <cstddef>
+
 #if defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(_M_IX86)
 #include <xmmintrin.h>
 typedef __m128 SimdVector;

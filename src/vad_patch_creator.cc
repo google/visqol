@@ -15,6 +15,8 @@
 #include "vad_patch_creator.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <numeric>
 #include <vector>
 

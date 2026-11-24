@@ -15,9 +15,10 @@
 #include <thread>  // NOLINT(build/c++11)
 
 #include "absl/flags/flag.h"
+#include "commandline_parser.h"
 #include "conformance.h"
+#include "file_path.h"
 #include "gtest/gtest.h"
-#include "similarity_result.h"
 #include "test_utility.h"
 #include "visqol_manager.h"
 

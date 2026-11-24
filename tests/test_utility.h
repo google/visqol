@@ -17,12 +17,18 @@
 #ifndef VISQOL_TESTS_TEST_UTILITY_H
 #define VISQOL_TESTS_TEST_UTILITY_H
 
+#include <complex>
+#include <cstdlib>
+#include <string>
+
 #include "absl/flags/flag.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "amatrix.h"
 #include "commandline_parser.h"
-#include "gtest/gtest.h"
+#include "file_path.h"
+#include "gtest/gtest.h"  // IWYU pragma: keep
+#include "model_file_path.h"
 
 namespace Visqol {
 inline Visqol::CommandLineArgs CommandLineArgsHelper(

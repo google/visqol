@@ -14,16 +14,18 @@
 
 #include "gammatone_spectrogram_builder.h"
 
-#include "absl/memory/memory.h"
+#include <cstddef>
+#include <vector>
+
 #include "amatrix.h"
 #include "analysis_window.h"
-#include "equivalent_rectangular_bandwidth.h"
+#include "audio_signal.h"
+#include "errors.h"
 #include "file_path.h"
 #include "gammatone_filterbank.h"
 #include "gtest/gtest.h"
 #include "misc_audio.h"
 #include "spectrogram.h"
-#include "spectrogram_builder.h"
 
 namespace Visqol {
 namespace {
@@ -69,6 +71,19 @@ TEST(BuildSpectrogramTest, basic_positive_flow) {
   ASSERT_EQ(kNumBands, spectrogram_ref.Data().NumRows());
   ASSERT_EQ(kDegSpectroNumCols, spectrogram_deg.Data().NumCols());
   ASSERT_EQ(kNumBands, spectrogram_deg.Data().NumRows());
+}
+
+TEST(BuildSpectrogramTest, returns_input_audio_too_short_error) {
+  AudioSignal signal = {
+      // 1 sample.
+      .data_matrix = {std::vector<double>{0.}},
+      .sample_rate = 48000,
+  };
+  auto filter_bank = GammatoneFilterBank{kNumBands, kMinimumFreq};
+  const AnalysisWindow window{signal.sample_rate, kOverlap};
+  GammatoneSpectrogramBuilder spectroBuilder(filter_bank, false);
+  auto result = spectroBuilder.Build(signal, window);
+  EXPECT_TRUE(IsInputAudioTooShort(result.status()));
 }
 
 }  // namespace

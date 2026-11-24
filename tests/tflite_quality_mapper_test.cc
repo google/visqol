@@ -1,5 +1,10 @@
 #include "tflite_quality_mapper.h"
 
+#include <vector>
+
+#include "absl/flags/flag.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "file_path.h"
 #include "gtest/gtest.h"
 

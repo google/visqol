@@ -17,8 +17,8 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
+#include "commandline_parser.h"
 #include "gtest/gtest.h"
-#include "similarity_result.h"
 #include "test_utility.h"
 #include "visqol_manager.h"
 

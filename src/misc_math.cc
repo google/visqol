@@ -15,7 +15,12 @@
 #include "misc_math.h"
 
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <vector>
+
+#include "amatrix.h"
 
 namespace Visqol {
 AMatrix<double> MiscMath::Normalize(const AMatrix<double>& m) {

@@ -16,13 +16,15 @@
 #ifndef THIRD_PARTY_VISQOL_SRC_INCLUDE_TFLITE_QUALITY_MAPPER_H_
 #define THIRD_PARTY_VISQOL_SRC_INCLUDE_TFLITE_QUALITY_MAPPER_H_
 
+#include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "similarity_to_quality_mapper.h"
-#include "tensorflow/lite/delegates/xnnpack/xnnpack_delegate.h"
 #include "tensorflow/lite/interpreter.h"
-#include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/model_builder.h"
 
 namespace Visqol {
@@ -47,9 +49,9 @@ class TFLiteQualityMapper : public SimilarityToQualityMapper {
   const std::string model_path_;
   const int num_frequency_bands_;
   std::unique_ptr<tflite::FlatBufferModel> model_;
-  std::unique_ptr<tflite::Interpreter> interpreter_;
   std::unique_ptr<TfLiteDelegate, std::function<void(TfLiteDelegate*)>>
       delegate_;
+  std::unique_ptr<tflite::Interpreter> interpreter_;
 };
 
 }  // namespace Visqol

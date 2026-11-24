@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "absl/base/internal/raw_logging.h"
+#include "absl/flags/usage.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "commandline_parser.h"
@@ -20,6 +21,8 @@
 #include "visqol_manager.h"
 
 int main(int argc, char** argv) {
+  absl::SetProgramUsageMessage(
+      "Perceptual quality estimator for speech and audio");
   // Parse the command line args.
   auto parse_statusor = Visqol::VisqolCommandLineParser::Parse(argc, argv);
   if (!parse_statusor.ok()) {

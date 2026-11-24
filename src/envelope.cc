@@ -14,14 +14,15 @@
 
 #include "envelope.h"
 
-#include <algorithm>
 #include <complex>
 #include <cstdio>
+#include <cstdlib>
 #include <memory>
 #include <vector>
 
-#include "absl/memory/memory.h"
+#include "amatrix.h"
 #include "fast_fourier_transform.h"
+#include "fft_manager.h"
 #include "misc_vector.h"
 
 namespace Visqol {

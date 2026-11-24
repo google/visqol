@@ -17,6 +17,7 @@
 #ifndef VISQOL_INCLUDE_RMS_VAD_H
 #define VISQOL_INCLUDE_RMS_VAD_H
 
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 

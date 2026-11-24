@@ -18,13 +18,22 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
-#include <memory>
+#include <ios>
 #include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include "absl/base/internal/raw_logging.h"
+#include "absl/types/optional.h"
+#include "amatrix.h"
+#include "audio_signal.h"
+#include "file_path.h"
+#include "misc_math.h"
+#include "spectrogram.h"
 #include "wav_reader.h"
 
 namespace Visqol {

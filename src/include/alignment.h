@@ -17,7 +17,7 @@
 #ifndef VISQOL_INCLUDE_ALIGNMENT_H
 #define VISQOL_INCLUDE_ALIGNMENT_H
 
-#include <utility>
+#include <tuple>
 
 namespace Visqol {
 struct AudioSignal;

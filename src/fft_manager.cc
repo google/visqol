@@ -17,8 +17,11 @@
 #include <assert.h>
 
 #include <algorithm>
+#include <cstddef>
 
+#include "audio_channel.h"
 #include "misc_math.h"
+#include "pffft.h"
 
 // Prevent Visual Studio from complaining about std::copy_n.
 #if defined(_WIN32)

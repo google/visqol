@@ -14,6 +14,7 @@
 
 #include "svr_similarity_to_quality_mapper.h"
 
+#include <algorithm>
 #include <vector>
 
 #include "absl/status/status.h"
